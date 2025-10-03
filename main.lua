@@ -203,7 +203,7 @@ if game.PlaceId == 85896571713843 then
     supportedSection:AddLabel("• V.1.0")
 
     MainTab:AddButton({
-        Name = "Join Discord For Updates and Support",
+        Name = "Copy Discord Link",
         Callback = function()
             setclipboard("https://discord.gg/JQFrBajQxW")
             OrionLib:MakeNotification({
