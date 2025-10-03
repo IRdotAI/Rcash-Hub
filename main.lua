@@ -176,7 +176,6 @@ if game.PlaceId == 85896571713843 then
     MainTab:AddButton({
         Name = "Destroy GUI",
         Callback = function()
-            -- ✅ Stop all running loops by disabling global toggles
             _G.AutoBlowBubbles = false
             _G.AutoHatch = false
             _G.AutoCS = false
@@ -186,17 +185,16 @@ if game.PlaceId == 85896571713843 then
             _G.HideHatchAnim = false
             _G.SpamE = false
             _G.AutoCollectPickups = false
-            _G.AutoClaimChests = false -- Add this if you include Auto Claim Chests
+            _G.AutoClaimChests = false 
 
-            -- ✅ Destroy the GUI
-            OrionLib:Destroy()
-
-            -- ✅ Show a notification
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "GUI destroyed. All toggles stopped.",
                 Time = 3
             })
+
+            OrionLib:Destroy()
+
         end
     })
 
