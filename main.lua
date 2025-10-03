@@ -14,7 +14,7 @@ if game.PlaceId == 85896571713843 then
 
 -- Notification for GUI loaded
     OrionLib:MakeNotification({
-        Name = "Rcash Hub",
+        Name = "Rcash Hub 💸",
         Content = "Rcash Hub loaded successfully.",
         Image = "rbxassetid://82088779453504",
         Time = 5
@@ -30,6 +30,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
+    _G.AutoClaimChests = false
 
 
 -- Functions
@@ -98,6 +99,24 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
+    function AutoClaimChests()
+        while _G.AutoClaimChests do
+            local chestNames = {
+                "Giant Chest",
+                "Void Chest",
+                "Dice Chest"
+                -- Add more chests here if needed
+            }
+
+            for _, chest in ipairs(chestNames) do
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimChest", chest, true)
+            end
+
+            ask.wait(600) -- wait 10 minutes
+        end
+    end
+
+
 
 -- Main Tab
     local MainTab = Window:MakeTab({
@@ -113,7 +132,7 @@ if game.PlaceId == 85896571713843 then
         Callback = function()
             game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Rejoining server...",
                 Time = 3
             })
@@ -135,20 +154,20 @@ if game.PlaceId == 85896571713843 then
                 if #y > 0 then
                     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, y[math.random(1, #y)])
                     OrionLib:MakeNotification({
-                        Name = "Rcash Hub",
+                        Name = "Rcash Hub 💸",
                         Content = "Server hopping...",
                         Time = 3
                     })
                 else
                     OrionLib:MakeNotification({
-                        Name = "Rcash Hub",
+                        Name = "Rcash Hub 💸",
                         Content = "No available servers found.",
                         Time = 5
                     })
                 end
             else
                 OrionLib:MakeNotification({
-                    Name = "Rcash Hub",
+                    Name = "Rcash Hub 💸",
                     Content = "Failed to fetch server list.",
                     Time = 5
                 })
@@ -168,21 +187,21 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
--- General Tab
-    local GeneralTab = Window:MakeTab({
-        Name = "General",
+-- Farming Tab
+    local FarmingTab = Window:MakeTab({
+        Name = "Farming",
         Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
 
-    GeneralTab:AddToggle({
+    FarmingTab:AddToggle({
         Name = "Auto Blow Bubbles",
         Default = false,
         Callback = function(Value)
             _G.AutoBlowBubbles = Value
             if Value then task.spawn(AutoBlowBubbles) end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Auto Blow Bubbles: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
@@ -198,9 +217,7 @@ if game.PlaceId == 85896571713843 then
         PremiumOnly = false
     })
 
-    local Section = Tab:AddSection({
-	    Name = "Select an egg to hatch and stand near the selected eggtcher"
-    })
+    PetsTab:AddLabel("Select an egg to hatch and stand near the selected egg")
 
 
     local EggCategories = {
@@ -219,7 +236,7 @@ if game.PlaceId == 85896571713843 then
             Callback = function(Value)
                 _G.SelectedEgg = Value
                 OrionLib:MakeNotification({
-                    Name = "Rcash Hub",
+                    Name = "Rcash Hub 💸",
                     Content = "Selected Egg: "..Value,
                     Time = 3
                 })
@@ -227,9 +244,6 @@ if game.PlaceId == 85896571713843 then
         })
     end
 
-    local Section = Tab:AddSection({
-	    Name = "Egg Hatcher"
-    })
 
     PetsTab:AddToggle({
         Name = "Auto Hatch Egg",
@@ -238,7 +252,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoHatch = Value
             if Value then task.spawn(AutoHatch) end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Auto Hatch: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
@@ -254,7 +268,7 @@ if game.PlaceId == 85896571713843 then
                 task.spawn(SpamEKey)
             end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Spam E: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
@@ -268,14 +282,14 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.HideHatchAnim = Value
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Hide Hatch Animation: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
         end
     })
 
---Misc Tab
+-- Misc Tab
     local MiscTab = Window:MakeTab({
         Name = "Misc",
         Icon = "rbxassetid://16081386327",
@@ -289,7 +303,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoClaimPTR = Value
             if Value then task.spawn(AutoClaimPTR) end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Auto Claim Play Time Rewards: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
@@ -303,7 +317,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoCS = Value
             if Value then task.spawn(AutoCS) end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Auto Claim Season: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
@@ -317,7 +331,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoMysteryBox = Value
             if Value then task.spawn(AutoMysteryBox) end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Auto Open Mystery Box: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
@@ -331,12 +345,48 @@ if game.PlaceId == 85896571713843 then
             _G.AutoSeasonEgg = Value
             if Value then task.spawn(AutoSeasonEgg) end
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
+                Name = "Rcash Hub 💸",
                 Content = "Auto Hatch Season Egg: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
         end
     })
+
+    MiscTab:AddToggle({
+        Name = "Auto Claim All Chests (Every 10 mins)",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoClaimChests = Value
+            if Value then task.spawn(AutoClaimChests) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Claim Chests: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    MiscTab:AddButton({
+        Name = "Claim All Chests Now",
+        Callback = function()
+            local chests = {
+                "Giant Chest",
+                "Void Chest",
+                "Dice Chest"
+            }
+
+            for _, chest in ipairs(chests) do
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimChest", chest, true)
+            end
+
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "All chests claimed.",
+                Time = 3
+            })
+        end
+    })
+
 
 
 
