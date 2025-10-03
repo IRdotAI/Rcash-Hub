@@ -33,6 +33,7 @@ if game.PlaceId == 85896571713843 then
     _G.SpamE = false
     _G.AutoCollectPickups = false
     _G.AutoSpinAutumnWheel = false
+    _G.AutoBuyAutumnShop = false
 
 
 
@@ -127,6 +128,22 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
+    function AutoBuyAutumnShop()
+        while _G.AutoBuyAutumnShop do
+            local Remote = game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent
+            pcall(function()
+                Remote:FireServer("BuyShopItem", "autumnnorm-shop", 1, true)
+                Remote:FireServer("BuyShopItem", "autumnnorm-shop", 2, true)
+                Remote:FireServer("BuyShopItem", "autumnnorm-shop", 3, true)
+            end)
+            task.wait(1) -- adjust delay to prevent spamming too fast
+        end
+    end
+
+
+
+
+
 
 
 
@@ -202,7 +219,8 @@ if game.PlaceId == 85896571713843 then
             _G.HideHatchAnim = false
             _G.SpamE = false
             _G.AutoCollectPickups = false
-            _G.AutoClaimChests = false 
+            _G.AutoSpinAutumnWheel = false 
+            _G.AutoBuyAutumnShop = false
 
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
@@ -228,7 +246,9 @@ if game.PlaceId == 85896571713843 then
             _G.HideHatchAnim = false
             _G.SpamE = false
             _G.AutoCollectPickups = false
-            _G.AutoClaimChests = false 
+            _G.AutoSpinAutumnWheel = false
+            _G.AutoBuyAutumnShop = false
+
 
             -- Destroy Orion GUI
             if OrionLib then
@@ -363,6 +383,27 @@ if game.PlaceId == 85896571713843 then
             })
         end
     })
+
+-- Shop Tab
+    local ShopTab = Window:MakeTab({
+        Name = "🛒 Shop",
+        PremiumOnly = false
+    })
+
+    ShopTab:AddToggle({
+    Name = "Auto Buy Autumn Shop",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoBuyAutumnShop = Value
+        if Value then task.spawn(AutoBuyAutumnShop) end
+        OrionLib:MakeNotification({
+            Name = "Rcash Hub 💸",
+            Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
+            Time = 3
+        })
+    end
+})
+
 
 -- Misc Tab
     local MiscTab = Window:MakeTab({
