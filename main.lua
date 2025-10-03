@@ -115,19 +115,18 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoSpinAutumnWheel()
+    function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
             pcall(function()
                 game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin")
             end)
-
             pcall(function()
                 game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
             end)
-
             task.wait(0.3)
         end
     end
+
 
 
 
@@ -432,7 +431,7 @@ if game.PlaceId == 85896571713843 then
         Default = false,
         Callback = function(Value)
             _G.AutoSpinAutumnWheel = Value
-            if Value then task.spawn(AutoSpinAutumnWheel) end
+            if Value then task.spawn(SpinAutumnWheel) end
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Auto Spin Autumn Wheel: "..(Value and "Enabled" or "Disabled"),
@@ -440,6 +439,7 @@ if game.PlaceId == 85896571713843 then
             })
         end
     })
+
 
 
 
