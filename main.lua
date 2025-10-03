@@ -103,13 +103,16 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
+    local FallLeafListenerStarted = false
+
     function ListenForFallLeafPickups()
+        if FallLeafListenerStarted then return end
+        FallLeafListenerStarted = true
+
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
         local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
         local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
-
-        print("[AUTO COLLECT] Fall Leaf auto-collection function enabled.")
 
         task.spawn(function()
             while true do
@@ -125,7 +128,7 @@ if game.PlaceId == 85896571713843 then
                     end
 
                     if leafCount > 0 then
-                        print("[AUTO COLLECT] Collected " .. leafCount .. " Fall Leaf pickup(s) from workspace.")
+                        print("[🍁] Collected " .. leafCount .. " Fall Leaf pickup(s) from workspace.")
                     end
                 end
                 task.wait(1)
@@ -136,13 +139,14 @@ if game.PlaceId == 85896571713843 then
             if _G.AutoCollectAutumnLeaves then
                 for _, pickup in pairs(pickupList) do
                     if pickup.Visual == "Fall Leaf" and pickup.Id then
-                        print("[AUTO COLLECT] New Fall Leaf spawned with ID:", pickup.Id)
+                        print("[🍁] New Fall Leaf spawned with ID:", pickup.Id)
                         CollectPickup:FireServer(pickup.Id)
                     end
                 end
             end
         end)
     end
+
 
 
 
@@ -339,13 +343,19 @@ if game.PlaceId == 85896571713843 then
         Default = false,
         Callback = function(Value)
             _G.AutoCollectAutumnLeaves = Value
+
+            if Value then ListenForFallLeafPickups() end
+
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Auto Collect Autumn Leafs: " .. (Value and "Enabled" or "Disabled"),
                 Time = 3
             })
+
+            print("[🍁] Auto Collect Autumn Leaves: " .. (Value and "ENABLED" or "DISABLED"))
         end
     })
+
 
 
 
