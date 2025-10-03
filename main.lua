@@ -5,7 +5,7 @@ if game.PlaceId == 85896571713843 then
 -- Create main window
     local Window = OrionLib:MakeWindow({
         Name = "Rcash Hub 💸 | BGSI",
-        HidePremium = false,
+        HidePremium = true,
         SaveConfig = true,
         IntroText = "Rcash Hub",
         IntroIcon = "rbxassetid://82088779453504",
@@ -35,11 +35,6 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
-    _G.WebhookURL = ""
-    _G.WebhookPing = false
-    _G.WebhookUsername = ""
-    _G.WebhookMinRarity = "Common"
-
 
 
 
@@ -62,32 +57,11 @@ if game.PlaceId == 85896571713843 then
                 return
             end
 
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local Network = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent
-
-            Network:FireServer("HatchEgg", _G.SelectedEgg, 6)
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, 6)
             task.wait(0.3)
         end
     end
 
-    local Player = game.Players.LocalPlayer
-    local Inventory = Player:WaitForChild("Inventory")
-
-    if not Inventory:FindFirstChild("WebhookListener") then
-        local marker = Instance.new("BoolValue")
-        marker.Name = "WebhookListener"
-        marker.Parent = Inventory
-
-        Inventory.ChildAdded:Connect(function(pet)
-            local rarity = pet:FindFirstChild("Rarity") and pet.Rarity.Value or "Unknown"
-            local rarities = {"Common","Unique","Rare","Epic","Legendary","Secret","Infinity"}
-            local minIndex = table.find(rarities, _G.WebhookMinRarity) or 1
-            local petIndex = table.find(rarities, rarity) or 0
-            if petIndex >= minIndex then
-                sendWebhook(pet.Name, rarity)
-            end
-        end)
-    end
 
     function AutoCS()
         while _G.AutoCS do
@@ -128,10 +102,7 @@ if game.PlaceId == 85896571713843 then
             end
         end)
     end
-
-    task.spawn(function()
-        pcall(HideHatchAnim)
-    end)
+    task.spawn(HideHatchAnim)
 
     function SpamEKey()
         local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -311,24 +282,6 @@ if game.PlaceId == 85896571713843 then
             end
         end)
     end
-
-    local HttpService = game:GetService("HttpService")
-
-    function sendWebhook(petName, petRarity)
-        if _G.WebhookURL == "" then return end
-        local content = ""
-        if _G.WebhookPing and _G.WebhookUsername ~= "" then
-            content = string.format("<@%s> hatched a %s [%s]!", _G.WebhookUsername, petName, petRarity)
-        else
-            content = string.format("%s hatched a %s [%s]!", _G.WebhookUsername ~= "" and _G.WebhookUsername or "Someone", petName, petRarity)
-        end
-        local data = { content = content }
-        pcall(function()
-            HttpService:PostAsync(_G.WebhookURL, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
-        end)
-    end
-
-
 
 
 
@@ -731,80 +684,15 @@ if game.PlaceId == 85896571713843 then
 
 
 
--- Webhooks Tab
-    local WebhooksTab = Window:MakeTab({
-        Name = "🌐 Webhooks",
-        PremiumOnly = false
-    })
 
-    WebhooksTab:AddLabel("Set up Discord webhooks for pet hatching notifications.")
 
-    WebhooksTab:AddTextbox({
-        Name = "Webhook URL",
-        Default = _G.WebhookURL,
-        TextDisappear = false,
-        Callback = function(Value)
-            _G.WebhookURL = Value
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Webhook URL set.",
-                Time = 3
-            })
-        end
-    })
 
-    WebhooksTab:AddTextbox({
-        Name = "Username (for mentions)",
-        Default = _G.WebhookUsername,
-        TextDisappear = false,
-        Callback = function(Value)
-            _G.WebhookUsername = Value
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Webhook Username set.",
-                Time = 3
-            })
-        end
-    })
 
-    WebhooksTab:AddDropdown({
-        Name = "Minimum Rarity to Notify",
-        Default = _G.WebhookMinRarity,
-        Options = {"Common", "Unique", "Rare", "Epic", "Legendary", "Secret", "Infinity"},
-        Callback = function(Value)
-            _G.WebhookMinRarity = Value
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Webhook Minimum Rarity set to "..Value,
-                Time = 3
-            })
-        end
-    })
 
-    WebhooksTab:AddToggle({
-        Name = "Ping on Notification",
-        Default = _G.WebhookPing,
-        Callback = function(Value)
-            _G.WebhookPing = Value
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Webhook Ping: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
 
-    WebhooksTab:AddButton({
-        Name = "Test Webhook",
-        Callback = function()
-            sendWebhook("TestPet", "Legendary")
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Test webhook sent!",
-                Time = 3
-            })
-        end
-    })
+
+
+
 
 
 
@@ -938,5 +826,4 @@ if game.PlaceId == 85896571713843 then
 
 -- Start Fall Leaf listener (only once)
     ListenForFallLeafPickups()
-
 end
