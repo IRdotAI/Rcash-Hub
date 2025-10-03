@@ -156,7 +156,14 @@ if game.PlaceId == 85896571713843 then
     })
 
     MainTab:AddLabel("By RdotA")
-    MainTab:AddLabel(" \nSupported games so far:\nBubble Gum Simulator INFINITY\nMore to come soon!\n ")
+
+    local supportedSection = MainTab:AddSection({
+        Name = "Supported Games"
+    })
+
+    supportedSection:AddLabel("• Bubble Gum Simulator INFINITY")
+    supportedSection:AddLabel("• More to come soon!")
+
 
 
     MainTab:AddButton({
