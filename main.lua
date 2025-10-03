@@ -312,7 +312,7 @@ if game.PlaceId == 85896571713843 then
     })
 
     pickupSection:AddToggle({
-        Name = "Auto Collect Autumn Leafs",
+        Name = "Auto Collect Autumn Leaves",
         Default = false,
         Callback = function(Value)
             _G.AutoCollectAutumnLeaves = Value
