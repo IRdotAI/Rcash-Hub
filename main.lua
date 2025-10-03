@@ -927,10 +927,13 @@ if game.PlaceId == 85896571713843 then
 
 
 
--- Start Fall Leaf listener (only once)
-    ListenForFallLeafPickups()
+
 
 
 -- Initialize GUI
     OrionLib:Init()
+
+-- Start Fall Leaf listener (only once)
+    ListenForFallLeafPickups()
+
 end
