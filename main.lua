@@ -63,7 +63,7 @@ if game.PlaceId == 85896571713843 then
 
     function AutoMysteryBox()
         while _G.AutoMysteryBox do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box",25)
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box", 25)
             task.wait(0.3)
         end
     end
@@ -476,4 +476,5 @@ if game.PlaceId == 85896571713843 then
 -- Initialize GUI
     OrionLib:Init()
 end
+
 
