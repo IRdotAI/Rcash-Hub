@@ -107,22 +107,36 @@ if game.PlaceId == 85896571713843 then
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
         local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
+        local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
 
+        -- Collect any Fall Leaves already in workspace
+        task.spawn(function()
+            while true do
+                if _G.AutoCollectAutumnLeaves then
+                    for _, model in pairs(Chunker:GetChildren()) do
+                        local visual = model:FindFirstChild("Visual")
+                        if visual and visual:FindFirstChild("Name") and visual.Name == "Fall Leaf" then
+                            CollectPickup:FireServer(model.Name)
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+
+        -- Listen for new Fall Leaves
         SpawnPickups.OnClientEvent:Connect(function(pickupList)
             if _G.AutoCollectAutumnLeaves then
                 for _, pickup in pairs(pickupList) do
                     if pickup.Visual == "Fall Leaf" and pickup.Id then
                         print("[DEBUG] Detected Fall Leaf Pickup:", pickup.Id)
-
-                        local model = workspace.Rendered.Chunker:FindFirstChild(pickup.Id)
-                        if model then
-                            CollectPickup:FireServer(pickup.Id)
-                        end
+                        CollectPickup:FireServer(pickup.Id)
                     end
                 end
             end
         end)
     end
+
 
 
 
