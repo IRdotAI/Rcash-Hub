@@ -106,29 +106,24 @@ if game.PlaceId == 85896571713843 then
     function ListenForFallLeafPickups()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
-        local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local root = character:WaitForChild("HumanoidRootPart")
+        local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
 
-        SpawnPickups.OnClientEvent:Connect(function(pickupDataList)
+        SpawnPickups.OnClientEvent:Connect(function(pickupList)
             if _G.AutoCollectAutumnLeaves then
-                for _, pickup in pairs(pickupDataList) do
+                for _, pickup in pairs(pickupList) do
                     if pickup.Visual == "Fall Leaf" and pickup.Id then
-                        local model = Chunker:FindFirstChild(pickup.Id)
-                        if model and model:IsA("Model") then
-                            local part = model:FindFirstChildWhichIsA("BasePart", true)
-                            if part then
-                                firetouchinterest(root, part, 0)
-                                task.wait(0.1)
-                                firetouchinterest(root, part, 1)
-                            end
+                        print("[DEBUG] Detected Fall Leaf Pickup:", pickup.Id)
+
+                        local model = workspace.Rendered.Chunker:FindFirstChild(pickup.Id)
+                        if model then
+                            CollectPickup:FireServer(pickup.Id)
                         end
                     end
                 end
             end
         end)
     end
+
 
 
 
