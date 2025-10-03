@@ -125,7 +125,6 @@ if game.PlaceId == 85896571713843 then
 
     MainTab:AddLabel("By RdotA")
 
-
     MainTab:AddButton({
         Name = "Rejoin",
         Callback = function()
