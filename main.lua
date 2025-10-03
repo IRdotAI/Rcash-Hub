@@ -125,26 +125,38 @@ if game.PlaceId == 85896571713843 then
         local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
 
         task.spawn(function()
-            while true do
+            hile true do
                 if _G.AutoCollectAutumnLeaves then
+                    local foundIDs = {}
                     local collectedCount = 0
+
+                    -- First, gather all IDs
                     for _, pickupID in pairs(Chunker:GetChildren()) do
-                        -- pickupID.Name is the actual ID
+                        table.insert(foundIDs, pickupID.Name)
+                    end
+
+                    -- Print all IDs found this cycle
+                    if #foundIDs > 0 then
+                        print("[🍁] Found IDs:", table.concat(foundIDs, ", "))
+                    end
+
+                    -- Then collect all IDs
+                    for _, id in pairs(foundIDs) do
                         pcall(function()
-                            CollectPickup:FireServer(pickupID.Name)
+                            CollectPickup:FireServer(id)
                             collectedCount += 1
                         end)
-                        print("[🍁] Collected pickup with ID:", pickupID.Name)
                     end
 
                     if collectedCount > 0 then
                         print("[🍁] Total pickups collected this cycle: " .. collectedCount)
                     end
                 end
-                task.wait(1) -- adjust the delay if needed
+                task.wait(1) -- adjust delay as needed
             end
         end)
     end
+
 
 
 
