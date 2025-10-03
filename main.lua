@@ -104,8 +104,10 @@ if game.PlaceId == 85896571713843 then
         while _G.AutoCollectPickups do
             for _, v in pairs(workspace.rendered.pickup:GetChildren()) do
                 if v:IsA("Model") or v:IsA("Part") then
-                local serial = v.Name
-                    game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(serial)
+                if v.Name:match("^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$") then
+                    game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(v.Name)
+end
+
                 end
             end
             task.wait(3) -- adjust how often pickups are collected (every 3 seconds)
@@ -174,14 +176,30 @@ if game.PlaceId == 85896571713843 then
     MainTab:AddButton({
         Name = "Destroy GUI",
         Callback = function()
+            -- ✅ Stop all running loops by disabling global toggles
+            _G.AutoBlowBubbles = false
+            _G.AutoHatch = false
+            _G.AutoCS = false
+            _G.AutoClaimPTR = false
+            _G.AutoMysteryBox = false
+            _G.AutoSeasonEgg = false
+            _G.HideHatchAnim = false
+            _G.SpamE = false
+            _G.AutoCollectPickups = false
+            _G.AutoClaimChests = false -- Add this if you include Auto Claim Chests
+
+            -- ✅ Destroy the GUI
             OrionLib:Destroy()
+
+            -- ✅ Show a notification
             OrionLib:MakeNotification({
-                Name = "Rcash Hub",
-                Content = "GUI destroyed.",
+                Name = "Rcash Hub 💸",
+                Content = "GUI destroyed. All toggles stopped.",
                 Time = 3
             })
         end
     })
+
 
 -- Farming Tab
     local FarmingTab = Window:MakeTab({
