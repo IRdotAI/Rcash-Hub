@@ -125,7 +125,7 @@ if game.PlaceId == 85896571713843 then
         local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
 
         task.spawn(function()
-            hile true do
+            while true do
                 if _G.AutoCollectAutumnLeaves then
                     local foundIDs = {}
                     local collectedCount = 0
