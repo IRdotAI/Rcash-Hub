@@ -427,7 +427,7 @@ if game.PlaceId == 85896571713843 then
 
 
     PetsTab:AddToggle({
-        Name = "Hide Hatch Animation",
+        Name = "Hide Hatch Animation (Broken)",
         Default = false,
         Callback = function(Value)
             _G.HideHatchAnim = Value
