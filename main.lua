@@ -128,7 +128,10 @@ if game.PlaceId == 85896571713843 then
             end
         end)
     end
-    task.spawn(HideHatchAnim)
+
+    task.spawn(function()
+        pcall(HideHatchAnim)
+    end)
 
     function SpamEKey()
         local VirtualInputManager = game:GetService("VirtualInputManager")
