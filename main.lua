@@ -119,7 +119,6 @@ if game.PlaceId == 85896571713843 then
 -- Main Tab
     local MainTab = Window:MakeTab({
         Name = "🏠 Main",
-        Icon = "rbxassetid://13060262582",
         PremiumOnly = false
     })
 
@@ -204,7 +203,6 @@ if game.PlaceId == 85896571713843 then
 -- Farming Tab
     local FarmingTab = Window:MakeTab({
         Name = "🚜 Farming",
-        Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
 
@@ -242,7 +240,6 @@ if game.PlaceId == 85896571713843 then
 -- Pets Tab
     local PetsTab = Window:MakeTab({
         Name = "🐾 Pets",
-        Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
 
@@ -321,7 +318,6 @@ if game.PlaceId == 85896571713843 then
 -- Misc Tab
     local MiscTab = Window:MakeTab({
         Name = "➕ Misc",
-        Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
 
