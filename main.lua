@@ -124,29 +124,35 @@ if game.PlaceId == 85896571713843 then
         local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
         local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
 
-        local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
-        for _, model in pairs(Chunker:GetChildren()) do
-            if model:FindFirstChild("Visual") and model.Visual.Name == "Fall Leaf" then
-                CollectPickup:FireServer(model.Name)
+        -- Function to collect all current Fall Leafs in workspace
+        local function collectExistingLeaves()
+            local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
+            for _, model in pairs(Chunker:GetChildren()) do
+                local visual = model:FindFirstChild("Visual")
+                if visual and visual.Name == "Fall Leaf" and model:FindFirstChild("ID") then
+                    local pickupId = model.ID.Value -- Actual pickup ID stored in the model
+                    CollectPickup:FireServer(pickupId)
+                    print("[🍁] Collected existing Fall Leaf with ID:", pickupId)
+                end
             end
         end
 
+        collectExistingLeaves() -- collect current leaves on load
+
+        -- Listen for new pickups spawning
         SpawnPickups.OnClientEvent:Connect(function(pickupList)
             if _G.AutoCollectAutumnLeaves then
                 for _, pickup in pairs(pickupList) do
                     if pickup.Visual == "Fall Leaf" and pickup.Id then
-                        local pickupModel = workspace:WaitForChild("Rendered"):WaitForChild("Chunker"):WaitForChild(pickup.Id, 5)
-                        if pickupModel then
-                            CollectPickup:FireServer(pickup.Id)
-                            print("[🍁] Collected spawned Fall Leaf with ID:", pickup.Id)
-                        else
-                            warn("[🍁] Pickup did not appear in time:", pickup.Id)
-                        end
+                        -- Fire collect using the ID from the event
+                        CollectPickup:FireServer(pickup.Id)
+                        print("[🍁] Collected spawned Fall Leaf with ID:", pickup.Id)
                     end
                 end
             end
         end)
     end
+
 
 
     function SpinAutumnWheel()
