@@ -25,7 +25,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoBlowBubbles = false
     _G.AutoHatch = false
     _G.AutoCS = false
-    _G.SelectedEgg = "Common Egg"
+    _G.SelectedEgg = ""
     _G.AutoClaimPTR = false
     _G.AutoMysteryBox = false
     _G.AutoSeasonEgg = false
