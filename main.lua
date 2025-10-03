@@ -109,7 +109,7 @@ if game.PlaceId == 85896571713843 then
                     end
                 end
             end
-            task.wait(3) -- adjust how often pickups are collected (every 3 seconds)
+            task.wait(3) 
         end
     end
 
@@ -118,7 +118,7 @@ if game.PlaceId == 85896571713843 then
 
 -- Main Tab
     local MainTab = Window:MakeTab({
-        Name = "Main",
+        Name = "🏠 Main",
         Icon = "rbxassetid://13060262582",
         PremiumOnly = false
     })
@@ -203,7 +203,7 @@ if game.PlaceId == 85896571713843 then
 
 -- Farming Tab
     local FarmingTab = Window:MakeTab({
-        Name = "Farming",
+        Name = "🚜 Farming",
         Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
@@ -241,7 +241,7 @@ if game.PlaceId == 85896571713843 then
 
 -- Pets Tab
     local PetsTab = Window:MakeTab({
-        Name = "Pets",
+        Name = "🐾 Pets",
         Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
@@ -320,7 +320,7 @@ if game.PlaceId == 85896571713843 then
 
 -- Misc Tab
     local MiscTab = Window:MakeTab({
-        Name = "Misc",
+        Name = "➕ Misc",
         Icon = "rbxassetid://16081386327",
         PremiumOnly = false
     })
