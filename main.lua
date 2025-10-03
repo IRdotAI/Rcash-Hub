@@ -104,15 +104,15 @@ if game.PlaceId == 85896571713843 then
         while _G.AutoCollectPickups do
             for _, v in pairs(workspace.rendered.pickup:GetChildren()) do
                 if v:IsA("Model") or v:IsA("Part") then
-                if v.Name:match("^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$") then
-                    game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(v.Name)
-end
-
+                    if v.Name:match("^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$") then
+                        game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(v.Name)
+                    end
                 end
             end
             task.wait(3) -- adjust how often pickups are collected (every 3 seconds)
         end
     end
+
 
 
 
