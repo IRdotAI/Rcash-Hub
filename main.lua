@@ -196,6 +196,7 @@ if game.PlaceId == 85896571713843 then
 
     supportedSection:AddLabel("• Bubble Gum Simulator INFINITY")
     supportedSection:AddLabel("• More to come soon!")
+    supportedSection:AddLabel("• V.1.0")
 
 
 
