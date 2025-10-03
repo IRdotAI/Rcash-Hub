@@ -521,7 +521,7 @@ if game.PlaceId == 85896571713843 then
         ["World 1 Eggs"] = {"Common Egg", "Spotted Egg", "Iceshard Egg", "Inferno Egg", "Spikey Egg", "Magma Egg", "Crystal Egg", "Lunar Egg", "Void Egg", "Hell Egg", "Nightmare Egg", "Rainbow Egg"},
         ["World 2 Eggs"] = {"Showman Egg", "Mining Egg", "Cyber Egg", "Neon Egg", "Chance Egg"},
         ["World 3 Eggs"] = {"Icy Egg", "Vine Egg", "Lava Egg", "Secret Egg", "Atlantis Egg", "Classic Egg"},
-        ["Event Eggs"] = {"Autumn Egg", "Developer Egg", "Infinity Egg"}
+        ["Event Eggs"] = {"Candle Egg", "Autumn Egg", "Developer Egg", "Infinity Egg"}
     }
 
 
