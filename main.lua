@@ -123,40 +123,31 @@ if game.PlaceId == 85896571713843 then
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
         local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
+
         local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
-
-        task.spawn(function()
-            while true do
-                if _G.AutoCollectAutumnLeaves then
-                    local leafCount = 0
-
-                    for _, model in pairs(Chunker:GetChildren()) do
-                        local visual = model:FindFirstChild("Visual")
-                        if visual and visual:FindFirstChild("Name") and visual.Name == "Fall Leaf" then
-                            CollectPickup:FireServer(model.Name)
-                            leafCount += 1
-                        end
-                    end
-
-                    if leafCount > 0 then
-                        print("[🍁] Collected " .. leafCount .. " Fall Leaf pickup(s) from workspace.")
-                    end
-                end
-                task.wait(1)
+        for _, model in pairs(Chunker:GetChildren()) do
+            if model:FindFirstChild("Visual") and model.Visual.Name == "Fall Leaf" then
+                CollectPickup:FireServer(model.Name)
             end
-        end)
+        end
 
         SpawnPickups.OnClientEvent:Connect(function(pickupList)
             if _G.AutoCollectAutumnLeaves then
                 for _, pickup in pairs(pickupList) do
                     if pickup.Visual == "Fall Leaf" and pickup.Id then
-                        print("[🍁] New Fall Leaf spawned with ID:", pickup.Id)
-                        CollectPickup:FireServer(pickup.Id)
+                        local pickupModel = workspace:WaitForChild("Rendered"):WaitForChild("Chunker"):WaitForChild(pickup.Id, 5)
+                        if pickupModel then
+                            CollectPickup:FireServer(pickup.Id)
+                            print("[🍁] Collected spawned Fall Leaf with ID:", pickup.Id)
+                        else
+                            warn("[🍁] Pickup did not appear in time:", pickup.Id)
+                        end
                     end
                 end
             end
         end)
     end
+
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
