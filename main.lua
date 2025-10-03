@@ -32,6 +32,7 @@ if game.PlaceId == 85896571713843 then
     _G.HideHatchAnim = false
     _G.SpamE = false
     _G.AutoCollectPickups = false
+    _G.AutoSpinAutumnWheel = false
 
 
 
@@ -111,6 +112,13 @@ if game.PlaceId == 85896571713843 then
                 end
             end
             task.wait(3) 
+        end
+    end
+
+    function AutoSpinAutumnWheel()
+        while _G.AutoSpinAutumnWheel do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin") and game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
+            task.wait(0.3)
         end
     end
 
@@ -406,6 +414,20 @@ if game.PlaceId == 85896571713843 then
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Auto Hatch Season Egg: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    MiscTab:AddToggle({
+        Name = "Auto Spin Autumn Wheel",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoSpinAutumnWheel = Value
+            if Value then task.spawn(AutoSpinAutumnWheel) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Spin Autumn Wheel: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
         end
