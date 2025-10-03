@@ -47,10 +47,20 @@ if game.PlaceId == 85896571713843 then
 
     function AutoHatch()
         while _G.AutoHatch do
+            if _G.SelectedEgg == "" then
+                OrionLib:MakeNotification({
+                    Name = "Rcash Hub 💸",
+                    Content = "Please select an egg first!",
+                    Time = 3
+                })
+                return
+            end
+
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, 6)
             task.wait(0.3)
         end
     end
+
 
     function AutoCS()
         while _G.AutoCS do
