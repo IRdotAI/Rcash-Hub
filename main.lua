@@ -486,7 +486,7 @@ if game.PlaceId == 85896571713843 then
     })
 
     World3Section:AddToggle({
-        Name = "Auto Complete Obbies",
+        Name = "Auto Complete Obbies (Use Auto Spam E in pets tab)",
         Default = false,
         Callback = function(Value)
             _G.AutoObby = Value
