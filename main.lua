@@ -30,7 +30,6 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
-    _G.AutoClaimChests = false
 
 
 -- Functions
@@ -98,24 +97,6 @@ if game.PlaceId == 85896571713843 then
             task.wait(0.05)
         end
     end
-
-    function AutoClaimChests()
-        while _G.AutoClaimChests do
-            local chestNames = {
-                "Giant Chest",
-                "Void Chest",
-                "Dice Chest"
-                -- Add more chests here if needed
-            }
-
-            for _, chest in ipairs(chestNames) do
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimChest", chest, true)
-            end
-
-            ask.wait(600) -- wait 10 minutes
-        end
-    end
-
 
 
 -- Main Tab
@@ -351,42 +332,6 @@ if game.PlaceId == 85896571713843 then
             })
         end
     })
-
-    MiscTab:AddToggle({
-        Name = "Auto Claim All Chests (Every 10 mins)",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoClaimChests = Value
-            if Value then task.spawn(AutoClaimChests) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Auto Claim Chests: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
-    MiscTab:AddButton({
-        Name = "Claim All Chests Now",
-        Callback = function()
-            local chests = {
-                "Giant Chest",
-                "Void Chest",
-                "Dice Chest"
-            }
-
-            for _, chest in ipairs(chests) do
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimChest", chest, true)
-            end
-
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "All chests claimed.",
-                Time = 3
-            })
-        end
-    })
-
 
 
 
