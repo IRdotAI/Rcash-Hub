@@ -200,6 +200,39 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
+    MainTab:AddButton({
+        Name = "Reload GUI",
+        Callback = function()
+            -- Stop all global toggles
+            _G.AutoBlowBubbles = false
+            _G.AutoHatch = false
+            _G.AutoCS = false
+            _G.AutoClaimPTR = false
+            _G.AutoMysteryBox = false
+            _G.AutoSeasonEgg = false
+            _G.HideHatchAnim = false
+            _G.SpamE = false
+            _G.AutoCollectPickups = false
+            _G.AutoClaimChests = false 
+
+            -- Destroy Orion GUI
+            if OrionLib then
+                OrionLib:Destroy()
+            end
+
+            -- Notify player
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Rcash Hub 💸",
+                Text = "Reloading GUI...",
+                Duration = 3
+            })
+
+            -- Reload script
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/main/main.lua"))()
+        end
+    })
+
+
 
 -- Farming Tab
     local FarmingTab = Window:MakeTab({
