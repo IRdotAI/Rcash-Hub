@@ -62,7 +62,7 @@ if game.PlaceId == 85896571713843 then
     function AutoClaimPTR()
         while _G.AutoClaimPTR do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAllPlaytime")
-            task.wait(30) -- Claim every 60 seconds
+            task.wait(30) 
         end
     end
 
@@ -97,7 +97,7 @@ if game.PlaceId == 85896571713843 then
         local VirtualInputManager = game:GetService("VirtualInputManager")
         while _G.SpamE do
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-            task.wait(0.05) -- short delay (adjust as needed)
+            task.wait(0.05) 
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
             task.wait(0.05)
         end
@@ -136,7 +136,7 @@ if game.PlaceId == 85896571713843 then
                 Remote:FireServer("BuyShopItem", "autumnnorm-shop", 2, true)
                 Remote:FireServer("BuyShopItem", "autumnnorm-shop", 3, true)
             end)
-            task.wait(1) -- adjust delay to prevent spamming too fast
+            task.wait(1) 
         end
     end
 
