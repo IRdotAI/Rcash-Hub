@@ -202,7 +202,17 @@ if game.PlaceId == 85896571713843 then
     supportedSection:AddLabel("• More to come soon!")
     supportedSection:AddLabel("• V.1.0")
 
-
+    MainTab:AddButton({
+        Name = "Join Discord For Updates and Support",
+        Callback = function()
+            setclipboard("https://discord.gg/JQFrBajQxW")
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Discord invite copied to clipboard!",
+                Time = 3
+            })
+        end
+    })
 
     MainTab:AddButton({
         Name = "Rejoin",
