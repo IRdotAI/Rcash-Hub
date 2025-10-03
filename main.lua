@@ -117,10 +117,18 @@ if game.PlaceId == 85896571713843 then
 
     function AutoSpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin") and game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
+            pcall(function()
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin")
+            end)
+
+            pcall(function()
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
+            end)
+
             task.wait(0.3)
         end
     end
+
 
 
 
