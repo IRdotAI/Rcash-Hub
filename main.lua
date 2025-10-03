@@ -5,7 +5,7 @@ if game.PlaceId == 85896571713843 then
 -- Create main window
     local Window = OrionLib:MakeWindow({
         Name = "Rcash Hub 💸 | BGSI",
-        HidePremium = true,
+        HidePremium = false,
         SaveConfig = true,
         IntroText = "Rcash Hub",
         IntroIcon = "rbxassetid://82088779453504",
