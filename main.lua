@@ -123,7 +123,15 @@ if game.PlaceId == 85896571713843 then
         PremiumOnly = false
     })
 
-    MainTab:AddLabel("By RdotA")
+    local rainbowLabel = MainTab:AddLabel("By RdotA")
+        task.spawn(function()
+            local hue = 0
+            while true do
+                hue = (hue + 0.01) % 1
+                rainbowLabel:Set("TextColor3", Color3.fromHSV(hue, 1, 1))
+                task.wait(0.05)
+            end
+        end)
 
     MainTab:AddButton({
         Name = "Rejoin",
