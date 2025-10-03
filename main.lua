@@ -35,13 +35,58 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
+    _G.WebhookURL = ""
+    _G.WebhookPing = false
+    _G.WebhookUsername = ""
+    _G.WebhookMinRarity = "Common"
+
+-- Services
+    local HttpService = game:GetService("HttpService")
+    local Player = game.Players.LocalPlayer
+    local Inventory = Player:WaitForChild("Inventory")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Workspace = game:GetService("Workspace")
 
 
+-- Webhook Function --
 
--- Functions
+    function sendWebhook(petName, petRarity)
+        if _G.WebhookURL == "" then return end
+        local content = ""
+        if _G.WebhookPing and _G.WebhookUsername ~= "" then
+            content = string.format("<@%s> hatched a %s [%s]!", _G.WebhookUsername, petName, petRarity)
+        else
+            content = string.format("%s hatched a %s [%s]!", _G.WebhookUsername ~= "" and _G.WebhookUsername or "Someone", petName, petRarity)
+        end
+        local data = { content = content }
+        pcall(function()
+            HttpService:PostAsync(_G.WebhookURL, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
+        end)
+    end
+
+-- Inventory Listener (Webhooks) --
+    if not Inventory:FindFirstChild("WebhookListener") then
+        local marker = Instance.new("BoolValue")
+        marker.Name = "WebhookListener"
+        marker.Parent = Inventory
+
+        Inventory.ChildAdded:Connect(function(pet)
+            local rarity = pet:FindFirstChild("Rarity") and pet.Rarity.Value or "Unknown"
+            local rarities = {"Common","Unique","Rare","Epic","Legendary","Secret","Infinity"}
+            local minIndex = table.find(rarities, _G.WebhookMinRarity) or 1
+            local petIndex = table.find(rarities, rarity) or 0
+            if petIndex >= minIndex then
+                sendWebhook(pet.Name, rarity)
+            end
+        end)
+    end
+
+
+-- Functions --
+
     function AutoBlowBubbles()
         while _G.AutoBlowBubbles do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("BlowBubble")
+            ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("BlowBubble")
             task.wait(0.3)
         end
     end
@@ -56,45 +101,41 @@ if game.PlaceId == 85896571713843 then
                 })
                 return
             end
-
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, 6)
+            ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, 6)
             task.wait(0.3)
         end
     end
 
-
     function AutoCS()
         while _G.AutoCS do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimSeason")
+            ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimSeason")
             task.wait(0.3)
         end
     end
 
     function AutoClaimPTR()
         while _G.AutoClaimPTR do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAllPlaytime")
-            task.wait(30) 
+            ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAllPlaytime")
+            task.wait(30)
         end
     end
 
     function AutoMysteryBox()
         while _G.AutoMysteryBox do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box",25)
+            ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box",25)
             task.wait(0.3)
         end
     end
 
     function AutoSeasonEgg()
         while _G.AutoSeasonEgg do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchPowerupEgg","Season 8 Egg",6)
+            ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchPowerupEgg","Season 8 Egg",6)
             task.wait(0.3)
         end
     end
 
     function HideHatchAnim()
-        local player = game.Players.LocalPlayer
-        local gui = player:WaitForChild("PlayerGui")
-
+        local gui = Player:WaitForChild("PlayerGui")
         gui.ChildAdded:Connect(function(child)
             if _G.HideHatchAnim and child.Name:lower():match("hatch") then
                 task.wait(0.05)
@@ -108,28 +149,29 @@ if game.PlaceId == 85896571713843 then
         local VirtualInputManager = game:GetService("VirtualInputManager")
         while _G.SpamE do
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-            task.wait(0.05) 
+            task.wait(0.05)
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
             task.wait(0.05)
         end
     end
 
+    -----------------------------
+    -- Fall Leaf Collection --
+    -----------------------------
     local FallLeafListenerStarted = false
 
     function ListenForFallLeafPickups()
         if FallLeafListenerStarted then return end
         FallLeafListenerStarted = true
 
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
         local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
-        local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
+        local Chunker = Workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
 
         task.spawn(function()
             while true do
                 if _G.AutoCollectAutumnLeaves then
                     local leafCount = 0
-
                     for _, model in pairs(Chunker:GetChildren()) do
                         local visual = model:FindFirstChild("Visual")
                         if visual and visual:FindFirstChild("Name") and visual.Name == "Fall Leaf" then
@@ -137,7 +179,6 @@ if game.PlaceId == 85896571713843 then
                             leafCount += 1
                         end
                     end
-
                     if leafCount > 0 then
                         print("[🍁] Collected " .. leafCount .. " Fall Leaf pickup(s) from workspace.")
                     end
@@ -150,8 +191,8 @@ if game.PlaceId == 85896571713843 then
             if _G.AutoCollectAutumnLeaves then
                 for _, pickup in pairs(pickupList) do
                     if pickup.Visual == "Fall Leaf" and pickup.Id then
-                        print("[🍁] New Fall Leaf spawned with ID:", pickup.Id)
                         CollectPickup:FireServer(pickup.Id)
+                        print("[🍁] New Fall Leaf spawned with ID:", pickup.Id)
                     end
                 end
             end
@@ -161,10 +202,8 @@ if game.PlaceId == 85896571713843 then
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
             pcall(function()
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin")
-            end)
-            pcall(function()
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
+                ReplicatedStorage.Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin")
+                ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
             end)
             task.wait(0.3)
         end
@@ -172,35 +211,29 @@ if game.PlaceId == 85896571713843 then
 
     function AutoBuyAutumnShop()
         while _G.AutoBuyAutumnShop do
-            local Remote = game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent
+            local Remote = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent
             pcall(function()
                 Remote:FireServer("BuyShopItem", "autumnnorm-shop", 1, true)
                 Remote:FireServer("BuyShopItem", "autumnnorm-shop", 2, true)
                 Remote:FireServer("BuyShopItem", "autumnnorm-shop", 3, true)
             end)
-            task.wait(1) 
+            task.wait(1)
         end
     end
 
-
+    -----------------------------
+    -- Obby Automation --
+    -----------------------------
     local ENABLED = true
     local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
     local TELEPORT_DELAY = 2.5
-
-    if not ENABLED then return end
-
-    local Players = game:GetService("Players")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Workspace = game:GetService("Workspace")
-    local LocalPlayer = Players.LocalPlayer
-
     local LocalData = require(ReplicatedStorage.Client.Framework.Services.LocalData)
     local RemoteEvent = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent
     local ObbysFolder = Workspace.Obbys
     local ObbyTeleports = Workspace.Worlds["Seven Seas"].Areas["Classic Island"].Obbys
 
     local function teleportTo(target)
-        local character = LocalPlayer.Character
+        local character = Player.Character
         if not character or not target then return end
         local targetCFrame
         if typeof(target) == "CFrame" then
@@ -211,19 +244,16 @@ if game.PlaceId == 85896571713843 then
             targetCFrame = target:GetPivot()
         end
         if targetCFrame then
-            character:PivotTo(targetCFrame * CFrame.new(0, 3, 0))
+            character:PivotTo(targetCFrame * CFrame.new(0,3,0))
         end
     end
 
     local function runObbyCycle(difficulty)
-        print("Starting obby: " .. difficulty)
         local teleportPart = ObbyTeleports:FindFirstChild(difficulty) 
             and ObbyTeleports[difficulty]:FindFirstChild("Portal") 
             and ObbyTeleports[difficulty].Portal:FindFirstChild("Part")
         local completePart = ObbysFolder:FindFirstChild(difficulty) and ObbysFolder[difficulty]:FindFirstChild("Complete")
-        if not teleportPart or not completePart then
-            return
-        end
+        if not teleportPart or not completePart then return end
         teleportTo(teleportPart)
         task.wait(0.5)
         RemoteEvent:FireServer("StartObby", difficulty)
@@ -239,7 +269,7 @@ if game.PlaceId == 85896571713843 then
     function AutoObbyCycle()
         task.spawn(function()
             while _G.AutoObby do
-                local character = LocalPlayer.Character
+                local character = Player.Character
                 local playerData = LocalData:Get()
                 if not character or not character.PrimaryPart or not playerData or not playerData.ObbyCooldowns then
                     task.wait(1)
@@ -257,31 +287,13 @@ if game.PlaceId == 85896571713843 then
                         if not playerData or not playerData.ObbyCooldowns then break end
                     end
                 end
-                if completedAnObbyInCycle then
-                    teleportTo(initialPosition)
-                end
+                if completedAnObbyInCycle then teleportTo(initialPosition) end
                 playerData = LocalData:Get()
-                if not playerData or not playerData.ObbyCooldowns then
-                    task.wait(1)
-                    continue
-                end
-                local nextAvailableTime = math.huge
-                for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
-                    local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
-                    if cooldownEndTime > os.time() and cooldownEndTime < nextAvailableTime then
-                        nextAvailableTime = cooldownEndTime
-                    end
-                end
-                if nextAvailableTime ~= math.huge then
-                    local timeToWait = nextAvailableTime - os.time()
-                    if timeToWait > 0 then
-                        print("All obbies are on cooldown. Next check in " .. timeToWait .. " seconds.")
-                        task.wait(timeToWait)
-                    end
-                end
+                task.wait(1)
             end
         end)
     end
+
 
 
 
@@ -684,15 +696,80 @@ if game.PlaceId == 85896571713843 then
 
 
 
+-- Webhooks Tab
+    local WebhooksTab = Window:MakeTab({
+        Name = "🌐 Webhooks",
+        PremiumOnly = false
+    })
 
+    WebhooksTab:AddLabel("Set up Discord webhooks for pet hatching notifications.")
 
+    WebhooksTab:AddTextbox({
+        Name = "Webhook URL",
+        Default = _G.WebhookURL,
+        TextDisappear = false,
+        Callback = function(Value)
+            _G.WebhookURL = Value
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Webhook URL set.",
+                Time = 3
+            })
+        end
+    })
 
+    WebhooksTab:AddTextbox({
+        Name = "Username (for mentions)",
+        Default = _G.WebhookUsername,
+        TextDisappear = false,
+        Callback = function(Value)
+            _G.WebhookUsername = Value
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Webhook Username set.",
+                Time = 3
+            })
+        end
+    })
 
+    WebhooksTab:AddDropdown({
+        Name = "Minimum Rarity to Notify",
+        Default = _G.WebhookMinRarity,
+        Options = {"Common", "Unique", "Rare", "Epic", "Legendary", "Secret", "Infinity"},
+        Callback = function(Value)
+            _G.WebhookMinRarity = Value
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Webhook Minimum Rarity set to "..Value,
+                Time = 3
+            })
+        end
+    })
 
+    WebhooksTab:AddToggle({
+        Name = "Ping on Notification",
+        Default = _G.WebhookPing,
+        Callback = function(Value)
+            _G.WebhookPing = Value
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Webhook Ping: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
 
-
-
-
+    WebhooksTab:AddButton({
+        Name = "Test Webhook",
+        Callback = function()
+            sendWebhook("TestPet", "Legendary")
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Test webhook sent!",
+                Time = 3
+            })
+        end
+    })
 
 
 
