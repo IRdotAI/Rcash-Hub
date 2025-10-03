@@ -30,6 +30,8 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
+    _G.AutoCollectPickups = false
+
 
 
 -- Functions
@@ -63,7 +65,7 @@ if game.PlaceId == 85896571713843 then
 
     function AutoMysteryBox()
         while _G.AutoMysteryBox do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box", 25)
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box",25)
             task.wait(0.3)
         end
     end
@@ -97,6 +99,19 @@ if game.PlaceId == 85896571713843 then
             task.wait(0.05)
         end
     end
+
+    function AutoCollectPickups()
+        while _G.AutoCollectPickups do
+            for _, v in pairs(workspace.rendered.pickup:GetChildren()) do
+                if v:IsA("Model") or v:IsA("Part") then
+                l   ocal serial = v.Name
+                    game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(serial)
+                end
+            end
+            task.wait(3) -- adjust how often pickups are collected (every 3 seconds)
+        end
+    end
+
 
 
 -- Main Tab
@@ -189,6 +204,21 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
+    FarmingTab:AddToggle({
+        Name = "Auto Collect Pickups",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoCollectPickups = Value
+            if Value then task.spawn(AutoCollectPickups) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+
 
 
 -- Pets Tab
@@ -258,7 +288,7 @@ if game.PlaceId == 85896571713843 then
 
 
     PetsTab:AddToggle({
-        Name = "Hide Hatch Animation (BROKEN)",
+        Name = "Hide Hatch Animation",
         Default = false,
         Callback = function(Value)
             _G.HideHatchAnim = Value
@@ -476,5 +506,3 @@ if game.PlaceId == 85896571713843 then
 -- Initialize GUI
     OrionLib:Init()
 end
-
-
