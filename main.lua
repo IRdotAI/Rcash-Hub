@@ -258,7 +258,7 @@ if game.PlaceId == 85896571713843 then
 
 
     PetsTab:AddToggle({
-        Name = "Hide Hatch Animation",
+        Name = "Hide Hatch Animation (BROKEN)",
         Default = false,
         Callback = function(Value)
             _G.HideHatchAnim = Value
@@ -476,3 +476,4 @@ if game.PlaceId == 85896571713843 then
 -- Initialize GUI
     OrionLib:Init()
 end
+
