@@ -263,7 +263,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoSeasonEgg = false
             _G.HideHatchAnim = false
             _G.SpamE = false
-            _G.AutoCollectPickups = false
+            _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false 
             _G.AutoBuyAutumnShop = false
 
@@ -290,7 +290,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoSeasonEgg = false
             _G.HideHatchAnim = false
             _G.SpamE = false
-            _G.AutoCollectPickups = false
+            _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
 
