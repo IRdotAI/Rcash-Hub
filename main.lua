@@ -31,7 +31,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
-    _G.AutoCollectPickups = false
+    _G.AutoCollectAutumnLeaves = false
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
 
@@ -103,18 +103,22 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoCollectPickups()
-        while _G.AutoCollectPickups do
-            for _, v in pairs(workspace.rendered.pickup:GetChildren()) do
-                if v:IsA("Model") or v:IsA("Part") then
-                    if v.Name:match("^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$") then
-                        game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(v.Name)
+    function ListenForFallLeafPickups()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local SpawnPickups = ReplicatedStorage.Remotes.Pickups.SpawnPickups
+        local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
+
+        SpawnPickups.OnClientEvent:Connect(function(pickupDataList)
+            if _G.AutoCollectAutumnLeaves then
+                for _, pickup in pairs(pickupDataList) do
+                    if pickup.Visual == "Fall Leaf" and pickup.Id then
+                    CollectPickup:FireServer(pickup.Id)
                     end
                 end
             end
-            task.wait(3) 
-        end
+        end)
     end
+
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
@@ -296,19 +300,23 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
-    FarmingTab:AddToggle({
-        Name = "Auto Collect Pickups",
+    local pickupSection = FarmingTab:AddSection({
+        Name = "Auto Pick Up Currency"
+    })
+
+    pickupSection:AddToggle({
+        Name = "Auto Collect Autumn Leafs",
         Default = false,
         Callback = function(Value)
-            _G.AutoCollectPickups = Value
-            if Value then task.spawn(AutoCollectPickups) end
+            _G.AutoCollectAutumnLeaves = Value
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
-                Content = "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"),
+                Content = "Auto Collect Autumn Leafs: " .. (Value and "Enabled" or "Disabled"),
                 Time = 3
             })
         end
     })
+
 
 
 
@@ -398,18 +406,18 @@ if game.PlaceId == 85896571713843 then
     })
 
     ShopTab:AddToggle({
-    Name = "Auto Buy Autumn Shop",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoBuyAutumnShop = Value
-        if Value then task.spawn(AutoBuyAutumnShop) end
-        OrionLib:MakeNotification({
-            Name = "Rcash Hub 💸",
-            Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
-            Time = 3
-        })
-    end
-})
+        Name = "Auto Buy Autumn Shop",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoBuyAutumnShop = Value
+            if Value then task.spawn(AutoBuyAutumnShop) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
 
 
 -- Misc Tab
@@ -626,7 +634,8 @@ if game.PlaceId == 85896571713843 then
 
 
 
-
+-- Start Fall Leaf listener (only once)
+    ListenForFallLeafPickups()
 
 
 -- Initialize GUI
