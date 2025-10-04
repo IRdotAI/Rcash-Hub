@@ -133,10 +133,10 @@ if game.PlaceId == 85896571713843 then
         local PlayerGui = player:WaitForChild("PlayerGui")
         
         PlayerGui.ChildAdded:Connect(function(child)
-            if _G.HideHatchAnim and (child.Name == "HatchUI" or child.Name == "HatchingUI" or child.Name == "EggHatch") then
-                task.wait(0.01)
+            if _G.HideHatchAnim and child.Name == "Hatching" then 
+                task.wait(0.01) 
                 child:Destroy()
-                print("[PETS] Destroyed hatch animation GUI: " .. child.Name)
+                print("[PETS] Successfully destroyed hatch animation GUI: " .. child.Name)
             end
         end)
     end
