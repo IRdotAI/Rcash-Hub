@@ -145,7 +145,7 @@ if game.PlaceId == 85896571713843 then
     function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
-        -- Confirmed Remote Call: ReplicatedStorage.Remotes.Pickups.CollectPickup
+        -- Confirmed Remote Call
         local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
 
         -- Start the continuous collection loop
@@ -155,10 +155,19 @@ if game.PlaceId == 85896571713843 then
                 local Rendered = Workspace:FindFirstChild("Rendered")
             
                 if Rendered then
+                    
+                    -- ROBUST FIX: Dynamically search for the folder by name (chunker/pickups)
                     local RenderedChildren = Rendered:GetChildren()
-                
-                    -- CONFIRMED LOCATION: Index [14] of Rendered's children
-                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
+                    
+                    for _, child in ipairs(RenderedChildren) do
+                        if child:IsA("Folder") and (child.Name:lower():match("chunker") or child.Name:lower():match("pickups")) then
+                            CollectiblesChunker = child
+                            break -- Stop searching once we find a probable container
+                        end
+                    end
+                    
+                    -- Fallback to Index 14 (if the dynamic search fails, your original location)
+                    if not CollectiblesChunker and #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
                     end
                 end
@@ -168,10 +177,10 @@ if game.PlaceId == 85896571713843 then
                 
                     -- Iterate through every collectible model inside the chunker
                     for _, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
-                        -- The UUID is stored in the 'ID' Attribute on the model
+                        
+                        -- CONFIRMED METHOD: read the 'ID' Attribute
                         local pickupId = collectibleModel:GetAttribute("ID") 
                     
-                        -- Check if we successfully read the UUID string
                         if type(pickupId) == "string" and string.len(pickupId) > 20 then
                             -- Fire the server remote with the pickup's unique ID
                             CollectPickupRemote:FireServer(pickupId)
