@@ -130,7 +130,7 @@ if game.PlaceId == 85896571713843 then
                 end
             end
         end)
-    endd
+    end
 
     function SpamEKey()
         local VirtualInputManager = game:GetService("VirtualInputManager")
