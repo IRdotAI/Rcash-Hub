@@ -38,10 +38,10 @@ if game.PlaceId == 85896571713843 then
     _G.AutoEquipBest = false
 
     local EggModelMap = {
-        ["Candle Egg"] = "Model - Candle Egg",
-        ["Autumn Egg"] = "Model - Autumn Egg",
-        ["Developer Egg"] = "Model - Dev Egg",
-        ["Infinity Egg"] = "Model - Infinity Egg", 
+        ["Candle Egg"] = "Candle Egg",
+        ["Autumn Egg"] = "Autumn Egg",
+        ["Developer Egg"] = "Dev Egg",
+        ["Infinity Egg"] = "Infinity Egg", 
         ["Common Egg"] = "Common Egg", 
         ["Spotted Egg"] = "Spotted Egg", 
         ["Iceshard Egg"] = "Iceshard Egg", 
