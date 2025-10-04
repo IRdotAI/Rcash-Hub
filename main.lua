@@ -76,14 +76,7 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoHatch()
-        while _G.AutoHatch do
-            if _G.SelectedEgg ~= "" then
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg,6)
-            end
-            task.wait(0.3)
-        end
-    end
+    --Auto Hatch Function
     
 
 
