@@ -145,9 +145,8 @@ if game.PlaceId == 85896571713843 then
     function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
-        -- Confirmed Remote Call: ReplicatedStorage.Remotes.Pickups.CollectPickup
+        -- CONFIRMED Remote Call Path
         local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
-        local Player = game.Players.LocalPlayer
         
         print("[APU_DEBUG] AutoPickupAll function defined and starting main loop.")
 
@@ -155,39 +154,35 @@ if game.PlaceId == 85896571713843 then
             while true do
                 local CollectiblesChunker = nil
                 local Rendered = Workspace:FindFirstChild("Rendered")
-                local HRP = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
             
                 if Rendered then
                     local RenderedChildren = Rendered:GetChildren()
                 
-                    -- CONFIRMED LOCATION: Index [14] of Rendered's children
+                    -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
                     if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
-                        -- We know this line successfully executes from the debug output
                     end
                 end
                 
-                -- Check if the feature is enabled AND we found the container
-                if _G.AutoPickupAll and CollectiblesChunker and HRP then
+                if _G.AutoPickupAll and CollectiblesChunker then
                     local collectedCount = 0
                     
-                    -- Use GetDescendants() to find deeply nested items and solve the "Container is empty" issue
+                    -- Use GetDescendants() to find deeply nested items (solves the "empty container" issue)
                     local items = CollectiblesChunker:GetDescendants()
                     
                     -- Iterate through every collectible item
                     for _, collectibleModel in ipairs(items) do
                         
-                        -- Only process objects that could hold the ID
+                        -- Check for objects that could hold the 'ID' attribute
                         if collectibleModel:IsA("Model") or collectibleModel:IsA("BasePart") or collectibleModel:IsA("Configuration") then
                             
-                            -- Read the 'ID' Attribute
+                            -- Read the 'ID' Attribute (Confirmed UUID location)
                             local pickupId = collectibleModel:GetAttribute("ID") 
                         
                             if type(pickupId) == "string" and string.len(pickupId) > 20 then
                                 
-                                -- FIX: Fire the Remote Event with the ID and the boolean 'true' 
-                                -- The server often expects a boolean 'true' to confirm collection.
-                                CollectPickupRemote:FireServer(pickupId, true)
+                                -- 🔑 FINAL FIX: Fire the Remote Event with ONLY the UUID string.
+                                CollectPickupRemote:FireServer(pickupId)
                                 collectedCount = collectedCount + 1
                             end
                         end
