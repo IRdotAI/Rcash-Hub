@@ -145,8 +145,9 @@ if game.PlaceId == 85896571713843 then
     function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
-        -- Confirmed Remote Call
         local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
+        
+        print("[APU_DEBUG] AutoPickupAll function defined and starting main loop.")
 
         -- Start the continuous collection loop
         task.spawn(function()
@@ -156,41 +157,62 @@ if game.PlaceId == 85896571713843 then
             
                 if Rendered then
                     
-                    -- ROBUST FIX: Dynamically search for the folder by name (chunker/pickups)
+                    -- Step 1: Search Dynamically (Robust Method)
                     local RenderedChildren = Rendered:GetChildren()
                     
                     for _, child in ipairs(RenderedChildren) do
                         if child:IsA("Folder") and (child.Name:lower():match("chunker") or child.Name:lower():match("pickups")) then
                             CollectiblesChunker = child
-                            break -- Stop searching once we find a probable container
+                            print("[APU_DEBUG] Found container by name: " .. child.Name)
+                            break 
                         end
                     end
                     
-                    -- Fallback to Index 14 (if the dynamic search fails, your original location)
+                    -- Step 2: Fallback to Index 14 (Your original location)
                     if not CollectiblesChunker and #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
+                        print("[APU_DEBUG] Fallback: Found container at index 14.")
                     end
                 end
-
+                
+                -- Check if the feature is enabled AND we found the container
                 if _G.AutoPickupAll and CollectiblesChunker then
                     local collectedCount = 0
+                    local itemFound = false
+                    
+                    -- Check if the container has items
+                    if #CollectiblesChunker:GetChildren() > 0 then
+                        print("[APU_DEBUG] Container has " .. #CollectiblesChunker:GetChildren() .. " items.")
+                    else
+                        print("[APU_DEBUG] Container is empty.")
+                    end
                 
                     -- Iterate through every collectible model inside the chunker
                     for _, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
+                        itemFound = true
                         
-                        -- CONFIRMED METHOD: read the 'ID' Attribute
+                        -- Step 3: Read the 'ID' Attribute (The UUID)
                         local pickupId = collectibleModel:GetAttribute("ID") 
                     
                         if type(pickupId) == "string" and string.len(pickupId) > 20 then
-                            -- Fire the server remote with the pickup's unique ID
+                            print("[APU_DEBUG] SUCCESS: Reading UUID " .. string.sub(pickupId, 1, 8) .. "... from item " .. collectibleModel.Name)
+                            
+                            -- Step 4: Fire the Remote Event
                             CollectPickupRemote:FireServer(pickupId)
                             collectedCount = collectedCount + 1
+                        else
+                            -- This item did not have a valid ID attribute
+                            print("[APU_DEBUG] FAIL: Item " .. collectibleModel.Name .. " has no valid 'ID' Attribute.")
                         end
                     end
                 
                     if collectedCount > 0 then
                         print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
+                    elseif itemFound and collectedCount == 0 then
+                        print("[APU_DEBUG] WARNING: Found items, but collected 0. Remote likely failed.")
                     end
+                elseif _G.AutoPickupAll and not CollectiblesChunker then
+                    print("[APU_DEBUG] ERROR: AutoPickupAll is ON, but Collectibles Chunker was NOT found.")
                 end
 
                 task.wait(0.1) 
