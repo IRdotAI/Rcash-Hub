@@ -131,16 +131,23 @@ if game.PlaceId == 85896571713843 then
     function HideHatchAnim()
         local player = game.Players.LocalPlayer
         local PlayerGui = player:WaitForChild("PlayerGui")
+        local ScreenContainer = PlayerGui:FindFirstChildOfClass("ScreenGui") or PlayerGui 
         
-        PlayerGui.ChildAdded:Connect(function(child)
-            if _G.HideHatchAnim and child.Name == "Hatching" then 
-                task.wait(0.01) 
-                child:Destroy()
-                print("[PETS] Successfully destroyed hatch animation GUI: " .. child.Name)
+        task.spawn(function()
+            while true do
+                if _G.HideHatchAnim then
+                    local HatchingGUI = ScreenContainer:FindFirstChild("Hatching")
+                    
+                    if HatchingGUI and HatchingGUI:IsA("ScreenGui") then
+                        task.wait(0.01)
+                        HatchingGUI:Destroy()
+                        print("[PETS] Successfully destroyed Hatching GUI.")
+                    end
+                end
+                task.wait(0.1)
             end
         end)
     end
-    task.spawn(HideHatchAnim)
 
     function SpamEKey()
         local VirtualInputManager = game:GetService("VirtualInputManager")
