@@ -41,7 +41,7 @@ if game.PlaceId == 85896571713843 then
     local EggModelMap = {
         ["Candle Egg"] = "Candle Egg",
         ["Autumn Egg"] = "Autumn Egg",
-        ["Developer Egg"] = "Dev Egg",
+        ["Developer Egg"] = "Rcash_DevEgg_Marker",
         ["Infinity Egg"] = "Infinity Egg", 
         ["Common Egg"] = "Common Egg", 
         ["Spotted Egg"] = "Spotted Egg", 
@@ -336,40 +336,51 @@ if game.PlaceId == 85896571713843 then
 
     if not HRP then return end
 
-    -- 1. Get the target model name from your comprehensive map
-    local TargetModelName = EggModelMap[EggName]
-    
-    if not TargetModelName then
-        OrionLib:MakeNotification({
-            Name = "Rcash Hub 💸",
-            Content = "Error: Egg name not found in map: " .. EggName,
-            Time = 5
-        })
-        return
-    end
-    
+    local TargetModelName = EggModelMap[EggName] or EggName
     local EggModel = nil
     
-    -- 2. PRIORITY SEARCH: Check the specific Rendered.Generic path (Where event eggs often live)
-    local GenericFolder = Workspace:FindFirstChild("Rendered") and Workspace.Rendered:FindFirstChild("Generic")
-    if GenericFolder then
-        EggModel = GenericFolder:FindFirstChild(TargetModelName) 
-    end
-    
-    -- 3. FALLBACK SEARCH: If not found, search the entire workspace recursively (for world eggs)
-    if not EggModel then
-         EggModel = Workspace:FindFirstChild(TargetModelName, true) 
-    end
-
-
-    if EggModel and EggModel:IsA("Model") then
-        local EggCFrame
-        local PrimaryPart = EggModel.PrimaryPart or EggModel:FindFirstChildOfClass("BasePart") 
+    if TargetModelName == "Rcash_DevEgg_Marker" then
+        local foundEgg = nil
+        local closestDistance = math.huge
         
-        if PrimaryPart then
-            EggCFrame = PrimaryPart.CFrame
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") or obj:IsA("BasePart") then
+                if string.find(obj.Name:lower(), "dev", 1, true) or string.find(obj.Name:lower(), "egg", 1, true) then
+                    local eggPosition = obj:IsA("Model") and obj:GetPivot().p or obj.Position
+                    local distance = (eggPosition - HRP.Position).Magnitude
+                    
+                    if distance < closestDistance and distance < 1000 then
+                        closestDistance = distance
+                        foundEgg = obj
+                    end
+                end
+            end
+        end
+        
+        EggModel = foundEgg
+        
+    else
+        
+        -- 1. PRIORITY SEARCH 1: Check the Rendered.Generic path (For Event Eggs)
+        local GenericFolder = Workspace:FindFirstChild("Rendered") and Workspace.Rendered:FindFirstChild("Generic")
+        if GenericFolder then
+            EggModel = GenericFolder:FindFirstChild(TargetModelName) 
+        end
+        
+        -- 2. FALLBACK SEARCH: Search the entire workspace recursively (For World Eggs)
+        if not EggModel then
+            EggModel = Workspace:FindFirstChild(TargetModelName, true) 
+        end
+    end
+
+
+    if EggModel and (EggModel:IsA("Model") or EggModel:IsA("BasePart")) then
+        local EggCFrame
+        if EggModel:IsA("Model") then
+            local PrimaryPart = EggModel.PrimaryPart or EggModel:FindFirstChildOfClass("BasePart") 
+            EggCFrame = PrimaryPart and PrimaryPart.CFrame or EggModel:GetPivot()
         else
-            EggCFrame = EggModel:GetPivot()
+            EggCFrame = EggModel.CFrame
         end
 
         HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
@@ -382,7 +393,7 @@ if game.PlaceId == 85896571713843 then
     else
         OrionLib:MakeNotification({
             Name = "Rcash Hub 💸",
-            Content = "Error: Could not find model named **" .. TargetModelName .. "** in the game.",
+            Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
             Time = 5
         })
     end
@@ -618,10 +629,11 @@ end
         PremiumOnly = false
     })
 
-    PetsTab:AddLabel("Select an egg, then enable Auto Hatch. You will teleport instantly.")
+    local PetsSection = PetsTab:AddSection({
+        Name = "1. Pets Management"
+    })
 
-    -- Existing Auto Equip Best Pets
-    PetsTab:AddToggle({
+    PetsSection:AddToggle({
         Name = "Auto Equip Best Pets",
         Default = false,
         Callback = function(Value)
@@ -635,8 +647,7 @@ end
         end
     })
     
-    -- NEW: Auto Sell Pets
-    PetsTab:AddToggle({
+    PetsSection:AddToggle({
         Name = "Auto Sell Unused Pets (Requires Auto Equip Best)",
         Default = false,
         Callback = function(Value)
@@ -649,6 +660,13 @@ end
             })
         end
     })
+
+    local EggsSection = PetsTab:AddSection({
+        Name = "2. Egg Hatching"
+    })
+    
+    EggsSection:AddLabel("Select an egg to teleport, then enable Auto Hatch.")
+
 
     local EggCategories = {
         ["World 1 Eggs"] = {"Common Egg", "Spotted Egg", "Iceshard Egg", "Inferno Egg", "Spikey Egg", "Magma Egg", "Crystal Egg", "Lunar Egg", "Void Egg", "Hell Egg", "Nightmare Egg", "Rainbow Egg"},
@@ -664,7 +682,7 @@ end
         end
     end
 
-    PetsTab:AddDropdown({
+    EggsSection:AddDropdown({
         Name = "Select Egg to Teleport/Hatch",
         Default = _G.SelectedEgg,
         Options = AllEggs,
@@ -680,7 +698,7 @@ end
     })
 
 
-    PetsTab:AddToggle({
+    EggsSection:AddToggle({
         Name = "Auto Hatch Egg",
         Default = false,
         Callback = function(Value)
@@ -701,7 +719,7 @@ end
         end
     })
 
-    PetsTab:AddToggle({
+    EggsSection:AddToggle({
         Name = "Spam E Key",
         Default = false,
         Callback = function(Value)
@@ -718,7 +736,7 @@ end
     })
 
 
-    PetsTab:AddToggle({
+    EggsSection:AddToggle({
         Name = "Hide Hatch Animation (Broken)",
         Default = false,
         Callback = function(Value)
