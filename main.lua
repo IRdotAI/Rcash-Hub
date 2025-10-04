@@ -161,48 +161,19 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoPickupAll()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    function AutoPickupAll_DEBUG()
         local Workspace = game:GetService("Workspace")
-        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup
 
-        -- Helper function to find a UUID string inside a model
-        local function findUUID(model)
-            for _, child in ipairs(model:GetChildren()) do
-                -- 1. Check if the child's name IS the UUID
-                if string.len(child.Name) > 20 and string.match(child.Name, "[%-a-f0-9]+") then
-                    return child.Name
-                end
-            
-                -- 2. Check if the child is a StringValue or Attribute that holds the UUID
-                if child:IsA("StringValue") and string.len(child.Value) > 20 then
-                    return child.Value
-                end
-
-                -- 3. Check for an Attribute named "ID" or "UUID" on the primary part
-                if model.PrimaryPart then
-                    if model.PrimaryPart:GetAttribute("ID") and string.len(model.PrimaryPart:GetAttribute("ID")) > 20 then
-                        return model.PrimaryPart:GetAttribute("ID")
-                    end
-                end
-            
-                -- Recursively search if the child is a folder/container
-                if child:IsA("Folder") or child:IsA("Configuration") or child:IsA("Model") then
-                    local found = findUUID(child)
-                    if found then return found end
-                end
-            end
-            return nil
-        end
-
-        -- Start the continuous collection loop
+        -- Start the continuous DEBUG loop
         task.spawn(function()
-            while _G.AutoPickupAll do
+            print("--- STARTING PICKUP DEBUG ---")
+            while true do
                 local CollectiblesChunker = nil
                 local Rendered = Workspace:FindFirstChild("Rendered")
             
                 if Rendered then
                     local RenderedChildren = Rendered:GetChildren()
+                
                     -- Use the confirmed index [14]
                     if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
@@ -210,31 +181,37 @@ if game.PlaceId == 85896571713843 then
                 end
 
                 if CollectiblesChunker then
-                    local collectedCount = 0
+                    print("\n[DEBUG] Found Collectibles Chunker. Items found: " .. #CollectiblesChunker:GetChildren())
                 
                     -- Iterate through every collectible model inside the chunker
-                    for _, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
+                    for i, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
                         if collectibleModel:IsA("Model") or collectibleModel:IsA("BasePart") then
+                            print("\n[ITEM " .. i .. "] Name: " .. collectibleModel.Name)
                         
-                            -- Look inside the model for the UUID
-                            local pickupId = findUUID(collectibleModel) 
+                            -- Look for Attributes on the model/part
+                            local attributes = collectibleModel:GetAttributes()
+                            for key, value in pairs(attributes) do
+                                print("[ITEM " .. i .. "] Attribute: " .. key .. " = " .. tostring(value))
+                            end
                         
-                            if pickupId then
-                                -- Fire the server remote with the pickup's unique ID
-                                CollectPickupRemote:FireServer(pickupId)
-                                collectedCount = collectedCount + 1
+                            -- Look for Children (StringValues, Folders, Parts)
+                            for _, child in ipairs(collectibleModel:GetDescendants()) do
+                                if child:IsA("StringValue") then
+                                    print("[ITEM " .. i .. "] Child StringValue: " .. child.Name .. " = " .. child.Value)
+                                end
+                                if child:IsA("Configuration") or child:IsA("Folder") then
+                                    print("[ITEM " .. i .. "] Child Container: " .. child.Name)
+                                end
+                                -- Check if the child's name is the UUID
+                                if string.len(child.Name) > 20 and string.match(child.Name, "[%-a-f0-9]+") then
+                                    print("[ITEM " .. i .. "] CHILD NAME IS UUID: " .. child.Name)
+                                end
                             end
                         end
                     end
-                
-                    if collectedCount > 0 then
-                        print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
-                    end
                 end
-
-                task.wait(0.1) 
+            task.wait(2) -- Check every 2 seconds
             end
-            task.wait(0.5)
         end)
     end
 
@@ -440,7 +417,8 @@ if game.PlaceId == 85896571713843 then
     end
 
     task.spawn(HideHatchAnim)
-    task.spawn(AutoPickupAll)
+    task.spawn(AutoPickupAll_DEBUG)
+
 
 
 
