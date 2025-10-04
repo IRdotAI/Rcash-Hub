@@ -31,7 +31,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
-    _G.AutoCollectAutumnLeaves = false
+    _G.AutoPickupAll = false
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
@@ -76,21 +76,23 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoHatch()
-        while _G.AutoHatch do
-            if _G.SelectedEgg == "" then
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
-                    Content = "Please select an egg first!",
-                    Time = 3
-                })
-                return
-            end
+    function HideHatchAnim()
+        local player = game.Players.LocalPlayer
+        local PlayerGui = player:WaitForChild("PlayerGui")
+        
+        PlayerGui.ChildAdded:Connect(function(child)
 
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, 6)
-            task.wait(0.3)
-        end
+            if _G.HideHatchAnim and child.Name:lower():match("hatch") then
+                
+                if child.Name == "Hatching" or child.Name:lower():match("hatch") then
+                    task.wait(0.01)
+                    child:Destroy()
+                    print("[PETS] Successfully destroyed hatch animation GUI: " .. child.Name)
+                end
+            end
+        end)
     end
+    
 
 
     function AutoCS()
@@ -159,46 +161,48 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    local FallLeafListenerStarted = false
-
-    function ListenForFallLeafPickups()
-        if FallLeafListenerStarted then return end
-        FallLeafListenerStarted = true
-
+        function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local CollectPickup = ReplicatedStorage.Remotes.Pickups.CollectPickup
-        local Chunker = workspace:WaitForChild("Rendered"):WaitForChild("Chunker")
+        local Workspace = game:GetService("Workspace")
+        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup
 
+        -- Start the continuous collection loop
         task.spawn(function()
-            while true do
-                if _G.AutoCollectAutumnLeaves then
-                    local foundIDs = {}
+            while _G.AutoPickupAll do
+                local CollectiblesChunker = nil
+            
+                -- Your finding: The collectibles are in the 14th child of workspace.Rendered
+                local RenderedChildren = Workspace.Rendered:GetChildren()
+                if #RenderedChildren >= 14 then
+                    CollectiblesChunker = RenderedChildren[14]
+                end
+
+                if CollectiblesChunker and CollectiblesChunker:IsA("Folder") then
                     local collectedCount = 0
-
-                    -- First, gather all IDs
-                    for _, pickupID in pairs(Chunker:GetChildren()) do
-                        table.insert(foundIDs, pickupID.Name)
+                
+                    -- Iterate through every collectible model inside the chunker
+                    for _, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
+                        -- The model's Name is the unique ID (e.g., "978b9479-e3df-4e11-a655-6335af2bb248")
+                        local pickupId = collectibleModel.Name
+                    
+                        -- Check if it's a valid ID format (UUID) before firing
+                        if string.len(pickupId) > 20 then
+                            -- Fire the server remote with the pickup's unique ID
+                            CollectPickupRemote:FireServer(pickupId)
+                            collectedCount = collectedCount + 1
+                        end
                     end
-
-                    -- Print all IDs found this cycle
-                    if #foundIDs > 0 then
-                        print("[🍁] Found IDs:", table.concat(foundIDs, ", "))
-                    end
-
-                    -- Then collect all IDs
-                    for _, id in pairs(foundIDs) do
-                        pcall(function()
-                            CollectPickup:FireServer(id)
-                            collectedCount += 1
-                        end)
-                    end
-
+                
                     if collectedCount > 0 then
-                        print("[🍁] Total pickups collected this cycle: " .. collectedCount)
+                        print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
                     end
                 end
-                task.wait(1) -- adjust delay as needed
+
+                -- Fast collection rate
+                task.wait(0.1) 
             end
+            -- Slow loop rate when disabled
+            task.wait(0.5)
         end)
     end
 
@@ -337,75 +341,78 @@ if game.PlaceId == 85896571713843 then
     end
 
     function TeleportToEgg(EggName)
-    local Player = game.Players.LocalPlayer
-    local Character = Player.Character or Player.CharacterAdded:Wait()
-    local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
-    local Workspace = game:GetService("Workspace")
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character or Player.CharacterAdded:Wait()
+        local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
+        local Workspace = game:GetService("Workspace")
 
-    if not HRP then return end
+        if not HRP then return end
 
-    local TargetModelName = EggModelMap[EggName] or EggName
-    local EggModel = nil
+        local TargetModelName = EggModelMap[EggName] or EggName
+        local EggModel = nil
     
-    if TargetModelName == "Rcash_DevEgg_Marker" then
-        local foundEgg = nil
-        local closestDistance = math.huge
+        if TargetModelName == "Rcash_DevEgg_Marker" then
+            local foundEgg = nil
+            local closestDistance = math.huge
         
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("Model") or obj:IsA("BasePart") then
-                if string.find(obj.Name:lower(), "dev", 1, true) or string.find(obj.Name:lower(), "egg", 1, true) then
-                    local eggPosition = obj:IsA("Model") and obj:GetPivot().p or obj.Position
-                    local distance = (eggPosition - HRP.Position).Magnitude
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if obj:IsA("Model") or obj:IsA("BasePart") then
+                    if string.find(obj.Name:lower(), "dev", 1, true) or string.find(obj.Name:lower(), "egg", 1, true) then
+                        local eggPosition = obj:IsA("Model") and obj:GetPivot().p or obj.Position
+                        local distance = (eggPosition - HRP.Position).Magnitude
                     
-                    if distance < closestDistance and distance < 1000 then
-                        closestDistance = distance
-                        foundEgg = obj
+                        if distance < closestDistance and distance < 1000 then
+                            closestDistance = distance
+                            foundEgg = obj
+                        end
                     end
                 end
             end
-        end
         
-        EggModel = foundEgg
+            EggModel = foundEgg
         
-    else
-        
-        -- 1. PRIORITY SEARCH 1: Check the Rendered.Generic path (For Event Eggs)
-        local GenericFolder = Workspace:FindFirstChild("Rendered") and Workspace.Rendered:FindFirstChild("Generic")
-        if GenericFolder then
-            EggModel = GenericFolder:FindFirstChild(TargetModelName) 
-        end
-        
-        -- 2. FALLBACK SEARCH: Search the entire workspace recursively (For World Eggs)
-        if not EggModel then
-            EggModel = Workspace:FindFirstChild(TargetModelName, true) 
-        end
-    end
-
-
-    if EggModel and (EggModel:IsA("Model") or EggModel:IsA("BasePart")) then
-        local EggCFrame
-        if EggModel:IsA("Model") then
-            local PrimaryPart = EggModel.PrimaryPart or EggModel:FindFirstChildOfClass("BasePart") 
-            EggCFrame = PrimaryPart and PrimaryPart.CFrame or EggModel:GetPivot()
         else
-            EggCFrame = EggModel.CFrame
+        
+            -- 1. PRIORITY SEARCH 1: Check the Rendered.Generic path (For Event Eggs)
+            local GenericFolder = Workspace:FindFirstChild("Rendered") and Workspace.Rendered:FindFirstChild("Generic")
+            if GenericFolder then
+                EggModel = GenericFolder:FindFirstChild(TargetModelName) 
+            end
+        
+            -- 2. FALLBACK SEARCH: Search the entire workspace recursively (For World Eggs)
+            if not EggModel then
+                EggModel = Workspace:FindFirstChild(TargetModelName, true) 
+            end
         end
 
-        HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
+
+        if EggModel and (EggModel:IsA("Model") or EggModel:IsA("BasePart")) then
+            local EggCFrame
+            if EggModel:IsA("Model") then
+                local PrimaryPart = EggModel.PrimaryPart or EggModel:FindFirstChildOfClass("BasePart") 
+                EggCFrame = PrimaryPart and PrimaryPart.CFrame or EggModel:GetPivot()
+            else
+                EggCFrame = EggModel.CFrame
+            end
+
+            HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-        OrionLib:MakeNotification({
-            Name = "Rcash Hub 💸",
-            Content = "Teleported to: " .. EggName,
-            Time = 3
-        })
-    else
-        OrionLib:MakeNotification({
-            Name = "Rcash Hub 💸",
-            Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
-            Time = 5
-        })
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Teleported to: " .. EggName,
+                Time = 3
+            })
+        else
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
+                Time = 5
+            })
+        end
     end
-end
+
+    task.spawn(HideHatchAnim)
+    task.spawn(AutoPickupAll)
 
 
 
@@ -577,25 +584,17 @@ end
         end
     })
 
-    local pickupSection = FarmingTab:AddSection({
-        Name = "Auto Pick Up Currency"
-    })
-
-    pickupSection:AddToggle({
-        Name = "Auto Collect Autumn Leaves",
+    FarmingTab:AddToggle({
+        Name = "Auto Pickup All (ID Injection)",
         Default = false,
         Callback = function(Value)
-            _G.AutoCollectAutumnLeaves = Value
-
-            if Value then ListenForFallLeafPickups() end
-
+            _G.AutoPickupAll = Value
+        
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
-                Content = "Auto Collect Autumn Leafs: " .. (Value and "Enabled" or "Disabled"),
+                Content = "Auto Pickup All: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
-
-            print("[🍁] Auto Collect Autumn Leaves: " .. (Value and "ENABLED" or "DISABLED"))
         end
     })
 
