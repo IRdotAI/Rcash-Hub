@@ -610,8 +610,9 @@ end
         PremiumOnly = false
     })
 
-    PetsTab:AddLabel("Select an egg to hatch and stand near the selected egg")
+    PetsTab:AddLabel("Select an egg, then enable Auto Hatch. You will teleport instantly.")
 
+    -- Existing Auto Equip Best Pets
     PetsTab:AddToggle({
         Name = "Auto Equip Best Pets",
         Default = false,
@@ -625,6 +626,21 @@ end
             })
         end
     })
+    
+    -- NEW: Auto Sell Pets
+    PetsTab:AddToggle({
+        Name = "Auto Sell Unused Pets (Requires Auto Equip Best)",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoSellPets = Value
+            if Value then task.spawn(AutoSellPets) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Sell Pets: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
 
     local EggCategories = {
         ["World 1 Eggs"] = {"Common Egg", "Spotted Egg", "Iceshard Egg", "Inferno Egg", "Spikey Egg", "Magma Egg", "Crystal Egg", "Lunar Egg", "Void Egg", "Hell Egg", "Nightmare Egg", "Rainbow Egg"},
@@ -632,24 +648,28 @@ end
         ["World 3 Eggs"] = {"Icy Egg", "Vine Egg", "Lava Egg", "Secret Egg", "Atlantis Egg", "Classic Egg"},
         ["Event Eggs"] = {"Candle Egg", "Autumn Egg", "Developer Egg", "Infinity Egg"}
     }
-
-
-    for categoryName, eggList in pairs(EggCategories) do
-        PetsTab:AddDropdown({
-            Name = categoryName,
-            Default = _G.SelectedEgg,
-            Options = eggList,
-            Callback = function(Value)
-                _G.SelectedEgg = Value
-                TeleportToEgg(Value)
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
-                    Content = "Selected Egg: "..Value,
-                    Time = 3
-                })
-            end
-        })
+    
+    local AllEggs = {}
+    for _, eggList in pairs(EggCategories) do
+        for _, eggName in ipairs(eggList) do
+            table.insert(AllEggs, eggName)
+        end
     end
+
+    PetsTab:AddDropdown({
+        Name = "Select Egg to Teleport/Hatch",
+        Default = _G.SelectedEgg,
+        Options = AllEggs,
+        Callback = function(Value)
+            _G.SelectedEgg = Value
+            TeleportToEgg(Value)
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Selected Egg: "..Value,
+                Time = 3
+            })
+        end
+    })
 
 
     PetsTab:AddToggle({
