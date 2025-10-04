@@ -130,12 +130,13 @@ if game.PlaceId == 85896571713843 then
 
     function HideHatchAnim()
         local player = game.Players.LocalPlayer
-        local gui = player:WaitForChild("PlayerGui")
-
-        gui.ChildAdded:Connect(function(child)
-            if _G.HideHatchAnim and child.Name:lower():match("hatch") then
-                task.wait(0.05)
+        local PlayerGui = player:WaitForChild("PlayerGui")
+        
+        PlayerGui.ChildAdded:Connect(function(child)
+            if _G.HideHatchAnim and (child.Name == "HatchUI" or child.Name == "HatchingUI" or child.Name == "EggHatch") then
+                task.wait(0.01)
                 child:Destroy()
+                print("[PETS] Destroyed hatch animation GUI: " .. child.Name)
             end
         end)
     end
@@ -630,7 +631,7 @@ end
     })
 
     local PetsSection = PetsTab:AddSection({
-        Name = "1. Pets Management"
+        Name = "Pets Management"
     })
 
     PetsSection:AddToggle({
@@ -662,7 +663,7 @@ end
     })
 
     local EggsSection = PetsTab:AddSection({
-        Name = "2. Egg Hatching"
+        Name = "Egg Hatching"
     })
     
     EggsSection:AddLabel("Select an egg to teleport, then enable Auto Hatch.")
