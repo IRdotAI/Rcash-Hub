@@ -36,6 +36,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
     _G.AutoEquipBest = false
+    _G.AutoSellPets = false
 
     local EggModelMap = {
         ["Candle Egg"] = "Candle Egg",
@@ -318,6 +319,13 @@ if game.PlaceId == 85896571713843 then
                 end
             end
         end)
+    end
+
+    function AutoSellPets() 
+        while _G.AutoSellPets do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("SellPets")
+            task.wait(5)
+        end
     end
 
     function TeleportToEgg(EggName)
