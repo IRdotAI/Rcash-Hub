@@ -161,35 +161,69 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-        function AutoPickupAll()
+    function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
         local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup
+
+        -- Helper function to find a UUID string inside a model
+        local function findUUID(model)
+            for _, child in ipairs(model:GetChildren()) do
+                -- 1. Check if the child's name IS the UUID
+                if string.len(child.Name) > 20 and string.match(child.Name, "[%-a-f0-9]+") then
+                    return child.Name
+                end
+            
+                -- 2. Check if the child is a StringValue or Attribute that holds the UUID
+                if child:IsA("StringValue") and string.len(child.Value) > 20 then
+                    return child.Value
+                end
+
+                -- 3. Check for an Attribute named "ID" or "UUID" on the primary part
+                if model.PrimaryPart then
+                    if model.PrimaryPart:GetAttribute("ID") and string.len(model.PrimaryPart:GetAttribute("ID")) > 20 then
+                        return model.PrimaryPart:GetAttribute("ID")
+                    end
+                end
+            
+                -- Recursively search if the child is a folder/container
+                if child:IsA("Folder") or child:IsA("Configuration") or child:IsA("Model") then
+                    local found = findUUID(child)
+                    if found then return found end
+                end
+            end
+            return nil
+        end
 
         -- Start the continuous collection loop
         task.spawn(function()
             while _G.AutoPickupAll do
                 local CollectiblesChunker = nil
+                local Rendered = Workspace:FindFirstChild("Rendered")
             
-                -- Your finding: The collectibles are in the 14th child of workspace.Rendered
-                local RenderedChildren = Workspace.Rendered:GetChildren()
-                if #RenderedChildren >= 14 then
-                    CollectiblesChunker = RenderedChildren[14]
+                if Rendered then
+                    local RenderedChildren = Rendered:GetChildren()
+                    -- Use the confirmed index [14]
+                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
+                        CollectiblesChunker = RenderedChildren[14]
+                    end
                 end
 
-                if CollectiblesChunker and CollectiblesChunker:IsA("Folder") then
+                if CollectiblesChunker then
                     local collectedCount = 0
                 
                     -- Iterate through every collectible model inside the chunker
                     for _, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
-                        -- The model's Name is the unique ID (e.g., "978b9479-e3df-4e11-a655-6335af2bb248")
-                        local pickupId = collectibleModel.Name
-                    
-                        -- Check if it's a valid ID format (UUID) before firing
-                        if string.len(pickupId) > 20 then
-                            -- Fire the server remote with the pickup's unique ID
-                            CollectPickupRemote:FireServer(pickupId)
-                            collectedCount = collectedCount + 1
+                        if collectibleModel:IsA("Model") or collectibleModel:IsA("BasePart") then
+                        
+                            -- Look inside the model for the UUID
+                            local pickupId = findUUID(collectibleModel) 
+                        
+                            if pickupId then
+                                -- Fire the server remote with the pickup's unique ID
+                                CollectPickupRemote:FireServer(pickupId)
+                                collectedCount = collectedCount + 1
+                            end
                         end
                     end
                 
@@ -198,17 +232,11 @@ if game.PlaceId == 85896571713843 then
                     end
                 end
 
-                -- Fast collection rate
                 task.wait(0.1) 
             end
-            -- Slow loop rate when disabled
             task.wait(0.5)
         end)
     end
-
-
-
-
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
@@ -585,7 +613,7 @@ if game.PlaceId == 85896571713843 then
     })
 
     FarmingTab:AddToggle({
-        Name = "Auto Pickup All (ID Injection)",
+        Name = "Auto Pickup All",
         Default = false,
         Callback = function(Value)
             _G.AutoPickupAll = Value
