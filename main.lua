@@ -657,7 +657,14 @@ end
         Default = false,
         Callback = function(Value)
             _G.AutoHatch = Value
-            if Value then task.spawn(AutoHatch) end
+            
+            if Value then
+                if _G.SelectedEgg ~= "" then
+                    TeleportToEgg(_G.SelectedEgg) 
+                end
+                task.spawn(AutoHatch) 
+            end
+            
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Auto Hatch: "..(Value and "Enabled" or "Disabled"),
