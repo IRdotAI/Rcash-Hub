@@ -145,7 +145,6 @@ if game.PlaceId == 85896571713843 then
     function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
-        -- CONFIRMED Remote Call Path
         local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
         
         print("[APU_DEBUG] AutoPickupAll function defined and starting main loop.")
@@ -166,28 +165,39 @@ if game.PlaceId == 85896571713843 then
                 
                 if _G.AutoPickupAll and CollectiblesChunker then
                     local collectedCount = 0
-                    
-                    -- Use GetDescendants() to find deeply nested items (solves the "empty container" issue)
+                    local itemFoundWithAttribute = false
+
+                    -- Use GetDescendants() to find deeply nested items
                     local items = CollectiblesChunker:GetDescendants()
                     
+                    -- Print how many objects were found inside the container
+                    if #items > 0 then
+                        print("[APU_DEBUG] Chunker found " .. #items .. " total descendants.")
+                    end
+
                     -- Iterate through every collectible item
-                    for _, collectibleModel in ipairs(items) do
+                    for _, collectibleInstance in ipairs(items) do
                         
-                        -- Check for objects that could hold the 'ID' attribute
-                        if collectibleModel:IsA("Model") or collectibleModel:IsA("BasePart") or collectibleModel:IsA("Configuration") then
+                        -- Search for the "ID" Attribute on ANY instance
+                        local pickupId = collectibleInstance:GetAttribute("ID") 
+                        
+                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
+                            itemFoundWithAttribute = true
                             
-                            -- Read the 'ID' Attribute (Confirmed UUID location)
-                            local pickupId = collectibleModel:GetAttribute("ID") 
-                        
-                            if type(pickupId) == "string" and string.len(pickupId) > 20 then
-                                
-                                -- 🔑 FINAL FIX: Fire the Remote Event with ONLY the UUID string.
-                                CollectPickupRemote:FireServer(pickupId)
-                                collectedCount = collectedCount + 1
-                            end
+                            print("[APU_DEBUG] SUCCESS: Reading UUID " .. string.sub(pickupId, 1, 8) .. "... from instance: " .. collectibleInstance.Name)
+                            
+                            -- CONFIRMED FINAL REMOTE CALL: Only the UUID string is passed
+                            CollectPickupRemote:FireServer(pickupId)
+                            collectedCount = collectedCount + 1
                         end
                     end
-                
+
+                    if #items > 0 and not itemFoundWithAttribute then
+                        print("[APU_DEBUG] WARNING: Items present, but the 'ID' attribute was NOT found on any.")
+                    elseif #items == 0 then
+                         print("[APU_DEBUG] Chunker folder is empty.")
+                    end
+
                     if collectedCount > 0 then
                         print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
                     end
