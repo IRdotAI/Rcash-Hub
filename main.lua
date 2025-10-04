@@ -76,22 +76,7 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function HideHatchAnim()
-        local player = game.Players.LocalPlayer
-        local PlayerGui = player:WaitForChild("PlayerGui")
-        
-        PlayerGui.ChildAdded:Connect(function(child)
-
-            if _G.HideHatchAnim and child.Name:lower():match("hatch") then
-                
-                if child.Name == "Hatching" or child.Name:lower():match("hatch") then
-                    task.wait(0.01)
-                    child:Destroy()
-                    print("[PETS] Successfully destroyed hatch animation GUI: " .. child.Name)
-                end
-            end
-        end)
-    end
+    --Auro Hatch Function
     
 
 
@@ -133,23 +118,19 @@ if game.PlaceId == 85896571713843 then
     function HideHatchAnim()
         local player = game.Players.LocalPlayer
         local PlayerGui = player:WaitForChild("PlayerGui")
-        local ScreenContainer = PlayerGui:FindFirstChildOfClass("ScreenGui") or PlayerGui 
         
-        task.spawn(function()
-            while true do
-                if _G.HideHatchAnim then
-                    local HatchingGUI = ScreenContainer:FindFirstChild("Hatching")
-                    
-                    if HatchingGUI and HatchingGUI:IsA("ScreenGui") then
-                        task.wait(0.01)
-                        HatchingGUI:Destroy()
-                        print("[PETS] Successfully destroyed Hatching GUI.")
-                    end
+        PlayerGui.ChildAdded:Connect(function(child)
+
+            if _G.HideHatchAnim and child.Name:lower():match("hatch") then
+                
+                if child.Name == "Hatching" or child.Name:lower():match("hatch") then
+                    task.wait(0.01)
+                    child:Destroy()
+                    print("[PETS] Successfully destroyed hatch animation GUI: " .. child.Name)
                 end
-                task.wait(0.1)
             end
         end)
-    end
+    endd
 
     function SpamEKey()
         local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -161,12 +142,14 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoPickupAll_DEBUG()
+    function AutoPickupAll()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
+        -- Confirmed Remote Call: ReplicatedStorage.Remotes.Pickups.CollectPickup
+        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
 
-        -- Start the continuous DEBUG loop
+        -- Start the continuous collection loop
         task.spawn(function()
-            print("--- STARTING PICKUP DEBUG ---")
             while true do
                 local CollectiblesChunker = nil
                 local Rendered = Workspace:FindFirstChild("Rendered")
@@ -174,43 +157,34 @@ if game.PlaceId == 85896571713843 then
                 if Rendered then
                     local RenderedChildren = Rendered:GetChildren()
                 
-                    -- Use the confirmed index [14]
+                    -- CONFIRMED LOCATION: Index [14] of Rendered's children
                     if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
                     end
                 end
 
-                if CollectiblesChunker then
-                    print("\n[DEBUG] Found Collectibles Chunker. Items found: " .. #CollectiblesChunker:GetChildren())
+                if _G.AutoPickupAll and CollectiblesChunker then
+                    local collectedCount = 0
                 
                     -- Iterate through every collectible model inside the chunker
-                    for i, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
-                        if collectibleModel:IsA("Model") or collectibleModel:IsA("BasePart") then
-                            print("\n[ITEM " .. i .. "] Name: " .. collectibleModel.Name)
-                        
-                            -- Look for Attributes on the model/part
-                            local attributes = collectibleModel:GetAttributes()
-                            for key, value in pairs(attributes) do
-                                print("[ITEM " .. i .. "] Attribute: " .. key .. " = " .. tostring(value))
-                            end
-                        
-                            -- Look for Children (StringValues, Folders, Parts)
-                            for _, child in ipairs(collectibleModel:GetDescendants()) do
-                                if child:IsA("StringValue") then
-                                    print("[ITEM " .. i .. "] Child StringValue: " .. child.Name .. " = " .. child.Value)
-                                end
-                                if child:IsA("Configuration") or child:IsA("Folder") then
-                                    print("[ITEM " .. i .. "] Child Container: " .. child.Name)
-                                end
-                                -- Check if the child's name is the UUID
-                                if string.len(child.Name) > 20 and string.match(child.Name, "[%-a-f0-9]+") then
-                                    print("[ITEM " .. i .. "] CHILD NAME IS UUID: " .. child.Name)
-                                end
-                            end
+                    for _, collectibleModel in ipairs(CollectiblesChunker:GetChildren()) do
+                        -- The UUID is stored in the 'ID' Attribute on the model
+                        local pickupId = collectibleModel:GetAttribute("ID") 
+                    
+                        -- Check if we successfully read the UUID string
+                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
+                            -- Fire the server remote with the pickup's unique ID
+                            CollectPickupRemote:FireServer(pickupId)
+                            collectedCount = collectedCount + 1
                         end
                     end
+                
+                    if collectedCount > 0 then
+                        print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
+                    end
                 end
-            task.wait(2) -- Check every 2 seconds
+
+                task.wait(0.1) 
             end
         end)
     end
@@ -417,7 +391,7 @@ if game.PlaceId == 85896571713843 then
     end
 
     task.spawn(HideHatchAnim)
-    task.spawn(AutoPickupAll_DEBUG)
+    AutoPickupAll()
 
 
 
