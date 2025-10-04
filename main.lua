@@ -35,8 +35,37 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
+    _G.AutoEquipBest = false
 
-
+    local EggModelMap = {
+        ["Candle Egg"] = "Candle Egg", 
+        ["Autumn Egg"] = "Autumn Egg", 
+        ["Developer Egg"] = "Dev Egg", 
+        ["Infinity Egg"] = "Infinity Egg", 
+        ["Common Egg"] = "Common Egg", 
+        ["Spotted Egg"] = "Spotted Egg", 
+        ["Iceshard Egg"] = "Iceshard Egg", 
+        ["Inferno Egg"] = "Inferno Egg", 
+        ["Spikey Egg"] = "Spikey Egg", 
+        ["Magma Egg"] = "Magma Egg", 
+        ["Crystal Egg"] = "Crystal Egg", 
+        ["Lunar Egg"] = "Lunar Egg", 
+        ["Void Egg"] = "Void Egg", 
+        ["Hell Egg"] = "Hell Egg", 
+        ["Nightmare Egg"] = "Nightmare Egg", 
+        ["Rainbow Egg"] = "Rainbow Egg", 
+        ["Showman Egg"] = "Showman Egg", 
+        ["Mining Egg"] = "Mining Egg", 
+        ["Cyber Egg"] = "Cyber Egg", 
+        ["Neon Egg"] = "Neon Egg", 
+        ["Chance Egg"] = "Chance Egg", 
+        ["Icy Egg"] = "Icy Egg", 
+        ["Vine Egg"] = "Vine Egg", 
+        ["Lava Egg"] = "Lava Egg", 
+        ["Secret Egg"] = "Secret Egg", 
+        ["Atlantis Egg"] = "Atlantis Egg", 
+        ["Classic Egg"] = "Classic Egg"
+    }
 
 -- Functions
     function AutoBlowBubbles()
@@ -88,6 +117,13 @@ if game.PlaceId == 85896571713843 then
         while _G.AutoSeasonEgg do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchPowerupEgg","Season 8 Egg",6)
             task.wait(0.3)
+        end
+    end
+
+    function AutoEquipBest()
+        while _G.AutoEquipBest do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("EquipBestPets")
+            task.wait(5) 
         end
     end
 
@@ -186,11 +222,9 @@ if game.PlaceId == 85896571713843 then
     end
 
 
-    local ENABLED = true
     local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
     local TELEPORT_DELAY = 2.5
 
-    if not ENABLED then return end
 
     local Players = game:GetService("Players")
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -285,6 +319,68 @@ if game.PlaceId == 85896571713843 then
             end
         end)
     end
+
+    function TeleportToEgg(EggName)
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Workspace = game:GetService("Workspace")
+
+    if not HRP then return end
+
+    -- 1. Get the target model name from your comprehensive map
+    local TargetModelName = EggModelMap[EggName]
+    
+    if not TargetModelName then
+        OrionLib:MakeNotification({
+            Name = "Rcash Hub 💸",
+            Content = "Error: Egg name not found in map: " .. EggName,
+            Time = 5
+        })
+        return
+    end
+    
+    local EggModel = nil
+    
+    -- 2. PRIORITY SEARCH: Check the specific Rendered.Generic path (Where event eggs often live)
+    local GenericFolder = Workspace:FindFirstChild("Rendered") and Workspace.Rendered:FindFirstChild("Generic")
+    if GenericFolder then
+        EggModel = GenericFolder:FindFirstChild(TargetModelName) 
+    end
+    
+    -- 3. FALLBACK SEARCH: If not found, search the entire workspace recursively (for world eggs)
+    if not EggModel then
+         EggModel = Workspace:FindFirstChild(TargetModelName, true) 
+    end
+
+
+    if EggModel and EggModel:IsA("Model") then
+        local EggCFrame
+        local PrimaryPart = EggModel.PrimaryPart or EggModel:FindFirstChildOfClass("BasePart") 
+        
+        if PrimaryPart then
+            EggCFrame = PrimaryPart.CFrame
+        else
+            EggCFrame = EggModel:GetPivot()
+        end
+
+        HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
+        
+        OrionLib:MakeNotification({
+            Name = "Rcash Hub 💸",
+            Content = "Teleported to: " .. EggName,
+            Time = 3
+        })
+    else
+        OrionLib:MakeNotification({
+            Name = "Rcash Hub 💸",
+            Content = "Error: Could not find model named **" .. TargetModelName .. "** in the game.",
+            Time = 5
+        })
+    end
+end
+
+
 
 
 
@@ -516,6 +612,19 @@ if game.PlaceId == 85896571713843 then
 
     PetsTab:AddLabel("Select an egg to hatch and stand near the selected egg")
 
+    PetsTab:AddToggle({
+        Name = "Auto Equip Best Pets",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoEquipBest = Value
+            if Value then task.spawn(AutoEquipBest) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Equip Best Pets: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
 
     local EggCategories = {
         ["World 1 Eggs"] = {"Common Egg", "Spotted Egg", "Iceshard Egg", "Inferno Egg", "Spikey Egg", "Magma Egg", "Crystal Egg", "Lunar Egg", "Void Egg", "Hell Egg", "Nightmare Egg", "Rainbow Egg"},
@@ -532,6 +641,7 @@ if game.PlaceId == 85896571713843 then
             Options = eggList,
             Callback = function(Value)
                 _G.SelectedEgg = Value
+                TeleportToEgg(Value)
                 OrionLib:MakeNotification({
                     Name = "Rcash Hub 💸",
                     Content = "Selected Egg: "..Value,
