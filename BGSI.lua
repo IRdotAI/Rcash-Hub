@@ -76,10 +76,39 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    --Auto Hatch Function
+    function AutoHatch()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Player = game.Players.LocalPlayer
+        
+        -- Commonly used remote for hatching
+        local HatchRemote = ReplicatedStorage.Remotes.HatchEgg 
+
+        task.spawn(function()
+            while _G.AutoHatch do
+                local Character = Player.Character
+                local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
+                
+                if not HRP then task.wait(0.5) continue end
+                
+                -- Check for the selected egg type from the GUI
+                if _G.SelectedEgg and _G.SelectedEgg ~= "" then
+                    
+                    -- Fire the server remote with the egg name
+                    -- This is the standard argument for an auto-hatch remote
+                    HatchRemote:FireServer(_G.SelectedEgg)
+                    
+                    -- This print confirms the script is attempting to hatch
+                    print("[HATCH] Fired Hatch Remote for egg: " .. _G.SelectedEgg)
+                else
+                    print("[HATCH] Error: No egg selected or SelectedEgg variable is empty.")
+                end
+
+                -- Standard wait time for auto-hatch to prevent spamming the remote
+                task.wait(0.1) 
+            end
+        end)
+    end
     
-
-
     function AutoCS()
         while _G.AutoCS do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimSeason")
@@ -146,7 +175,7 @@ if game.PlaceId == 85896571713843 then
         local Workspace = game:GetService("Workspace")
         local Player = game.Players.LocalPlayer
     
-        print("[APU_DEBUG] TouchInterest AutoPickup function defined and starting.")
+        print("[APU_DEBUG] Firing Touched Event AutoPickup defined and starting.")
 
         task.spawn(function()
             while true do
@@ -159,6 +188,7 @@ if game.PlaceId == 85896571713843 then
                 -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
                     if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
+                        print("[APU_DEBUG] Container found at Index 14.")
                     end
                 end
             
@@ -166,38 +196,35 @@ if game.PlaceId == 85896571713843 then
                     local pickedUpCount = 0
                     local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
 
-                -- Use GetDescendants() to find deeply nested items
-                    local items = CollectiblesChunker:GetDescendants()
-                
-                -- Iterate through every collectible item
-                    for _, collectibleInstance in ipairs(items) do
+                    if HRP then
+                    -- Use GetDescendants() to find deeply nested items
+                        local items = CollectiblesChunker:GetDescendants()
                     
-                    -- We only care about Parts, since only Parts have TouchInterest
-                        if collectibleInstance:IsA("BasePart") then
+                        if #items > 0 then
+                            print("[APU_DEBUG] Chunker found " .. #items .. " total descendants.")
+                        end
+                    
+                    -- Iterate through every collectible item
+                        for _, collectibleInstance in ipairs(items) do
                         
-                        -- Find the TouchInterest object (often hidden inside the Part)
-                            local TouchInterest = collectibleInstance:FindFirstChild("TouchInterest")
-                        
-                            if TouchInterest then
-                            -- The function that handles the touch is stored in the TouchInterest object
-                                local TouchFunction = getupvalue(TouchInterest.TouchFunction, 2)
+                        -- We only care about Parts that could be touched
+                            if collectibleInstance:IsA("BasePart") then
                             
-                            -- Verify the function is real before calling
-                                if type(TouchFunction) == "function" then
+                            -- Attempt to fire the Touched event
+                            -- We check for non-collidable or anchored parts as they are common pickup triggers
+                                if collectibleInstance.CanCollide == false or collectibleInstance.Anchored == true or collectibleInstance:GetAttribute("ID") then
                                 
-                                -- 🔑 THE FIX: Call the TouchFunction, simulating a touch.
-                                -- The required arguments are the Part instance that was touched (the item itself)
-                                -- and the Part instance that did the touching (the player's HRP).
-                                    TouchFunction(collectibleInstance, HRP)
+                                -- 🔑 THE FINAL ACTION: Fire the Touched event manually.
+                                -- The server's script should handle the rest.
+                                    collectibleInstance:FireServer("Touched", HRP)
                                     pickedUpCount = pickedUpCount + 1
-                                
                                 end
                             end
                         end
                     end
 
                     if pickedUpCount > 0 then
-                        print("[FARM] Collected " .. pickedUpCount .. " pickups via TouchInterest.")
+                        print("[FARM] Attempted to fire 'Touched' event for " .. pickedUpCount .. " items.")
                     end
                 end
 
