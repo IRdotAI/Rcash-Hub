@@ -93,22 +93,11 @@ if game.PlaceId == 13667319624 then
     MainTab:AddButton({
         Name = "Destroy GUI",
         Callback = function()
-            -- Stop all global toggles (assuming these are defined elsewhere)
-            _G.AutoBlowBubbles = false
-            _G.AutoHatch = false
-            _G.AutoCS = false
-            _G.AutoClaimPTR = false
-            _G.AutoMysteryBox = false
-            _G.AutoSeasonEgg = false
-            _G.HideHatchAnim = false
-            _G.SpamE = false
-            _G.AutoCollectAutumnLeaves = false
-            _G.AutoSpinAutumnWheel = false 
-            _G.AutoBuyAutumnShop = false
+            -- Removed all unused global toggles for a cleaner script.
 
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
-                Content = "GUI destroyed. All toggles stopped.",
+                Content = "GUI destroyed.",
                 Time = 3
             })
 
@@ -119,19 +108,8 @@ if game.PlaceId == 13667319624 then
     MainTab:AddButton({
         Name = "Reload GUI",
         Callback = function()
-            -- Stop all global toggles
-            _G.AutoBlowBubbles = false
-            _G.AutoHatch = false
-            _G.AutoCS = false
-            _G.AutoClaimPTR = false
-            _G.AutoMysteryBox = false
-            _G.AutoSeasonEgg = false
-            _G.HideHatchAnim = false
-            _G.SpamE = false
-            _G.AutoCollectAutumnLeaves = false
-            _G.AutoSpinAutumnWheel = false
-            _G.AutoBuyAutumnShop = false
-
+            -- Removed all unused global toggles for a cleaner script.
+            
             -- Destroy Orion GUI
             if OrionLib then
                 OrionLib:Destroy()
@@ -157,24 +135,23 @@ if game.PlaceId == 13667319624 then
 
     FarmingTab:AddButton({
         Name = "Infinite Wins",
-        Callback = function() -- <-- FIX: Removed the misplaced 'if'
+        Callback = function() 
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local WinGain = ReplicatedStorage.Event.WinGain 
             WinGain:FireServer(
                 math.huge
             )
-            -- The notification should be outside the scope of the FireServer call
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Infinite Wins activated!",
                 Time = 3
             })
-        end -- <-- FIX: Moved the 'end' to properly close the function
+        end 
     })
     
     FarmingTab:AddButton({
         Name = "Infinite Strength",
-        Callback = function() -- <-- FIX: Removed the misplaced 'if'
+        Callback = function() 
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local Train = ReplicatedStorage.Event.Train
             Train:FireServer(
@@ -185,12 +162,12 @@ if game.PlaceId == 13667319624 then
                 Content = "Infinite Strength activated!",
                 Time = 3
             })
-        end -- <-- FIX: Moved the 'end' to properly close the function
+        end 
     })
     
     FarmingTab:AddButton({
         Name = "Gravity power (BEST POWER) FREE",
-        Callback = function() -- <-- FIX: Removed the misplaced 'if'
+        Callback = function() 
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local BuyPower = ReplicatedStorage.Event.BuyPower
             BuyPower:FireServer(
@@ -202,12 +179,12 @@ if game.PlaceId == 13667319624 then
                 Content = "Gravity Power activated!",
                 Time = 3
             })
-        end -- <-- FIX: Moved the 'end' to properly close the function
+        end 
     })
     
     FarmingTab:AddButton({
         Name = "Inf enchant (FOR THE POWER U HAVE ON)",
-        Callback = function() -- <-- FIX: Removed the misplaced 'if'
+        Callback = function() 
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local Enchanted = ReplicatedStorage.Event.Enchanted
             Enchanted:FireServer(
@@ -219,6 +196,6 @@ if game.PlaceId == 13667319624 then
                 Content = "Infinite Enchant activated!",
                 Time = 3
             })
-        end -- <-- FIX: Moved the 'end' to properly close the function
+        end 
     })
 end
