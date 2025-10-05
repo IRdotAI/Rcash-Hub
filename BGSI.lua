@@ -1,12 +1,4 @@
 if game.PlaceId == 85896571713843 then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Rcash Hub 💸",
-        Text = "This script only works in Bubble Gum Simulator INFINITY!",
-        Duration = 5
-    })
-
-
-
     local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
     local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
 
