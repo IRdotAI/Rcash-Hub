@@ -199,8 +199,7 @@ if game.PlaceId == 13667319624 then
         end 
     })
     
--- Initialize GUI
+    -- This call is essential for the GUI to appear.
     OrionLib:Init()
-
 
 end
