@@ -1,5 +1,14 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
+if game.PlaceId == 85896571713843 then
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Rcash Hub 💸",
+        Text = "This script only works in Bubble Gum Simulator INFINITY!",
+        Duration = 5
+    })
+
+
+
+    local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+    local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
 
     local Window = WindUI:CreateWindow({
         Title = "Rcash Hub 💸",
@@ -71,7 +80,6 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
-    -- _G.AutoPickupAll REMOVED
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
@@ -127,7 +135,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
                 end)
             else
                 _G.AutoHatch = false
-                WinUI:Notify({
+                WindUI:Notify({
                     Title = "Rcash Hub 💸",
                     Content = "Auto Hatch stopped: Please select an egg first!",
                     Time = 5,
