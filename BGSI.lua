@@ -76,35 +76,25 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoHatch()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local Player = game.Players.LocalPlayer
-        
-        -- Commonly used remote for hatching
-        local HatchRemote = ReplicatedStorage.Remotes.HatchEgg 
+     function AutoHatch()
+        -- 🔑 HATCH FIX: Use the specific remote path derived from the error log.
+        local HatchRemote = game:GetService("ReplicatedStorage").Remotes.HatchEgg
+        local HatchCount = 6 
 
         task.spawn(function()
             while _G.AutoHatch do
-                local Character = Player.Character
-                local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
                 
-                if not HRP then task.wait(0.5) continue end
-                
-                -- Check for the selected egg type from the GUI
                 if _G.SelectedEgg and _G.SelectedEgg ~= "" then
                     
-                    -- Fire the server remote with the egg name
-                    -- This is the standard argument for an auto-hatch remote
-                    HatchRemote:FireServer(_G.SelectedEgg)
+                    -- Firing the HatchEgg remote with the Egg Name and the Count (6).
+                    HatchRemote:FireServer(_G.SelectedEgg, HatchCount)
                     
-                    -- This print confirms the script is attempting to hatch
-                    print("[HATCH] Fired Hatch Remote for egg: " .. _G.SelectedEgg)
+                    print("[HATCH] Fired HatchEgg remote for " .. HatchCount .. "x: " .. _G.SelectedEgg)
                 else
-                    print("[HATCH] Error: No egg selected or SelectedEgg variable is empty.")
+                    print("[HATCH] Waiting for an egg to be selected in the GUI.")
                 end
 
-                -- Standard wait time for auto-hatch to prevent spamming the remote
-                task.wait(0.1) 
+                task.wait(0.3) 
             end
         end)
     end
