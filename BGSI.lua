@@ -1,26 +1,68 @@
--- Load Orion GUI
-    local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
 
--- Create main window
-    local Window = OrionLib:MakeWindow({
-        Name = "Rcash Hub 💸 | BGSI",
-        HidePremium = true,
-        SaveConfig = true,
-        IntroText = "Rcash Hub",
-        IntroIcon = "rbxassetid://82088779453504",
-        ConfigFolder = "RcashConfig",
-        Icon = "rbxassetid://82088779453504"
+-- Create Window`
+    local Window = WindUI:CreateWindow({
+        Title = "Rcash Hub 💸",
+        Icon = "door-open", -- lucide icon
+        Author = "RdotA",
+        Folder = "RcashHub",
+    
+        Size = UDim2.fromOffset(580, 460),
+        MinSize = Vector2.new(560, 350),
+        MaxSize = Vector2.new(850, 560),
+        Transparent = true,
+        Theme = "DarkTheme",
+        Resizable = true,
+        SideBarWidth = 200,
+        BackgroundImageTransparency = 0.42,
+        HideSearchBar = true,
+        ScrollBarEnabled = false,
+    
+        User = {
+            Enabled = true,
+            Anonymous = true,
+            Callback = function()
+                print("clicked")
+            end,
+        },
+    
+    --[[]       remove this all, 
+    !    ↓  if you DON'T need the key system
+    KeySystem = { 
+         ↓ Optional. You can remove it.
+        Key = { "1234", "5678" },
+        
+        Note = "Example Key System.",
+        
+         ↓ Optional. You can remove it.
+        Thumbnail = {
+            Image = "rbxassetid://",
+            Title = "Thumbnail",
+        },
+        
+         ↓ Optional. You can remove it.
+        URL = "YOUR LINK TO GET KEY (Discord, Linkvertise, Pastebin, etc.)",
+        
+         ↓ Optional. You can remove it.
+        SaveKey = false, -- automatically save and load the key.
+        
+         ↓ Optional. You can remove it.
+         API = {} ← Services. Read about it below ↓
+    },
+    --]]
     })
 
--- Notification for GUI loaded
-    OrionLib:MakeNotification({
-        Name = "Rcash Hub 💸",
-        Content = "Rcash Hub loaded successfully.",
-        Image = "rbxassetid://82088779453504",
-        Time = 5
+-- Loaded Notification
+    WindUI:Notify({
+        Title = "Rcash Hub 💸",
+        Content = "Rcash Hub has been loaded successfully!",
+        Time = 5,
+        Type = "Success"
     })
 
--- Global toggles
+
+-- Global Triggers
     _G.AutoBlowBubbles = false
     _G.AutoHatch = false
     _G.AutoCS = false
@@ -75,9 +117,28 @@
         end
     end
 
-    --Auto Hatch Function
-    
-
+    function AutoHatch()
+        local RemoteEvent = game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent
+        local EggsToHatch = 15 
+        
+        while _G.AutoHatch do
+            if _G.SelectedEgg and _G.SelectedEgg ~= "" then
+                pcall(function()
+                    RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, EggsToHatch)
+                end)
+            else
+                _G.AutoHatch = false
+                WinUI:Notify({
+                    Title = "Rcash Hub 💸",
+                    Content = "Auto Hatch stopped: Please select an egg first!",
+                    Time = 5,
+                    Type = "Error"
+                })
+                break
+            end
+            task.wait(0.1)
+        end
+    end
 
     function AutoCS()
         while _G.AutoCS do
@@ -194,7 +255,7 @@
                     if #items > 0 and not itemFoundWithAttribute then
                         print("[APU_DEBUG] WARNING: Items present, but the 'ID' attribute was NOT found on any.")
                     elseif #items == 0 then
-                         print("[APU_DEBUG] Chunker folder is empty.")
+                        print("[APU_DEBUG] Chunker folder is empty.")
                     end
 
                     if collectedCount > 0 then
@@ -230,7 +291,6 @@
             task.wait(1) 
         end
     end
-
 
     local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
     local TELEPORT_DELAY = 2.5
@@ -394,34 +454,25 @@
 
             HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸", -- WinUI uses 'Title' instead of 'Name'
                 Content = "Teleported to: " .. EggName,
-                Time = 3
+                Time = 3,
+                Type = "Info" -- Or another type like "Info"
             })
         else
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WindUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
-                Time = 5
+                Time = 3,
+                Type = "Error" -- Or another type like "Info"
             })
+            
         end
     end
 
     task.spawn(HideHatchAnim)
     AutoPickupAll()
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 -- Main Tab
@@ -440,14 +491,16 @@
     supportedSection:AddLabel("• More to come soon!")
     supportedSection:AddLabel("• V.1.0")
 
+
     MainTab:AddButton({
         Name = "Copy Discord Link",
         Callback = function()
             setclipboard("https://discord.gg/JQFrBajQxW")
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WindUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Discord invite copied to clipboard!",
-                Time = 3
+                Time = 3,
+                Type = "Success"
             })
         end
     })
@@ -456,10 +509,11 @@
         Name = "Rejoin",
         Callback = function()
             game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WindUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Rejoining server...",
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -478,23 +532,26 @@
                 end
                 if #y > 0 then
                     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, y[math.random(1, #y)])
-                    OrionLib:MakeNotification({
-                        Name = "Rcash Hub 💸",
+                    WindUI:Notify({
+                        Title = "Rcash Hub 💸",
                         Content = "Server hopping...",
-                        Time = 3
+                        Time = 3,
+                        Type = "Info"
                     })
                 else
-                    OrionLib:MakeNotification({
-                        Name = "Rcash Hub 💸",
+                    WindUI:Notify({
+                        Title = "Rcash Hub 💸",
                         Content = "No available servers found.",
-                        Time = 5
+                        Time = 5,
+                        Type = "Warning"
                     })
                 end
             else
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
+                WindUI:Notify({
+                    Title = "Rcash Hub 💸",
                     Content = "Failed to fetch server list.",
-                    Time = 5
+                    Time = 5,
+                    Type = "Error"
                 })
             end
         end
@@ -512,24 +569,23 @@
             _G.HideHatchAnim = false
             _G.SpamE = false
             _G.AutoCollectAutumnLeaves = false
-            _G.AutoSpinAutumnWheel = false 
+            _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
 
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WindUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "GUI destroyed. All toggles stopped.",
-                Time = 3
+                Time = 3,
+                Type = "Error"
             })
 
-            OrionLib:Destroy()
-
+            Window:Destroy() 
         end
     })
 
     MainTab:AddButton({
         Name = "Reload GUI",
         Callback = function()
-            -- Stop all global toggles
             _G.AutoBlowBubbles = false
             _G.AutoHatch = false
             _G.AutoCS = false
@@ -543,23 +599,19 @@
             _G.AutoBuyAutumnShop = false
 
 
-            -- Destroy Orion GUI
-            if OrionLib then
-                OrionLib:Destroy()
+            if Window then
+                Window:Destroy()
             end
 
-            -- Notify player
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Rcash Hub 💸",
                 Text = "Reloading GUI...",
                 Duration = 3
             })
 
-            -- Reload script
             loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/main/main.lua"))()
         end
     })
-
 
 
 -- Farming Tab
@@ -574,10 +626,11 @@
         Callback = function(Value)
             _G.AutoBlowBubbles = Value
             if Value then task.spawn(AutoBlowBubbles) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Blow Bubbles: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -588,10 +641,11 @@
         Callback = function(Value)
             _G.AutoPickupAll = Value
         
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Pickup All: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -614,18 +668,14 @@
         Callback = function(Value)
             _G.AutoObby = Value
             if Value then AutoObbyCycle() end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Obbies: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
-
-
-
-
-
 
 
 -- Pets Tab
@@ -644,10 +694,11 @@
         Callback = function(Value)
             _G.AutoEquipBest = Value
             if Value then task.spawn(AutoEquipBest) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Equip Best Pets: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -658,10 +709,11 @@
         Callback = function(Value)
             _G.AutoSellPets = Value
             if Value then task.spawn(AutoSellPets) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Sell Pets: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -685,7 +737,7 @@
         for _, eggName in ipairs(eggList) do
             table.insert(AllEggs, eggName)
         end
-    end
+    }
 
     EggsSection:AddDropdown({
         Name = "Select Egg to Teleport/Hatch",
@@ -694,10 +746,11 @@
         Callback = function(Value)
             _G.SelectedEgg = Value
             TeleportToEgg(Value)
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Selected Egg: "..Value,
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -716,10 +769,11 @@
                 task.spawn(AutoHatch) 
             end
             
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Hatch: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -732,10 +786,11 @@
             if Value then
                 task.spawn(SpamEKey)
             end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Spam E: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -746,10 +801,11 @@
         Default = false,
         Callback = function(Value)
             _G.HideHatchAnim = Value
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Hide Hatch Animation: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -766,10 +822,11 @@
         Callback = function(Value)
             _G.AutoBuyAutumnShop = Value
             if Value then task.spawn(AutoBuyAutumnShop) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -787,10 +844,11 @@
         Callback = function(Value)
             _G.AutoClaimPTR = Value
             if Value then task.spawn(AutoClaimPTR) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Claim Play Time Rewards: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -801,10 +859,11 @@
         Callback = function(Value)
             _G.AutoCS = Value
             if Value then task.spawn(AutoCS) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Claim Season: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -815,10 +874,11 @@
         Callback = function(Value)
             _G.AutoMysteryBox = Value
             if Value then task.spawn(AutoMysteryBox) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Open Mystery Box: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -829,10 +889,11 @@
         Callback = function(Value)
             _G.AutoSeasonEgg = Value
             if Value then task.spawn(AutoSeasonEgg) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Hatch Season Egg: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
@@ -843,157 +904,11 @@
         Callback = function(Value)
             _G.AutoSpinAutumnWheel = Value
             if Value then task.spawn(SpinAutumnWheel) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
+            WinUI:Notify({
+                Title = "Rcash Hub 💸",
                 Content = "Auto Spin Autumn Wheel: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
+                Time = 3,
+                Type = "Info"
             })
         end
     })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- Initialize GUI
-    OrionLib:Init()
-
-
-end
