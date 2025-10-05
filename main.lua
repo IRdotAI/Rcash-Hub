@@ -1,5 +1,5 @@
 local games = {
-    [16510724413] = "",
+    [13667319624] = "",
     [17601705136] = "",
     [17181264920] = "",
     [18138547215] = "",
@@ -15,6 +15,7 @@ if scriptURL then
 else 
     print("Game not supported by Rcash Hub")
 end
+
 
 
 
