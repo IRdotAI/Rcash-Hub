@@ -1,4 +1,3 @@
-if game.PlaceId == 85896571713843 then
 -- Load Orion GUI
     local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
