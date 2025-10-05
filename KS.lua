@@ -158,44 +158,64 @@ if game.PlaceId == 13667319624 then
 
     FarmingTab:AddButton({
         Name = "Infinite Wins",
-        Callback = function()
+        if Callback = function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local WinGain = ReplicatedStorage.Event.WinGain 
             WinGain:FireServer(
                 math.huge
-            )
+            ) then
+                OrionLib:MakeNotification({
+                    Name = "Rcash Hub 💸",
+                    Content = "Infinite Wins activated!",
+                    Time = 3
+                })
         end
     })
     FarmingTab:AddButton({
         Name = "Infinite Strength",
-        Callback = function()
+        if Callback = function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local Train = ReplicatedStorage.Event.Train
             Train:FireServer(
                 math.huge
-            )
+            ) then 
+                OrionLib:MakeNotification({
+                    Name = "Rcash Hub 💸",
+                    Content = "Infinite Strength activated!",
+                    Time = 3
+                })
         end
     })
     FarmingTab:AddButton({
         Name = "Gravity power (BEST POWER) FREE",
-        Callback = function()
+        if Callback = function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local BuyPower = ReplicatedStorage.Event.BuyPower
             BuyPower:FireServer(
                 "Gravity",
                 0
-            )
+            ) then
+                OrionLib:MakeNotification({
+                    Name = "Rcash Hub 💸",
+                    Content = "Gravity Power activated!",
+                    Time = 3
+                })
         end
     })
     FarmingTab:AddButton({
         Name = "Inf enchant (FOR THE POWER U HAVE ON)",
-        Callback = function()
+        if Callback = function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local Enchanted = ReplicatedStorage.Event.Enchanted
             Enchanted:FireServer(
                 0,
                 math.huge
-            )
+            ) then
+                OrionLib:MakeNotification({
+                    Name = "Rcash Hub 💸",
+                    Content = "Infinite Enchant activated!",
+                    Time = 3
+                })
         end
     })
 
