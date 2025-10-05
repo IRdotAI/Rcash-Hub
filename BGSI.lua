@@ -108,7 +108,7 @@ if game.PlaceId == 85896571713843 then
             end
         end)
     end
-    
+
     function AutoCS()
         while _G.AutoCS do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimSeason")
@@ -172,59 +172,70 @@ if game.PlaceId == 85896571713843 then
     end
 
     function AutoPickupAll()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
+        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
         local Player = game.Players.LocalPlayer
-    
-        print("[APU_DEBUG] Firing Touched Event AutoPickup defined and starting.")
+        
+        print("[APU_FINAL_FIX] Teleport-To-Pickup function defined and starting.")
 
         task.spawn(function()
             while true do
                 local CollectiblesChunker = nil
                 local Rendered = Workspace:FindFirstChild("Rendered")
-        
+            
                 if Rendered then
                     local RenderedChildren = Rendered:GetChildren()
-            
-                -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
+                
+                    -- Use the confirmed Index [14]
                     if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
-                        print("[APU_DEBUG] Container found at Index 14.")
                     end
                 end
-            
+                
                 if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
-                    local pickedUpCount = 0
+                    local collectedCount = 0
                     local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
+                    local initialCFrame = HRP and HRP.CFrame -- Store original position
 
                     if HRP then
-                    -- Use GetDescendants() to find deeply nested items
                         local items = CollectiblesChunker:GetDescendants()
-                    
-                        if #items > 0 then
-                            print("[APU_DEBUG] Chunker found " .. #items .. " total descendants.")
-                        end
-                    
-                    -- Iterate through every collectible item
-                        for _, collectibleInstance in ipairs(items) do
                         
-                        -- We only care about Parts that could be touched
-                            if collectibleInstance:IsA("BasePart") then
+                        -- Iterate and process one item at a time to minimize teleport lag
+                        for _, collectibleModel in ipairs(items) do
                             
-                            -- Attempt to fire the Touched event
-                            -- We check for non-collidable or anchored parts as they are common pickup triggers
-                                if collectibleInstance.CanCollide == false or collectibleInstance.Anchored == true or collectibleInstance:GetAttribute("ID") then
+                            local pickupId = collectibleModel:GetAttribute("ID") 
+                        
+                            if type(pickupId) == "string" and string.len(pickupId) > 20 then
                                 
-                                -- 🔑 THE FINAL ACTION: Fire the Touched event manually.
-                                -- The server's script should handle the rest.
-                                    collectibleInstance:FireServer("Touched", HRP)
-                                    pickedUpCount = pickedUpCount + 1
+                                local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
+                                if collectiblePart then
+                                    
+                                    -- STEP 1: Teleport to the item
+                                    HRP.CFrame = collectiblePart.CFrame * CFrame.new(0, 3, 0) -- Move 3 studs above it
+                                    task.wait(0.01)
+                                    
+                                    -- STEP 2: Fire the confirmed remote event
+                                    CollectPickupRemote:FireServer(pickupId)
+                                    collectedCount = collectedCount + 1
+                                    
+                                    print("[APU_FINAL_FIX] Teleported and collected item: " .. string.sub(pickupId, 1, 8) .. "...")
+                                    
+                                    -- Break after one item to teleport back cleanly
+                                    break 
                                 end
                             end
                         end
-                    end
 
-                    if pickedUpCount > 0 then
-                        print("[FARM] Attempted to fire 'Touched' event for " .. pickedUpCount .. " items.")
+                        if collectedCount > 0 and initialCFrame then
+                            -- STEP 3: Teleport back to original location
+                            HRP.CFrame = initialCFrame
+                            print("[APU_FINAL_FIX] Teleported back to original position.")
+                        end
+                    end
+                
+                    if collectedCount > 0 then
+                        print("[FARM] Collected " .. collectedCount .. " pickups via Teleport Injection.")
                     end
                 end
 
