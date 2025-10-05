@@ -143,63 +143,61 @@ if game.PlaceId == 85896571713843 then
     end
 
     function AutoPickupAll()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
-        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
-        
-        print("[APU_DEBUG] AutoPickupAll function defined and starting main loop.")
+        local Player = game.Players.LocalPlayer
+    
+        print("[APU_DEBUG] TouchInterest AutoPickup function defined and starting.")
 
         task.spawn(function()
             while true do
                 local CollectiblesChunker = nil
                 local Rendered = Workspace:FindFirstChild("Rendered")
-            
+        
                 if Rendered then
                     local RenderedChildren = Rendered:GetChildren()
-                
-                    -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
+            
+                -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
                     if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
                         CollectiblesChunker = RenderedChildren[14]
                     end
                 end
-                
-                if _G.AutoPickupAll and CollectiblesChunker then
-                    local collectedCount = 0
-                    local itemFoundWithAttribute = false
+            
+                if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
+                    local pickedUpCount = 0
+                    local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
 
-                    -- Use GetDescendants() to find deeply nested items
+                -- Use GetDescendants() to find deeply nested items
                     local items = CollectiblesChunker:GetDescendants()
-                    
-                    -- Print how many objects were found inside the container
-                    if #items > 0 then
-                        print("[APU_DEBUG] Chunker found " .. #items .. " total descendants.")
-                    end
-
-                    -- Iterate through every collectible item
+                
+                -- Iterate through every collectible item
                     for _, collectibleInstance in ipairs(items) do
+                    
+                    -- We only care about Parts, since only Parts have TouchInterest
+                        if collectibleInstance:IsA("BasePart") then
                         
-                        -- Search for the "ID" Attribute on ANY instance
-                        local pickupId = collectibleInstance:GetAttribute("ID") 
+                        -- Find the TouchInterest object (often hidden inside the Part)
+                            local TouchInterest = collectibleInstance:FindFirstChild("TouchInterest")
                         
-                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
-                            itemFoundWithAttribute = true
+                            if TouchInterest then
+                            -- The function that handles the touch is stored in the TouchInterest object
+                                local TouchFunction = getupvalue(TouchInterest.TouchFunction, 2)
                             
-                            print("[APU_DEBUG] SUCCESS: Reading UUID " .. string.sub(pickupId, 1, 8) .. "... from instance: " .. collectibleInstance.Name)
-                            
-                            -- CONFIRMED FINAL REMOTE CALL: Only the UUID string is passed
-                            CollectPickupRemote:FireServer(pickupId)
-                            collectedCount = collectedCount + 1
+                            -- Verify the function is real before calling
+                                if type(TouchFunction) == "function" then
+                                
+                                -- 🔑 THE FIX: Call the TouchFunction, simulating a touch.
+                                -- The required arguments are the Part instance that was touched (the item itself)
+                                -- and the Part instance that did the touching (the player's HRP).
+                                    TouchFunction(collectibleInstance, HRP)
+                                    pickedUpCount = pickedUpCount + 1
+                                
+                                end
+                            end
                         end
                     end
 
-                    if #items > 0 and not itemFoundWithAttribute then
-                        print("[APU_DEBUG] WARNING: Items present, but the 'ID' attribute was NOT found on any.")
-                    elseif #items == 0 then
-                         print("[APU_DEBUG] Chunker folder is empty.")
-                    end
-
-                    if collectedCount > 0 then
-                        print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
+                    if pickedUpCount > 0 then
+                        print("[FARM] Collected " .. pickedUpCount .. " pickups via TouchInterest.")
                     end
                 end
 
