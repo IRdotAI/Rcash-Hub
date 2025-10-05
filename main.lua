@@ -4,7 +4,7 @@ local games = {
     [17181264920] = "",
     [18138547215] = "",
     [18901165922] = "",
-    [85896571713843] = "",
+    [85896571713843] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/BGSI.lua",
     [126884695634066] = "",
     [127742093697776] = ""
 }
@@ -15,3 +15,4 @@ if scriptURL then
 else 
     print("Game not supported by Rcash Hub")
 end
+
