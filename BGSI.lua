@@ -76,27 +76,13 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-     function AutoHatch()
-        -- 🔑 HATCH FIX: Use the specific remote path derived from the error log.
-        local HatchRemote = game:GetService("ReplicatedStorage").Remotes.HatchEgg
-        local HatchCount = 6 
-
-        task.spawn(function()
-            while _G.AutoHatch do
-                
-                if _G.SelectedEgg and _G.SelectedEgg ~= "" then
-                    
-                    -- Firing the HatchEgg remote with the Egg Name and the Count (6).
-                    HatchRemote:FireServer(_G.SelectedEgg, HatchCount)
-                    
-                    print("[HATCH] Fired HatchEgg remote for " .. HatchCount .. "x: " .. _G.SelectedEgg)
-                else
-                    print("[HATCH] Waiting for an egg to be selected in the GUI.")
-                end
-
-                task.wait(0.3) 
+    function AutoHatch()
+        while _G.AutoHatch do
+            if _G.SelectedEgg == "" then
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,6)
             end
-        end)
+            task.wait(0.3)
+        end
     end
 
     function AutoCS()
@@ -195,7 +181,6 @@ if game.PlaceId == 85896571713843 then
                         -- Iterate and process one item at a time
                         for _, collectibleModel in ipairs(items) do
                             
-                            -- Read the UUID attribute
                             local pickupId = collectibleModel:GetAttribute("ID") 
                         
                             if type(pickupId) == "string" and string.len(pickupId) > 20 then
@@ -204,7 +189,7 @@ if game.PlaceId == 85896571713843 then
                                 if collectiblePart then
                                     
                                     -- STEP 1: Teleport to the item
-                                    HRP.CFrame = collectiblePart.CFrame * CFrame.new(0, 3, 0) -- Move 3 studs above it
+                                    HRP.CFrame = collectiblePart.CFrame * CFrame.new(0, 3, 0) 
                                     task.wait(0.01)
                                     
                                     -- STEP 2: Fire the confirmed single-argument remote
