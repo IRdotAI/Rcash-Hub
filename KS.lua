@@ -93,7 +93,7 @@ if game.PlaceId == 13667319624 then
     MainTab:AddButton({
         Name = "Destroy GUI",
         Callback = function()
-            -- Removed all unused global toggles for a cleaner script.
+            -- All unused global toggles have been removed.
 
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
@@ -108,7 +108,7 @@ if game.PlaceId == 13667319624 then
     MainTab:AddButton({
         Name = "Reload GUI",
         Callback = function()
-            -- Removed all unused global toggles for a cleaner script.
+            -- All unused global toggles have been removed.
             
             -- Destroy Orion GUI
             if OrionLib then
