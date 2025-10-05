@@ -1,68 +1,27 @@
 if game.PlaceId == 85896571713843 then
-    local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-    local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
+-- Load Orion GUI
+    local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
-    local Window = WindUI:CreateWindow({
-        Title = "Rcash Hub 💸",
-        Icon = "door-open", -- lucide icon
-        Author = "RdotA",
-        Folder = "RcashHub",
-    
-        Size = UDim2.fromOffset(580, 460),
-        MinSize = Vector2.new(560, 350),
-        MaxSize = Vector2.new(850, 560),
-        Transparent = true,
-        Theme = "DarkTheme",
-        Resizable = true,
-        SideBarWidth = 200,
-        BackgroundImageTransparency = 0.42,
-        HideSearchBar = true,
-        ScrollBarEnabled = false,
-    
-        User = {
-            Enabled = true,
-            Anonymous = true,
-            Callback = function()
-                print("clicked")
-            end,
-        },
-    
-    --[[]       remove this all, 
-    !    ↓  if you DON'T need the key system
-    KeySystem = { 
-         ↓ Optional. You can remove it.
-        Key = { "1234", "5678" },
-        
-        Note = "Example Key System.",
-        
-         ↓ Optional. You can remove it.
-        Thumbnail = {
-            Image = "rbxassetid://",
-            Title = "Thumbnail",
-        },
-        
-         ↓ Optional. You can remove it.
-        URL = "YOUR LINK TO GET KEY (Discord, Linkvertise, Pastebin, etc.)",
-        
-         ↓ Optional. You can remove it.
-        SaveKey = false, -- automatically save and load the key.
-        
-         ↓ Optional. You can remove it.
-         API = {} ← Services. Read about it below ↓
-    },
-    --]]
+-- Create main window
+    local Window = OrionLib:MakeWindow({
+        Name = "Rcash Hub 💸 | BGSI",
+        HidePremium = true,
+        SaveConfig = true,
+        IntroText = "Rcash Hub",
+        IntroIcon = "rbxassetid://82088779453504",
+        ConfigFolder = "RcashConfig",
+        Icon = "rbxassetid://82088779453504"
     })
 
--- Loaded Notification
-    WindUI:Notify({
-        Title = "Rcash Hub 💸",
-        Content = "Rcash Hub has been loaded successfully!",
-        Time = 5,
-        Type = "Success"
+-- Notification for GUI loaded
+    OrionLib:MakeNotification({
+        Name = "Rcash Hub 💸",
+        Content = "Rcash Hub loaded successfully.",
+        Image = "rbxassetid://82088779453504",
+        Time = 5
     })
 
-
--- Global Triggers
+-- Global toggles
     _G.AutoBlowBubbles = false
     _G.AutoHatch = false
     _G.AutoCS = false
@@ -72,6 +31,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
+    _G.AutoPickupAll = false
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
@@ -116,28 +76,9 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoHatch()
-        local RemoteEvent = game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent
-        local EggsToHatch = 15 
-        
-        while _G.AutoHatch do
-            if _G.SelectedEgg and _G.SelectedEgg ~= "" then
-                pcall(function()
-                    RemoteEvent:FireServer("HatchEgg", _G.SelectedEgg, EggsToHatch)
-                end)
-            else
-                _G.AutoHatch = false
-                WindUI:Notify({
-                    Title = "Rcash Hub 💸",
-                    Content = "Auto Hatch stopped: Please select an egg first!",
-                    Time = 5,
-                    Type = "Error"
-                })
-                break
-            end
-            task.wait(0.1)
-        end
-    end
+    --Auto Hatch Function
+    
+
 
     function AutoCS()
         while _G.AutoCS do
@@ -201,7 +142,71 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    -- AutoPickupAll function REMOVED
+    function AutoPickupAll()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Workspace = game:GetService("Workspace")
+        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
+        
+        print("[APU_DEBUG] AutoPickupAll function defined and starting main loop.")
+
+        task.spawn(function()
+            while true do
+                local CollectiblesChunker = nil
+                local Rendered = Workspace:FindFirstChild("Rendered")
+            
+                if Rendered then
+                    local RenderedChildren = Rendered:GetChildren()
+                
+                    -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
+                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
+                        CollectiblesChunker = RenderedChildren[14]
+                    end
+                end
+                
+                if _G.AutoPickupAll and CollectiblesChunker then
+                    local collectedCount = 0
+                    local itemFoundWithAttribute = false
+
+                    -- Use GetDescendants() to find deeply nested items
+                    local items = CollectiblesChunker:GetDescendants()
+                    
+                    -- Print how many objects were found inside the container
+                    if #items > 0 then
+                        print("[APU_DEBUG] Chunker found " .. #items .. " total descendants.")
+                    end
+
+                    -- Iterate through every collectible item
+                    for _, collectibleInstance in ipairs(items) do
+                        
+                        -- Search for the "ID" Attribute on ANY instance
+                        local pickupId = collectibleInstance:GetAttribute("ID") 
+                        
+                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
+                            itemFoundWithAttribute = true
+                            
+                            print("[APU_DEBUG] SUCCESS: Reading UUID " .. string.sub(pickupId, 1, 8) .. "... from instance: " .. collectibleInstance.Name)
+                            
+                            -- CONFIRMED FINAL REMOTE CALL: Only the UUID string is passed
+                            CollectPickupRemote:FireServer(pickupId)
+                            collectedCount = collectedCount + 1
+                        end
+                    end
+
+                    if #items > 0 and not itemFoundWithAttribute then
+                        print("[APU_DEBUG] WARNING: Items present, but the 'ID' attribute was NOT found on any.")
+                    elseif #items == 0 then
+                         print("[APU_DEBUG] Chunker folder is empty.")
+                    end
+
+                    if collectedCount > 0 then
+                        print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
+                    end
+                end
+
+                task.wait(0.1) 
+            end
+        end)
+    end
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
@@ -226,6 +231,7 @@ if game.PlaceId == 85896571713843 then
             task.wait(1) 
         end
     end
+
 
     local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
     local TELEPORT_DELAY = 2.5
@@ -389,29 +395,36 @@ if game.PlaceId == 85896571713843 then
 
             HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-            WinUI:Notify({
-                Title = "Rcash Hub 💸", -- WinUI uses 'Title' instead of 'Name'
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Teleported to: " .. EggName,
-                Time = 3,
-                Type = "Info" -- Or another type like "Info"
+                Time = 3
             })
         else
-            WindUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
-                Time = 3,
-                Type = "Error" -- Or another type like "Info"
+                Time = 5
             })
-            
         end
     end
 
+    task.spawn(HideHatchAnim)
+    AutoPickupAll()
 
--- Final Function Initialization (Wrapped in pcall/task.spawn for safety)
-    task.spawn(function()
-        pcall(HideHatchAnim)
-    end)
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- Main Tab
     local MainTab = Window:MakeTab({
         Name = "🏠 Main",
@@ -428,16 +441,14 @@ if game.PlaceId == 85896571713843 then
     supportedSection:AddLabel("• More to come soon!")
     supportedSection:AddLabel("• V.1.0")
 
-
     MainTab:AddButton({
         Name = "Copy Discord Link",
         Callback = function()
             setclipboard("https://discord.gg/JQFrBajQxW")
-            WindUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Discord invite copied to clipboard!",
-                Time = 3,
-                Type = "Success"
+                Time = 3
             })
         end
     })
@@ -446,11 +457,10 @@ if game.PlaceId == 85896571713843 then
         Name = "Rejoin",
         Callback = function()
             game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-            WindUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Rejoining server...",
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -469,26 +479,23 @@ if game.PlaceId == 85896571713843 then
                 end
                 if #y > 0 then
                     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, y[math.random(1, #y)])
-                    WindUI:Notify({
-                        Title = "Rcash Hub 💸",
+                    OrionLib:MakeNotification({
+                        Name = "Rcash Hub 💸",
                         Content = "Server hopping...",
-                        Time = 3,
-                        Type = "Info"
+                        Time = 3
                     })
                 else
-                    WindUI:Notify({
-                        Title = "Rcash Hub 💸",
+                    OrionLib:MakeNotification({
+                        Name = "Rcash Hub 💸",
                         Content = "No available servers found.",
-                        Time = 5,
-                        Type = "Warning"
+                        Time = 5
                     })
                 end
             else
-                WindUI:Notify({
-                    Title = "Rcash Hub 💸",
+                OrionLib:MakeNotification({
+                    Name = "Rcash Hub 💸",
                     Content = "Failed to fetch server list.",
-                    Time = 5,
-                    Type = "Error"
+                    Time = 5
                 })
             end
         end
@@ -506,24 +513,24 @@ if game.PlaceId == 85896571713843 then
             _G.HideHatchAnim = false
             _G.SpamE = false
             _G.AutoCollectAutumnLeaves = false
-            _G.AutoSpinAutumnWheel = false
+            _G.AutoSpinAutumnWheel = false 
             _G.AutoBuyAutumnShop = false
-            -- AutoPickupAll removed from cleanup
 
-            WindUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "GUI destroyed. All toggles stopped.",
-                Time = 3,
-                Type = "Error"
+                Time = 3
             })
 
-            Window:Destroy() 
+            OrionLib:Destroy()
+
         end
     })
 
     MainTab:AddButton({
         Name = "Reload GUI",
         Callback = function()
+            -- Stop all global toggles
             _G.AutoBlowBubbles = false
             _G.AutoHatch = false
             _G.AutoCS = false
@@ -535,22 +542,25 @@ if game.PlaceId == 85896571713843 then
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
-            -- AutoPickupAll removed from cleanup
 
 
-            if Window then
-                Window:Destroy()
+            -- Destroy Orion GUI
+            if OrionLib then
+                OrionLib:Destroy()
             end
 
+            -- Notify player
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Rcash Hub 💸",
                 Text = "Reloading GUI...",
                 Duration = 3
             })
 
+            -- Reload script
             loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/main/main.lua"))()
         end
     })
+
 
 
 -- Farming Tab
@@ -565,16 +575,27 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoBlowBubbles = Value
             if Value then task.spawn(AutoBlowBubbles) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Blow Bubbles: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
 
-    -- Auto Pickup All toggle REMOVED
+    FarmingTab:AddToggle({
+        Name = "Auto Pickup All",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoPickupAll = Value
+        
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Pickup All: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
 
     local World1Section = FarmingTab:AddSection({
         Name = "World 1"
@@ -594,14 +615,18 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoObby = Value
             if Value then AutoObbyCycle() end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Obbies: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
+
+
+
+
+
 
 
 -- Pets Tab
@@ -620,11 +645,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoEquipBest = Value
             if Value then task.spawn(AutoEquipBest) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Equip Best Pets: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -635,11 +659,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoSellPets = Value
             if Value then task.spawn(AutoSellPets) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Sell Pets: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -663,7 +686,7 @@ if game.PlaceId == 85896571713843 then
         for _, eggName in ipairs(eggList) do
             table.insert(AllEggs, eggName)
         end
-    }
+    end
 
     EggsSection:AddDropdown({
         Name = "Select Egg to Teleport/Hatch",
@@ -672,11 +695,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.SelectedEgg = Value
             TeleportToEgg(Value)
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Selected Egg: "..Value,
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -690,17 +712,15 @@ if game.PlaceId == 85896571713843 then
             
             if Value then
                 if _G.SelectedEgg ~= "" then
-                    -- Teleport immediately upon enabling
                     TeleportToEgg(_G.SelectedEgg) 
                 end
                 task.spawn(AutoHatch) 
             end
             
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Hatch: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -713,11 +733,10 @@ if game.PlaceId == 85896571713843 then
             if Value then
                 task.spawn(SpamEKey)
             end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Spam E: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -728,11 +747,10 @@ if game.PlaceId == 85896571713843 then
         Default = false,
         Callback = function(Value)
             _G.HideHatchAnim = Value
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Hide Hatch Animation: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -749,11 +767,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoBuyAutumnShop = Value
             if Value then task.spawn(AutoBuyAutumnShop) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -771,11 +788,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoClaimPTR = Value
             if Value then task.spawn(AutoClaimPTR) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Claim Play Time Rewards: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -786,11 +802,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoCS = Value
             if Value then task.spawn(AutoCS) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Claim Season: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -801,11 +816,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoMysteryBox = Value
             if Value then task.spawn(AutoMysteryBox) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Open Mystery Box: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -816,11 +830,10 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoSeasonEgg = Value
             if Value then task.spawn(AutoSeasonEgg) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Hatch Season Egg: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
@@ -831,11 +844,157 @@ if game.PlaceId == 85896571713843 then
         Callback = function(Value)
             _G.AutoSpinAutumnWheel = Value
             if Value then task.spawn(SpinAutumnWheel) end
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
                 Content = "Auto Spin Autumn Wheel: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
+                Time = 3
             })
         end
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Initialize GUI
+    OrionLib:Init()
+
+
+end
