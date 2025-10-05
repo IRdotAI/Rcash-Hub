@@ -1,7 +1,6 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
 
--- Create Window`
     local Window = WindUI:CreateWindow({
         Title = "Rcash Hub 💸",
         Icon = "door-open", -- lucide icon
@@ -72,7 +71,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
     _G.AutoSeasonEgg = false
     _G.HideHatchAnim = false
     _G.SpamE = false
-    _G.AutoPickupAll = false
+    -- _G.AutoPickupAll REMOVED
     _G.AutoSpinAutumnWheel = false
     _G.AutoBuyAutumnShop = false
     _G.AutoObby = false
@@ -202,71 +201,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
         end
     end
 
-    function AutoPickupAll()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local Workspace = game:GetService("Workspace")
-        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
-        
-        print("[APU_DEBUG] AutoPickupAll function defined and starting main loop.")
-
-        task.spawn(function()
-            while true do
-                local CollectiblesChunker = nil
-                local Rendered = Workspace:FindFirstChild("Rendered")
-            
-                if Rendered then
-                    local RenderedChildren = Rendered:GetChildren()
-                
-                    -- CONFIRMED LOCATION: Index [14] is the correct Chunker folder
-                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
-                        CollectiblesChunker = RenderedChildren[14]
-                    end
-                end
-                
-                if _G.AutoPickupAll and CollectiblesChunker then
-                    local collectedCount = 0
-                    local itemFoundWithAttribute = false
-
-                    -- Use GetDescendants() to find deeply nested items
-                    local items = CollectiblesChunker:GetDescendants()
-                    
-                    -- Print how many objects were found inside the container
-                    if #items > 0 then
-                        print("[APU_DEBUG] Chunker found " .. #items .. " total descendants.")
-                    end
-
-                    -- Iterate through every collectible item
-                    for _, collectibleInstance in ipairs(items) do
-                        
-                        -- Search for the "ID" Attribute on ANY instance
-                        local pickupId = collectibleInstance:GetAttribute("ID") 
-                        
-                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
-                            itemFoundWithAttribute = true
-                            
-                            print("[APU_DEBUG] SUCCESS: Reading UUID " .. string.sub(pickupId, 1, 8) .. "... from instance: " .. collectibleInstance.Name)
-                            
-                            -- CONFIRMED FINAL REMOTE CALL: Only the UUID string is passed
-                            CollectPickupRemote:FireServer(pickupId)
-                            collectedCount = collectedCount + 1
-                        end
-                    end
-
-                    if #items > 0 and not itemFoundWithAttribute then
-                        print("[APU_DEBUG] WARNING: Items present, but the 'ID' attribute was NOT found on any.")
-                    elseif #items == 0 then
-                        print("[APU_DEBUG] Chunker folder is empty.")
-                    end
-
-                    if collectedCount > 0 then
-                        print("[FARM] Collected " .. collectedCount .. " pickups via ID injection.")
-                    end
-                end
-
-                task.wait(0.1) 
-            end
-        end)
-    end
+    -- AutoPickupAll function REMOVED
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
@@ -471,10 +406,12 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
         end
     end
 
-    task.spawn(HideHatchAnim)
-    AutoPickupAll()
 
-
+-- Final Function Initialization (Wrapped in pcall/task.spawn for safety)
+    task.spawn(function()
+        pcall(HideHatchAnim)
+    end)
+    
 -- Main Tab
     local MainTab = Window:MakeTab({
         Name = "🏠 Main",
@@ -571,6 +508,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
+            -- AutoPickupAll removed from cleanup
 
             WindUI:Notify({
                 Title = "Rcash Hub 💸",
@@ -597,6 +535,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
+            -- AutoPickupAll removed from cleanup
 
 
             if Window then
@@ -635,20 +574,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
         end
     })
 
-    FarmingTab:AddToggle({
-        Name = "Auto Pickup All",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoPickupAll = Value
-        
-            WinUI:Notify({
-                Title = "Rcash Hub 💸",
-                Content = "Auto Pickup All: "..(Value and "Enabled" or "Disabled"),
-                Time = 3,
-                Type = "Info"
-            })
-        end
-    })
+    -- Auto Pickup All toggle REMOVED
 
     local World1Section = FarmingTab:AddSection({
         Name = "World 1"
@@ -764,6 +690,7 @@ local Library = WindUI:CreateLib("BGSI GUI", "DarkTheme")
             
             if Value then
                 if _G.SelectedEgg ~= "" then
+                    -- Teleport immediately upon enabling
                     TeleportToEgg(_G.SelectedEgg) 
                 end
                 task.spawn(AutoHatch) 
