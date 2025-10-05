@@ -93,6 +93,7 @@ if game.PlaceId == 13667319624 then
     MainTab:AddButton({
         Name = "Destroy GUI",
         Callback = function()
+            -- Stop all global toggles (assuming these are defined elsewhere)
             _G.AutoBlowBubbles = false
             _G.AutoHatch = false
             _G.AutoCS = false
@@ -112,7 +113,6 @@ if game.PlaceId == 13667319624 then
             })
 
             OrionLib:Destroy()
-
         end
     })
 
@@ -132,13 +132,12 @@ if game.PlaceId == 13667319624 then
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
 
-
             -- Destroy Orion GUI
             if OrionLib then
                 OrionLib:Destroy()
             end
 
-            -- Notify player
+            -- Notify player (using SetCore to ensure notification even after destroying GUI)
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Rcash Hub 💸",
                 Text = "Reloading GUI...",
@@ -158,66 +157,68 @@ if game.PlaceId == 13667319624 then
 
     FarmingTab:AddButton({
         Name = "Infinite Wins",
-        if Callback = function()
+        Callback = function() -- <-- FIX: Removed the misplaced 'if'
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local WinGain = ReplicatedStorage.Event.WinGain 
             WinGain:FireServer(
                 math.huge
-            ) then
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
-                    Content = "Infinite Wins activated!",
-                    Time = 3
-                })
-        end
+            )
+            -- The notification should be outside the scope of the FireServer call
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Infinite Wins activated!",
+                Time = 3
+            })
+        end -- <-- FIX: Moved the 'end' to properly close the function
     })
+    
     FarmingTab:AddButton({
         Name = "Infinite Strength",
-        if Callback = function()
+        Callback = function() -- <-- FIX: Removed the misplaced 'if'
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local Train = ReplicatedStorage.Event.Train
             Train:FireServer(
                 math.huge
-            ) then 
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
-                    Content = "Infinite Strength activated!",
-                    Time = 3
-                })
-        end
+            ) 
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Infinite Strength activated!",
+                Time = 3
+            })
+        end -- <-- FIX: Moved the 'end' to properly close the function
     })
+    
     FarmingTab:AddButton({
         Name = "Gravity power (BEST POWER) FREE",
-        if Callback = function()
+        Callback = function() -- <-- FIX: Removed the misplaced 'if'
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local BuyPower = ReplicatedStorage.Event.BuyPower
             BuyPower:FireServer(
                 "Gravity",
                 0
-            ) then
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
-                    Content = "Gravity Power activated!",
-                    Time = 3
-                })
-        end
+            )
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Gravity Power activated!",
+                Time = 3
+            })
+        end -- <-- FIX: Moved the 'end' to properly close the function
     })
+    
     FarmingTab:AddButton({
         Name = "Inf enchant (FOR THE POWER U HAVE ON)",
-        if Callback = function()
+        Callback = function() -- <-- FIX: Removed the misplaced 'if'
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local Enchanted = ReplicatedStorage.Event.Enchanted
             Enchanted:FireServer(
                 0,
                 math.huge
-            ) then
-                OrionLib:MakeNotification({
-                    Name = "Rcash Hub 💸",
-                    Content = "Infinite Enchant activated!",
-                    Time = 3
-                })
-        end
+            )
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Infinite Enchant activated!",
+                Time = 3
+            })
+        end -- <-- FIX: Moved the 'end' to properly close the function
     })
-
-
-
+end
