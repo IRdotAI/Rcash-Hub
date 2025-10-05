@@ -164,6 +164,7 @@ if game.PlaceId == 85896571713843 then
     function AutoPickupAll()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Workspace = game:GetService("Workspace")
+        -- CONFIRMED Remote Call Path
         local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
         local Player = game.Players.LocalPlayer
         
@@ -191,9 +192,10 @@ if game.PlaceId == 85896571713843 then
                     if HRP then
                         local items = CollectiblesChunker:GetDescendants()
                         
-                        -- Iterate and process one item at a time to minimize teleport lag
+                        -- Iterate and process one item at a time
                         for _, collectibleModel in ipairs(items) do
                             
+                            -- Read the UUID attribute
                             local pickupId = collectibleModel:GetAttribute("ID") 
                         
                             if type(pickupId) == "string" and string.len(pickupId) > 20 then
@@ -205,13 +207,11 @@ if game.PlaceId == 85896571713843 then
                                     HRP.CFrame = collectiblePart.CFrame * CFrame.new(0, 3, 0) -- Move 3 studs above it
                                     task.wait(0.01)
                                     
-                                    -- STEP 2: Fire the confirmed remote event
+                                    -- STEP 2: Fire the confirmed single-argument remote
                                     CollectPickupRemote:FireServer(pickupId)
                                     collectedCount = collectedCount + 1
                                     
-                                    print("[APU_FINAL_FIX] Teleported and collected item: " .. string.sub(pickupId, 1, 8) .. "...")
-                                    
-                                    -- Break after one item to teleport back cleanly
+                                    -- Break after one item to teleport back immediately
                                     break 
                                 end
                             end
@@ -220,7 +220,6 @@ if game.PlaceId == 85896571713843 then
                         if collectedCount > 0 and initialCFrame then
                             -- STEP 3: Teleport back to original location
                             HRP.CFrame = initialCFrame
-                            print("[APU_FINAL_FIX] Teleported back to original position.")
                         end
                     end
                 
