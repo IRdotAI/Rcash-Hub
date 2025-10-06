@@ -1,9 +1,8 @@
 if game.PlaceId == 85896571713843 then
-
--- Load Orion GUI
+    -- Load Orion GUI
     local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
--- Create main window
+    -- Create main window
     local Window = OrionLib:MakeWindow({
         Name = "Rcash Hub 💸 | BGSI",
         HidePremium = true,
@@ -14,7 +13,7 @@ if game.PlaceId == 85896571713843 then
         Icon = "rbxassetid://82088779453504"
     })
 
--- Notification for GUI loaded
+    -- Notification for GUI loaded
     OrionLib:MakeNotification({
         Name = "Rcash Hub 💸",
         Content = "Rcash Hub loaded successfully.",
@@ -22,7 +21,7 @@ if game.PlaceId == 85896571713843 then
         Time = 5
     })
 
--- Global toggles
+    -- Global toggles
     _G.AutoBlowBubbles = false
     _G.AutoHatch = false
     _G.AutoCS = false
@@ -38,36 +37,6 @@ if game.PlaceId == 85896571713843 then
     _G.AutoObby = false
     _G.AutoEquipBest = false
     _G.AutoSellPets = false
-
--- Console Logging Feature Start
-
-    local MaxConsoleLines = 40 -- Max number of logs to display
-    local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V5)"} 
-    local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
-    local LogService = game:GetService("LogService")
-
-    -- CRITICAL FIX: Removed the messageType argument as some executors/APIs do not pass it, causing an error.
-    -- We will rely on the LogService hook capturing prints and errors, which only pass 'message'.
-    local function LogMessage(message)
-        local timeStamp = os.date("%H:%M:%S")
-        local prefix = "[INFO]" -- Default prefix, as we can't reliably determine the type
-
-        -- Use tostring() to safely handle cases where 'message' might be a table or an object
-        local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
-
-        -- Add the new message to the start of the array
-        table.insert(ConsoleOutput, 1, formattedMessage)
-
-        -- Keep the array trimmed to the maximum line count
-        while #ConsoleOutput > MaxConsoleLines do
-            table.remove(ConsoleOutput, #ConsoleOutput)
-        end
-    end
-
-    -- Hook the game's logging service
-    LogService.MessageOut:Connect(LogMessage)
-
-
 
     local EggModelMap = {
         ["Candle Egg"] = "Candle Egg",
@@ -99,23 +68,7 @@ if game.PlaceId == 85896571713843 then
         ["Classic Egg"] = "Classic Egg"
     }
 
--- Functions
-
-    local function UpdateConsoleUI()
-        while true do
-            if ConsoleUILabel then
-                -- Concatenate the stored messages with newlines (in reverse order for oldest at bottom)
-                local consoleText = table.concat(ConsoleOutput, "\n")
-            
-                -- Safely update the content of the Orion Paragraph/Label
-                pcall(function()
-                    ConsoleUILabel:set(consoleText)
-                end)
-            end
-            task.wait(0.1) -- Update every 0.1 seconds for real-time viewing
-        end
-    end
-
+    -- Functions
     function AutoBlowBubbles()
         while _G.AutoBlowBubbles do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("BlowBubble")
@@ -124,9 +77,13 @@ if game.PlaceId == 85896571713843 then
     end
 
     function AutoHatch()
+        local HatchRemote = game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent
+        local HatchCount = 6 
         while _G.AutoHatch do
-            if _G.SelectedEgg ~= "" then
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,6)
+            if _G.SelectedEgg and _G.SelectedEgg ~= "" then
+                -- Using generic remote path and confirmed arguments (Action, Egg Name, Count)
+                HatchRemote:FireServer("HatchEgg", _G.SelectedEgg, HatchCount)
+                print("[HATCH] Fired generic remote for " .. HatchCount .. "x: " .. _G.SelectedEgg)
             end
             task.wait(0.3)
         end
@@ -194,26 +151,83 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
+    function AutoPickupAll()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Workspace = game:GetService("Workspace")
+        local TweenService = game:GetService("TweenService") 
+        
+        -- Confirmed dedicated remote call path for pickups
+        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
+        local Player = game.Players.LocalPlayer
+        
+        print("[APU_FINAL_FIX] Tween-to-Pickup function defined and starting.")
 
-    for i, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
-        v:Disable();
-    end;
+        -- The outer task.spawn allows the function to run forever in the background
+        task.spawn(function()
+            while true do
+                local CollectiblesChunker = nil
+                local Rendered = Workspace:FindFirstChild("Rendered")
+            
+                if Rendered then
+                    local RenderedChildren = Rendered:GetChildren()
+                
+                    -- Use the confirmed Index [14] for the pickup chunker
+                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
+                        CollectiblesChunker = RenderedChildren[14]
+                    end
+                end
+                
+                if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
+                    local collectedCount = 0
+                    local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
 
-    local function CollectPickups()
-        for i, v in next, game:GetService("Workspace").Rendered:GetChildren() do
-            if v.Name == "Chunker" then
-                for i2, v2 in next, v:GetChildren() do
-                    local Part, HasMeshPart = v2:FindFirstChild("Part"), v2:FindFirstChildWhichIsA("MeshPart");
-                    local HasStars = Part and Part:FindFirstChild("Stars");
-                    local HasPartMesh = Part and Part:FindFirstChild("Mesh");
-                    if HasMeshPart or HasStars or HasPartMesh then
-                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(v2.Name);
-                        v2:Destroy();
-                    end;
-                end;
-            end;
-        end;
-    end;
+                    if HRP then
+                        local items = CollectiblesChunker:GetDescendants()
+                        local tweenInfo = TweenInfo.new(
+                            0.2,            -- Time: Item moves very quickly
+                            Enum.EasingStyle.Linear,
+                            Enum.EasingDirection.Out,
+                            0,             
+                            false,         
+                            0              
+                        )
+                        
+                        for _, collectibleModel in ipairs(items) do
+                            
+                            local pickupId = collectibleModel:GetAttribute("ID") 
+                        
+                            if type(pickupId) == "string" and string.len(pickupId) > 20 then
+                                
+                                local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
+                                if collectiblePart then
+                                    
+                                    -- 1. Calculate the target CFrame (right near the HRP)
+                                    local targetCFrame = HRP.CFrame * CFrame.new(0, 0, 0)
+                                    
+                                    -- 2. Tween the item to the player
+                                    local tween = TweenService:Create(collectiblePart, tweenInfo, {CFrame = targetCFrame})
+                                    tween:Play()
+                                    
+                                    -- 3. Wait for the tween to finish (or near finish)
+                                    task.wait(0.2)
+                                    
+                                    -- 4. Fire the confirmed single-argument remote
+                                    CollectPickupRemote:FireServer(pickupId)
+                                    collectedCount = collectedCount + 1
+                                end
+                            end
+                        end
+                    
+                        if collectedCount > 0 then
+                            print("[FARM] Collected " .. collectedCount .. " pickups via Item Magnet.")
+                        end
+                    end
+
+                    task.wait(0.1) 
+                end
+            end
+        end)
+    end
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
@@ -416,8 +430,15 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
+    task.spawn(HideHatchAnim)
+    AutoPickupAll()
 
--- Main Tab
+
+    --------------------------------------------------------------------------------
+    -- GUI TABS
+    --------------------------------------------------------------------------------
+
+    -- Main Tab
     local MainTab = Window:MakeTab({
         Name = "🏠 Main",
         PremiumOnly = false
@@ -507,6 +528,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false 
             _G.AutoBuyAutumnShop = false
+            _G.AutoObby = false -- Added Obby disable
 
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
@@ -534,6 +556,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
+            _G.AutoObby = false -- Added Obby disable
 
 
             -- Destroy Orion GUI
@@ -554,8 +577,9 @@ if game.PlaceId == 85896571713843 then
     })
 
 
+    --------------------------------------------------------------------------------
 
--- Farming Tab
+    -- Farming Tab
     local FarmingTab = Window:MakeTab({
         Name = "🚜 Farming",
         PremiumOnly = false
@@ -575,17 +599,15 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
-    FarmTab:AddToggle({
-        Name = "Auto Collect Pickups (Item Magnet)",
+    FarmingTab:AddToggle({
+        Name = "Auto Pickup All",
         Default = false,
         Callback = function(Value)
             _G.AutoPickupAll = Value
-            if Value then 
-                task.spawn(CollectPickups) -- Starts the loop while _G.AutoPickupAll is true
-            end
+        
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
-                Content = "Auto Collect Pickups: "..(Value and "Enabled" or "Disabled"),
+                Content = "Auto Pickup All: "..(Value and "Enabled" or "Disabled"),
                 Time = 3
             })
         end
@@ -617,13 +639,9 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
+    --------------------------------------------------------------------------------
 
-
-
-
-
-
--- Pets Tab
+    -- Pets Tab
     local PetsTab = Window:MakeTab({
         Name = "🐾 Pets",
         PremiumOnly = false
@@ -749,7 +767,9 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
--- Shop Tab
+    --------------------------------------------------------------------------------
+
+    -- Shop Tab
     local ShopTab = Window:MakeTab({
         Name = "🛒 Shop",
         PremiumOnly = false
@@ -764,115 +784,4 @@ if game.PlaceId == 85896571713843 then
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
-
--- Misc Tab
-    local MiscTab = Window:MakeTab({
-        Name = "➕ Misc",
-        PremiumOnly = false
-    })
-
-    MiscTab:AddToggle({
-        Name = "Auto Claim Play Time Rewards",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoClaimPTR = Value
-            if Value then task.spawn(AutoClaimPTR) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Auto Claim Play Time Rewards: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
-    MiscTab:AddToggle({
-        Name = "Auto Claim Season Rewards",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoCS = Value
-            if Value then task.spawn(AutoCS) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Auto Claim Season: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
-    MiscTab:AddToggle({
-        Name = "Auto Open Mystery Box",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoMysteryBox = Value
-            if Value then task.spawn(AutoMysteryBox) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Auto Open Mystery Box: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
-    MiscTab:AddToggle({
-        Name = "Auto Hatch Season Egg",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoSeasonEgg = Value
-            if Value then task.spawn(AutoSeasonEgg) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Auto Hatch Season Egg: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
-    MiscTab:AddToggle({
-        Name = "Auto Spin Autumn Wheel",
-        Default = false,
-        Callback = function(Value)
-            _G.AutoSpinAutumnWheel = Value
-            if Value then task.spawn(SpinAutumnWheel) end
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Auto Spin Autumn Wheel: "..(Value and "Enabled" or "Disabled"),
-                Time = 3
-            })
-        end
-    })
-
--- Console Tab
-    local ConsoleTab = Window:MakeTab({
-        Name = "💻 Console",
-        PremiumOnly = false
-    })
-
-    ConsoleTab:AddLabel("Live Script Output (Mobile Console) - Scrollable:")
-
-    local ConsoleContainer = ConsoleTab:AddParagraph({
-        Name = "Script Log Viewer",
-        Content = table.concat(ConsoleOutput, "\n"), -- Set initial content
-    })
-
-    ConsoleUILabel = ConsoleContainer
-
--- STARTUP LOGIC
-    -- Start the Hide Hatch listener
-    task.spawn(HideHatchAnim) 
-
-    -- Start the continuous Auto Pickup background loop (waits for _G.AutoPickupAll to be true)
-    task.spawn(AutoPickupAll)
-
-    -- Start the Console UI updating loop
-    task.spawn(UpdateConsoleUI)
-
--- Initialize GUI
-    OrionLib:Init()
-
-
-end
+                Time
