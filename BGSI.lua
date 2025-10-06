@@ -1,6 +1,15 @@
 if game.PlaceId == 85896571713843 then
-    -- Load Orion GUI
-    local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
+
+    local OrionLib
+    local success, err = pcall(function()
+        -- Load Orion GUI securely
+        OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
+    end)
+
+    if not success or not OrionLib then
+        warn("Rcash Hub: Failed to load Orion GUI library. Execution halted. Error: " .. tostring(err))
+        return -- STOP execution if the GUI library failed to load.
+    end
 
     -- Create main window
     local Window = OrionLib:MakeWindow({
@@ -430,8 +439,9 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
+    -- STARTUP LOGIC
     task.spawn(HideHatchAnim)
-    AutoPickupAll()
+    task.spawn(AutoPickupAll) -- Changed to task.spawn to explicitly run the continuous loop in the background
 
 
     --------------------------------------------------------------------------------
@@ -528,7 +538,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false 
             _G.AutoBuyAutumnShop = false
-            _G.AutoObby = false -- Added Obby disable
+            _G.AutoObby = false
 
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
@@ -556,7 +566,7 @@ if game.PlaceId == 85896571713843 then
             _G.AutoCollectAutumnLeaves = false
             _G.AutoSpinAutumnWheel = false
             _G.AutoBuyAutumnShop = false
-            _G.AutoObby = false -- Added Obby disable
+            _G.AutoObby = false
 
 
             -- Destroy Orion GUI
@@ -784,4 +794,93 @@ if game.PlaceId == 85896571713843 then
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
                 Content = "Auto Buy Autumn Shop: "..(Value and "Enabled" or "Disabled"),
-                Time
+                Time = 3
+            })
+        end
+    })
+
+    --------------------------------------------------------------------------------
+
+    -- Misc Tab
+    local MiscTab = Window:MakeTab({
+        Name = "➕ Misc",
+        PremiumOnly = false
+    })
+
+    MiscTab:AddToggle({
+        Name = "Auto Claim Play Time Rewards",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoClaimPTR = Value
+            if Value then task.spawn(AutoClaimPTR) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Claim Play Time Rewards: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    MiscTab:AddToggle({
+        Name = "Auto Claim Season Rewards",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoCS = Value
+            if Value then task.spawn(AutoCS) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Claim Season: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    MiscTab:AddToggle({
+        Name = "Auto Open Mystery Box",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoMysteryBox = Value
+            if Value then task.spawn(AutoMysteryBox) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Open Mystery Box: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    MiscTab:AddToggle({
+        Name = "Auto Hatch Season Egg",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoSeasonEgg = Value
+            if Value then task.spawn(AutoSeasonEgg) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Hatch Season Egg: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    MiscTab:AddToggle({
+        Name = "Auto Spin Autumn Wheel",
+        Default = false,
+        Callback = function(Value)
+            _G.AutoSpinAutumnWheel = Value
+            if Value then task.spawn(SpinAutumnWheel) end
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Auto Spin Autumn Wheel: "..(Value and "Enabled" or "Disabled"),
+                Time = 3
+            })
+        end
+    })
+
+    --------------------------------------------------------------------------------
+    -- Initialize GUI
+    --------------------------------------------------------------------------------
+
+    OrionLib:Init()
+
+end
