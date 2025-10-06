@@ -45,13 +45,14 @@ if game.PlaceId == 85896571713843 then
     local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
     local LogService = game:GetService("LogService")
 
-    -- FIX: LogService.MessageOut no longer passes messageType.
-    -- We assume all incoming messages are standard prints.
+    -- FIX: Updated LogMessage function to fix "Enum.MessageType" error.
+    -- It now only accepts the message and converts it to a string for safety.
     local function LogMessage(message)
         local timeStamp = os.date("%H:%M:%S")
         local prefix = "[INFO]"
 
-        -- Format: [HH:MM:SS] [TYPE] Message
+        -- Use tostring() to safely handle cases where 'message' might be a table or an object
+        -- This addresses the "string expected, got table" error.
         local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
 
         -- Add the new message to the start of the array
@@ -64,6 +65,8 @@ if game.PlaceId == 85896571713843 then
     end
 
     -- Hook the game's logging service to capture all print/warn/error messages
+    -- By removing the second argument in the function definition above, we fix the issue
+    -- where the internal LogService mechanism no longer passes MessageType reliably.
     LogService.MessageOut:Connect(LogMessage)
 
     --CONSOLE LOGGING FEATURE END
