@@ -1,7 +1,5 @@
 if game.PlaceId == 85896571713843 then
 -- Script Load Counter START
-    -- This counter helps track how many times the script has been executed 
-    -- in the current session (e.g., after copying/pasting or reloading).
     if _G.ScriptLoadCount then
         _G.ScriptLoadCount = _G.ScriptLoadCount + 1
     else
@@ -53,15 +51,15 @@ if game.PlaceId == 85896571713843 then
 -- Console Logging Feature Start
 
     local MaxConsoleLines = 40 -- Max number of logs to display
-    -- FIX: Adding a starting message to confirm console UI is working
-    local ConsoleOutput = {"[SYSTEM] Console UI initialised."} 
+    local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V5)"} 
     local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
     local LogService = game:GetService("LogService")
 
-    -- FIX: Function to safely capture messages from LogService
+    -- CRITICAL FIX: Removed the messageType argument as some executors/APIs do not pass it, causing an error.
+    -- We will rely on the LogService hook capturing prints and errors, which only pass 'message'.
     local function LogMessage(message)
         local timeStamp = os.date("%H:%M:%S")
-        local prefix = "[INFO]"
+        local prefix = "[INFO]" -- Default prefix, as we can't reliably determine the type
 
         -- Use tostring() to safely handle cases where 'message' might be a table or an object
         local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
@@ -77,8 +75,8 @@ if game.PlaceId == 85896571713843 then
 
     -- Hook the game's logging service
     LogService.MessageOut:Connect(LogMessage)
-
-    --CONSOLE LOGGING FEATURE END
+    
+--CONSOLE LOGGING FEATURE END
 
 
     local EggModelMap = {
@@ -221,7 +219,6 @@ if game.PlaceId == 85896571713843 then
                 local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
                 
                 if not HRP then 
-                    print("[AUTOPICKUP ERROR] HumanoidRootPart not found. Waiting for Character...")
                     task.wait(0.5) 
                     continue 
                 end
@@ -229,7 +226,7 @@ if game.PlaceId == 85896571713843 then
                 local CollectiblesChunker = nil
                 local Rendered = Workspace:FindFirstChild("Rendered")
                 
-                -- NEW RESILIENT SEARCH LOGIC: Find the folder containing all droppable items.
+                -- NEW RESILIENT SEARCH LOGIC (V5)
                 if Rendered then
                     -- 1. PRIORITY SEARCH: Search for folders with specific names
                     for _, child in ipairs(Rendered:GetChildren()) do
@@ -281,14 +278,18 @@ if game.PlaceId == 85896571713843 then
                         if type(pickupId) == "string" and string.len(pickupId) > 20 then
                             
                             local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
-                            if collectiblePart and collectiblePart.Parent == collectibleModel then -- Ensure it's not already picked up
+                            
+                            -- CRITICAL FIX (V5): Check if the part still exists and is parented correctly before tweening
+                            if collectiblePart and collectiblePart.Parent == collectibleModel and collectiblePart.Parent.Parent == CollectiblesChunker then 
                                 
                                 -- 1. Calculate the target CFrame 
                                 local targetCFrame = HRP.CFrame * CFrame.new(0, 0, 0)
                                 
-                                -- 2. Tween the item to the player
-                                local tween = TweenService:Create(collectiblePart, tweenInfo, {CFrame = targetCFrame})
-                                tween:Play()
+                                -- 2. Tween the item to the player (Using pcall due to the "Can only tween objects in the workspace" error)
+                                pcall(function()
+                                    local tween = TweenService:Create(collectiblePart, tweenInfo, {CFrame = targetCFrame})
+                                    tween:Play()
+                                end)
                                 
                                 -- 3. Wait for the tween to finish
                                 task.wait(0.2)
