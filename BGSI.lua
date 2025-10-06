@@ -148,68 +148,73 @@ if game.PlaceId == 85896571713843 then
     end
 
     function AutoPickupAll()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local Workspace = game:GetService("Workspace")
-        -- CONFIRMED Remote Call Path
-        local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
-        local Player = game.Players.LocalPlayer
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Workspace = game:GetService("Workspace")
+    local TweenService = game:GetService("TweenService") -- Make sure this line is included!
+    
+    -- Confirmed Remote Call Path
+    local CollectPickupRemote = ReplicatedStorage.Remotes.Pickups.CollectPickup 
+    local Player = game.Players.LocalPlayer
+    
+    print("[APU_FINAL_FIX] Tween-to-Pickup function defined and starting.")
+
+    task.spawn(function()
+        while true do
+            local CollectiblesChunker = nil
+            local Rendered = Workspace:FindFirstChild("Rendered")
         
-        print("[APU_FINAL_FIX] Teleport-To-Pickup function defined and starting.")
-
-        task.spawn(function()
-            while true do
-                local CollectiblesChunker = nil
-                local Rendered = Workspace:FindFirstChild("Rendered")
+            if Rendered then
+                local RenderedChildren = Rendered:GetChildren()
             
-                if Rendered then
-                    local RenderedChildren = Rendered:GetChildren()
-                
-                    -- Use the confirmed Index [14]
-                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
-                        CollectiblesChunker = RenderedChildren[14]
-                    end
+                -- Use the confirmed Index [14]
+                if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
+                    CollectiblesChunker = RenderedChildren[14]
                 end
-                
-                if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
-                    local collectedCount = 0
-                    local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-                    local initialCFrame = HRP and HRP.CFrame -- Store original position
+            end
+            
+            if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
+                local collectedCount = 0
+                local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
 
-                    if HRP then
-                        local items = CollectiblesChunker:GetDescendants()
+                if HRP then
+                    local items = CollectiblesChunker:GetDescendants()
+                    local tweenInfo = TweenInfo.new(
+                        0.2,            -- Time (fast tween)
+                        Enum.EasingStyle.Linear,
+                        Enum.EasingDirection.Out,
+                        0,              -- RepeatCount
+                        false,          -- Reverses
+                        0               -- DelayTime
+                    )
+                    
+                    for _, collectibleModel in ipairs(items) do
                         
-                        -- Iterate and process one item at a time
-                        for _, collectibleModel in ipairs(items) do
+                        local pickupId = collectibleModel:GetAttribute("ID") 
+                    
+                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
                             
-                            local pickupId = collectibleModel:GetAttribute("ID") 
-                        
-                            if type(pickupId) == "string" and string.len(pickupId) > 20 then
+                            local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
+                            if collectiblePart then
                                 
-                                local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
-                                if collectiblePart then
-                                    
-                                    -- STEP 1: Teleport to the item
-                                    HRP.CFrame = collectiblePart.CFrame * CFrame.new(0, 3, 0) 
-                                    task.wait(0.01)
-                                    
-                                    -- STEP 2: Fire the confirmed single-argument remote
-                                    CollectPickupRemote:FireServer(pickupId)
-                                    collectedCount = collectedCount + 1
-                                    
-                                    -- Break after one item to teleport back immediately
-                                    break 
-                                end
+                                -- 1. Calculate the target CFrame (right near the HRP)
+                                local targetCFrame = HRP.CFrame * CFrame.new(0, 0, 0)
+                                
+                                -- 2. Tween the item to the player
+                                local tween = TweenService:Create(collectiblePart, tweenInfo, {CFrame = targetCFrame})
+                                tween:Play()
+                                
+                                -- 3. Wait for the tween to finish (or near finish)
+                                task.wait(0.2)
+                                
+                                -- 4. Fire the confirmed single-argument remote
+                                CollectPickupRemote:FireServer(pickupId)
+                                collectedCount = collectedCount + 1
                             end
-                        end
-
-                        if collectedCount > 0 and initialCFrame then
-                            -- STEP 3: Teleport back to original location
-                            HRP.CFrame = initialCFrame
                         end
                     end
                 
                     if collectedCount > 0 then
-                        print("[FARM] Collected " .. collectedCount .. " pickups via Teleport Injection.")
+                        print("[FARM] Collected " .. collectedCount .. " pickups via Item Magnet.")
                     end
                 end
 
