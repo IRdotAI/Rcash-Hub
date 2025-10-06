@@ -38,7 +38,7 @@ if game.PlaceId == 85896571713843 then
         AutoEquipBest = false;
 
         AutoBuyAutumnShop = false;
-        AutoBuy
+        --AutoBuy
 
         AutoClaimPlaytimeRewards = false;
         AutoClaimSeasonRewards = false;
