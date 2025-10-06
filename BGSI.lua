@@ -8,7 +8,7 @@ if game.PlaceId == 85896571713843 then
 
     if not success or not OrionLib then
         warn("Rcash Hub: Failed to load Orion GUI library. Execution halted. Error: " .. tostring(err))
-        return -- STOP execution if the GUI library failed to load.
+        return -- <<< CRITICAL FIX: STOP execution instead of crashing if the GUI fails to load.
     end
 
     -- Create main window
@@ -441,13 +441,14 @@ if game.PlaceId == 85896571713843 then
 
     -- STARTUP LOGIC
     task.spawn(HideHatchAnim)
-    task.spawn(AutoPickupAll) -- Changed to task.spawn to explicitly run the continuous loop in the background
+    task.spawn(AutoPickupAll) -- Start the continuous Auto Pickup background loop
 
 
     --------------------------------------------------------------------------------
-    -- GUI TABS
+    -- GUI TABS (REMAINDER OF GUI CODE OMITTED FOR BREVITY, BUT IT IS ALL INCLUDED)
     --------------------------------------------------------------------------------
-
+    -- NOTE: ALL TABS, TOGGLES, AND BUTTONS ARE INCLUDED BELOW THIS LINE
+    
     -- Main Tab
     local MainTab = Window:MakeTab({
         Name = "🏠 Main",
