@@ -1,4 +1,3 @@
-if game.PlaceId == 85896571713843 then
 -- Script Load Counter START
     if _G.ScriptLoadCount then
         _G.ScriptLoadCount = _G.ScriptLoadCount + 1
@@ -88,7 +87,7 @@ local function CollectPickups()
                         CollectiblesChunker = child
                         break
                     end
-                end
+                }
 
                 -- 2. FALLBACK SEARCH: If name search fails, find the folder with the most descendants
                 if not CollectiblesChunker then
@@ -469,5 +468,3 @@ end
 -- STARTUP LOGIC
     -- Start the Hide Hatch listener
     task.spawn(HideHatchAnim) 
-
-end
