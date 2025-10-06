@@ -1,13 +1,3 @@
--- Script Load Counter START
-    if _G.ScriptLoadCount then
-        _G.ScriptLoadCount = _G.ScriptLoadCount + 1
-    else
-        _G.ScriptLoadCount = 1
-    end
-    print("--------------------------------------------------")
-    print("Rcash Hub Script Load Count: #" .. _G.ScriptLoadCount .. " (New Script Running)")
-    print("--------------------------------------------------")
--- Script Load Counter END
 -- Load Orion GUI
     local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
