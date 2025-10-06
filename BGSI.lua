@@ -38,6 +38,47 @@ if game.PlaceId == 85896571713843 then
     _G.AutoEquipBest = false
     _G.AutoSellPets = false
 
+-- Console Logging Feature Start
+
+    local MaxConsoleLines = 40 -- Max number of logs to display
+    local ConsoleOutput = {} -- Stores the actual log messages
+    local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
+    local LogService = game:GetService("LogService")
+
+    -- Function to handle log messages from the game
+    local function LogMessage(message, messageType)
+        local prefix = ""
+        local color = "White" -- Not used for text, but good for local debugging
+
+        if messageType == Enum.MessageType.Message then
+            prefix = "[INFO]"
+        elseif messageType == Enum.MessageType.Warning then
+            prefix = "[WARN]"
+        elseif messageType == Enum.MessageType.ErrorMessage or messageType == Enum.MessageType.ScriptErrorMessage then
+            prefix = "[ERROR]"
+        else
+            prefix = "[LOG]"
+        end
+
+        local timeStamp = os.date("%H:%M:%S")
+        -- Format: [HH:MM:SS] [TYPE] Message
+        local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, message)
+
+        -- Add the new message to the start of the array
+        table.insert(ConsoleOutput, 1, formattedMessage)
+
+        -- Keep the array trimmed to the maximum line count
+        while #ConsoleOutput > MaxConsoleLines do
+            table.remove(ConsoleOutput, #ConsoleOutput)
+        end
+    end
+
+    -- Hook the game's logging service to capture all print/warn/error messages
+    LogService.MessageOut:Connect(LogMessage)
+
+    --CONSOLE LOGGING FEATURE END
+
+
     local EggModelMap = {
         ["Candle Egg"] = "Candle Egg",
         ["Autumn Egg"] = "Autumn Egg",
@@ -69,6 +110,22 @@ if game.PlaceId == 85896571713843 then
     }
 
 -- Functions
+
+    local function UpdateConsoleUI()
+        while true do
+            if ConsoleUILabel and #ConsoleOutput > 0 then
+                -- Concatenate the stored messages with newlines
+                local consoleText = table.concat(ConsoleOutput, "\n")
+            
+                -- Safely update the content of the Orion Paragraph/Label
+                pcall(function()
+                    ConsoleUILabel:set(consoleText)
+                end)
+            end
+            task.wait(0.1) -- Update every 0.1 seconds for real-time viewing
+        end
+    end
+
     function AutoBlowBubbles()
         while _G.AutoBlowBubbles do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("BlowBubble")
@@ -869,9 +926,20 @@ if game.PlaceId == 85896571713843 then
         end
     })
 
+-- Console Tab
+    local ConsoleTab = Window:MakeTab({
+        Name = "💻 Console",
+        PremiumOnly = false
+    })
 
+    ConsoleTab:AddLabel("Live Script Output (Mobile Console) - Scrollable:")
 
+    local ConsoleContainer = ConsoleTab:AddParagraph({
+        Name = "Script Log Viewer",
+        Content = "Console ready. Waiting for script output...",
+    })
 
+    ConsoleUILabel = ConsoleContainer
 
 
 
@@ -1010,7 +1078,13 @@ if game.PlaceId == 85896571713843 then
 
 
 
--- Initialize GUI
+
+
+
+
+
+-- Initialize GUI and other tasks
+    task.spawn(UpdateConsoleUI)
     OrionLib:Init()
 
 
