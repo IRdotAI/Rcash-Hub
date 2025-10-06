@@ -40,15 +40,14 @@ if game.PlaceId == 85896571713843 then
 
 -- Console Logging Feature Start
 
-    local MaxConsoleLines = 40 -- Max number of logs to display
-    local ConsoleOutput = {} -- Stores the actual log messages
-    local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
+    local MaxConsoleLines = 40
+    local ConsoleOutput = {}
+    local ConsoleUILabel = nil
     local LogService = game:GetService("LogService")
 
-    -- Function to handle log messages from the game
     local function LogMessage(message, messageType)
         local prefix = ""
-        local color = "White" -- Not used for text, but good for local debugging
+        local color = "White"
 
         if messageType == Enum.MessageType.Message then
             prefix = "[INFO]"
@@ -61,23 +60,16 @@ if game.PlaceId == 85896571713843 then
         end
 
         local timeStamp = os.date("%H:%M:%S")
-        -- Format: [HH:MM:SS] [TYPE] Message
         local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, message)
 
-        -- Add the new message to the start of the array
         table.insert(ConsoleOutput, 1, formattedMessage)
 
-        -- Keep the array trimmed to the maximum line count
         while #ConsoleOutput > MaxConsoleLines do
             table.remove(ConsoleOutput, #ConsoleOutput)
         end
     end
 
-    -- Hook the game's logging service to capture all print/warn/error messages
     LogService.MessageOut:Connect(LogMessage)
-
-    --CONSOLE LOGGING FEATURE END
-
 
     local EggModelMap = {
         ["Candle Egg"] = "Candle Egg",
@@ -216,70 +208,70 @@ if game.PlaceId == 85896571713843 then
         print("[APU_FINAL_FIX] Tween-to-Pickup function defined and starting.")
 
         -- The outer task.spawn allows the function to run forever in the background
-        task.spawn(function()
-            while true do
-                local CollectiblesChunker = nil
-                local Rendered = Workspace:FindFirstChild("Rendered")
+        -- NOTE: Since this function is called inside task.spawn(AutoPickupAll) later, 
+        -- we wrap the core logic in a simple while true loop.
+        while true do
+            local CollectiblesChunker = nil
+            local Rendered = Workspace:FindFirstChild("Rendered")
+        
+            if Rendered then
+                local RenderedChildren = Rendered:GetChildren()
             
-                if Rendered then
-                    local RenderedChildren = Rendered:GetChildren()
-                
-                    -- Use the confirmed Index [14] for the pickup chunker
-                    if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
-                        CollectiblesChunker = RenderedChildren[14]
-                    end
-                end
-                
-                if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
-                    local collectedCount = 0
-                    local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-
-                    if HRP then
-                        local items = CollectiblesChunker:GetDescendants()
-                        local tweenInfo = TweenInfo.new(
-                            0.2,            -- Time: Item moves very quickly
-                            Enum.EasingStyle.Linear,
-                            Enum.EasingDirection.Out,
-                            0,             
-                            false,         
-                            0              
-                        )
-                        
-                        for _, collectibleModel in ipairs(items) do
-                            
-                            local pickupId = collectibleModel:GetAttribute("ID") 
-                        
-                            if type(pickupId) == "string" and string.len(pickupId) > 20 then
-                                
-                                local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
-                                if collectiblePart then
-                                    
-                                    -- 1. Calculate the target CFrame (right near the HRP)
-                                    local targetCFrame = HRP.CFrame * CFrame.new(0, 0, 0)
-                                    
-                                    -- 2. Tween the item to the player
-                                    local tween = TweenService:Create(collectiblePart, tweenInfo, {CFrame = targetCFrame})
-                                    tween:Play()
-                                    
-                                    -- 3. Wait for the tween to finish (or near finish)
-                                    task.wait(0.2)
-                                    
-                                    -- 4. Fire the confirmed single-argument remote
-                                    CollectPickupRemote:FireServer(pickupId)
-                                    collectedCount = collectedCount + 1
-                                end
-                            end
-                        end
-                    
-                        if collectedCount > 0 then
-                            print("[FARM] Collected " .. collectedCount .. " pickups via Item Magnet.")
-                        end
-                    end
-
-                    task.wait(0.1) 
+                -- Use the confirmed Index [14] for the pickup chunker
+                if #RenderedChildren >= 14 and RenderedChildren[14]:IsA("Folder") then
+                    CollectiblesChunker = RenderedChildren[14]
                 end
             end
-        end)
+            
+            if _G.AutoPickupAll and CollectiblesChunker and Player.Character then
+                local collectedCount = 0
+                local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
+
+                if HRP then
+                    local items = CollectiblesChunker:GetDescendants()
+                    local tweenInfo = TweenInfo.new(
+                        0.2,            -- Time: Item moves very quickly
+                        Enum.EasingStyle.Linear,
+                        Enum.EasingDirection.Out,
+                        0,             
+                        false,         
+                        0              
+                    )
+                    
+                    for _, collectibleModel in ipairs(items) do
+                        
+                        local pickupId = collectibleModel:GetAttribute("ID") 
+                    
+                        if type(pickupId) == "string" and string.len(pickupId) > 20 then
+                            
+                            local collectiblePart = collectibleModel:FindFirstChildOfClass("BasePart", true)
+                            if collectiblePart then
+                                
+                                -- 1. Calculate the target CFrame (right near the HRP)
+                                local targetCFrame = HRP.CFrame * CFrame.new(0, 0, 0)
+                                
+                                -- 2. Tween the item to the player
+                                local tween = TweenService:Create(collectiblePart, tweenInfo, {CFrame = targetCFrame})
+                                tween:Play()
+                                
+                                -- 3. Wait for the tween to finish (or near finish)
+                                task.wait(0.2)
+                                
+                                -- 4. Fire the confirmed single-argument remote
+                                CollectPickupRemote:FireServer(pickupId)
+                                collectedCount = collectedCount + 1
+                            end
+                        end
+                    end
+                
+                    if collectedCount > 0 then
+                        print("[FARM] Collected " .. collectedCount .. " pickups via Item Magnet.")
+                    end
+                end
+
+                task.wait(0.1) 
+            end
+        end
     end
 
     function SpinAutumnWheel()
@@ -483,22 +475,6 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    task.spawn(HideHatchAnim)
-    AutoPickupAll()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Main Tab
     local MainTab = Window:MakeTab({
         Name = "🏠 Main",
@@ -662,6 +638,8 @@ if game.PlaceId == 85896571713843 then
         Default = false,
         Callback = function(Value)
             _G.AutoPickupAll = Value
+            -- No need to task.spawn here, as AutoPickupAll is a continuous loop 
+            -- and is spawned once at script startup (see bottom of file).
         
             OrionLib:MakeNotification({
                 Name = "Rcash Hub 💸",
@@ -941,150 +919,14 @@ if game.PlaceId == 85896571713843 then
 
     ConsoleUILabel = ConsoleContainer
 
+-- STARTUP LOGIC (Moved and Fixed)
+    task.spawn(HideHatchAnim) 
 
+    task.spawn(AutoPickupAll)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- Initialize GUI and other tasks
     task.spawn(UpdateConsoleUI)
+
+-- Initialize GUI
     OrionLib:Init()
 
 
