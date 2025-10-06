@@ -87,7 +87,7 @@ local function CollectPickups()
                         CollectiblesChunker = child
                         break
                     end
-                }
+                end -- FIXED: Changed '}' to 'end' here.
 
                 -- 2. FALLBACK SEARCH: If name search fails, find the folder with the most descendants
                 if not CollectiblesChunker then
