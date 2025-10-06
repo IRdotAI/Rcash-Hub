@@ -126,7 +126,7 @@ if game.PlaceId == 85896571713843 then
     function AutoHatch()
         while _G.AutoHatch do
             if _G.SelectedEgg ~= "" then
-                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,6)
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,15)
             end
             task.wait(0.3)
         end
@@ -135,7 +135,7 @@ if game.PlaceId == 85896571713843 then
     function AutoCS()
         while _G.AutoCS do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimSeason")
-            task.wait(0.3)
+            task.wait(0.1)
         end
     end
 
@@ -155,8 +155,8 @@ if game.PlaceId == 85896571713843 then
 
     function AutoSeasonEgg()
         while _G.AutoSeasonEgg do
-            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchPowerupEgg","Season 8 Egg",6)
-            task.wait(0.3)
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchPowerupEgg","Season 8 Egg",1)
+            task.wait(0.1)
         end
     end
 
@@ -188,9 +188,9 @@ if game.PlaceId == 85896571713843 then
         local VirtualInputManager = game:GetService("VirtualInputManager")
         while _G.SpamE do
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-            task.wait(0.05) 
+            task.wait(0.001) 
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-            task.wait(0.05)
+            task.wait(0.001)
         end
     end
 
