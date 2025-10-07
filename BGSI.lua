@@ -457,13 +457,368 @@ if game.PlaceId == 8304191830 then
         }
     },
 
---Main Tab
-Tabs.Main:CreateParagraph("Aligned Paragraph", {
-    Title = "Rcash Hub 💸 | BGSI",
-    Content = "Supported Games:\n • Bubble Gum Simulator INFINITY\n",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Center
-})
+-- Main Tab
+    Tabs.Main:CreateParagraph("Aligned Paragraph", {
+        Title = "Rcash Hub 💸 | BGSI",
+        Content = "Supported Games:\n• Bubble Gum Simulator INFINITY\n• More to Come!\n\n• By RdotA",
+        TitleAlignment = "Middle",
+        ContentAlignment = Enum.TextXAlignment.Center
+    })
+
+    Tabs.Main:CreateButton{
+        Title = "Discord",
+        Description = "Join the Discord server for support, updates, and more!",
+        Callback = function()
+            setclipboard("https://discord.gg/JQFrBajQxW")
+            Library:Notify{
+                Title = "Rcash Hub 💸",
+                Content = "Discord link copied to clipboard!",
+                Duration = 5
+            }
+        end
+    }
+
+    Tabs.Main:CreateButton{
+        Title = "Patreon",
+        Description = "Support the development of Rcash Hub by becoming a patron!",
+        Callback = function()`
+            setclipboard("https://www.patreon.com/rdota")
+            Library:Notify{
+                Title = "Rcash Hub 💸",
+                Content = "Patreon link copied to clipboard!",
+                Duration = 5
+            }
+        end
+    }
+
+    Tabs.Main:CreateButton{
+        Title = "Rejoin",
+        Description = "Rejoin the current game server.",
+        Callback = function()
+            game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+        end
+    }
+
+    Tabs.main:CreateButton{
+        Title = "Server Hop",
+        Description = "Hop to a different server.",
+        Callback = function()
+            local PlaceID = game.PlaceId
+            local AllIDs = {}
+            local foundAnything = ""
+            local actualHour = os.date("!*t").hour
+            local Deleted = false
+            function TPReturner()
+                local Site;
+                if foundAnything == "" then
+                    Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+                else
+                    Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+                end
+                local ID = ""
+                if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+                    foundAnything = Site.nextPageCursor
+                end
+                local num = 0;
+                for i,v in pairs(Site.data) do
+                    local Possible = true
+                    ID = tostring(v.id)
+                    if tonumber(v.maxPlayers) > tonumber(v.playing) then
+                        for _,Existing in pairs(AllIDs) do
+                            if num ~= 0 then
+                                if ID == Existing then
+                                    Possible = false
+                                end
+                            else
+                                if tonumber(actualHour) ~= tonumber(Existing) then
+                                    AllIDs = {}
+                                    num = 1
+                                    break
+                                end
+                            end
+                        end
+                        if Possible == true then
+                            table.insert(AllIDs, ID)
+                            wait()
+                            pcall(function()
+                                game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                            end)
+                            wait(4)
+                        end
+                    end
+                end
+            end
+            function Teleport()
+                while wait() do
+                    pcall(function()
+                        TPReturner()
+                        if foundAnything == "" then
+                            wait(15)
+                        end
+                    end)
+                end
+            end
+            Teleport()
+        end
+    }
+
+    Tabs.Main:CreateButton{
+        Title = "Server Info",
+        Description = "Copy the current server's info to clipboard.",
+        Callback = function()
+            local ServerInfo = "Place ID: " .. game.PlaceId .. "\nJob ID: " .. game.JobId .. "\nServer Time (UTC): " .. os.date("!*t").hour .. ":" .. os.date("!*t").min .. ":" .. os.date("!*t").sec
+            setclipboard(ServerInfo)
+            Library:Notify{
+                Title = "Rcash Hub 💸",
+                Content = "Server info copied to clipboard!",
+                Duration = 5
+            }
+        end
+    }
+
+    Tabs.Main:CreateButton{
+        Title = "Destroy GUI",
+        Description = "Destroy the GUI and unload the script.",
+        Callback = function()
+            Library.Notify{
+                Title = "Rcash Hub 💸",
+                Content = "Unloaded successfully!",
+                Duration = 5
+            }
+            Library:Destroy()
+        end
+    }
+
+    Tabs.Main:CreateButton{
+        Title = "Reload GUI",
+        Description = "Reload the GUI.",
+        Callback = function()
+            Library.Notify{
+                Title = "Rcash Hub 💸",
+                Content = "Reloading...",
+                Duration = 5
+            }
+            Library:Destroy()
+            wait(1)
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/main.lua"))()
+        end
+    }
+
+-- Farming Tab
+    Tabs.Farming:CreateToggle("AutoBlowBubbles", {
+        Title = "Auto Blow Bubbles",
+        Default = false,
+        Description = "Automatically blow bubbles."
+    }):OnChanged(function(state)
+        _G.AutoBlowBubbles = state
+        if state then
+            task.spawn(AutoBlowBubbles)
+        end
+    end)
+
+    Tabs.Farming:CreateToggle("AutoCollectPickups", {
+        Title = "Auto Collect Pickups",
+        Default = false,
+        Description = "Automatically collect all pickups."
+    }):OnChanged(function(state)
+        _G.AutoPickupAll = state
+        if state then
+            task.spawn(function()
+                while _G.AutoPickupAll do
+                    CollectPickups()
+                    task.wait(1)
+                end
+            end)
+        end
+    end)
+
+    Tabs.Farming:CreateToggle("Auto Complete Obbies (Use Auto Spam E in pets tab)", {
+        Title = "Auto Complete Obbies",
+        Default = false,
+        Description = "Automatically complete obbies."
+    }):OnChanged(function(state)
+        _G.AutoObby = state
+        if state then
+            AutoObbyCycle()
+        end
+    end)
+
+-- Pets Tab
+
+    Tabs.Pets:CreateParagraph("Pets Manager", { 
+        Title = "Pets Manager", 
+        Content = "Manage your pets with the options below."
+    })
+
+    Tabs.Pets:CreateToggle("AutoEquipBest", {
+        Title = "Auto Equip Best Pets",
+        Default = false,
+        Description = "Automatically equip the best pets."
+    }):OnChanged(function(state)
+        _G.AutoEquipBest = state
+        if state then
+            task.spawn(AutoEquipBest)
+        end
+    end)
+
+    Tabs.Pets:CreateToggle("AutoSellPets", {
+        Title = "Auto Sell Pets",
+        Default = false,
+        Description = "Automatically sell all pets."
+    }):OnChanged(function(state)
+        _G.AutoSellPets = state
+        if state then
+            task.spawn(AutoSellPets)
+        end
+    end)
+
+    Tabs.Pets:CreateParagraph("Hatch Manager", { 
+        Title = "Hatch Manager", 
+        Content = "Manage your hatching with the options below."
+    })
+
+    Tabs.Pets:CreateDropdown("EggSelect", {
+        Title = "Select Egg",
+        Values = {
+            "Candle Egg", "Autumn Egg", "Developer Egg", "Infinity Egg", "Common Egg", "Spotted Egg", 
+            "Iceshard Egg", "Inferno Egg", "Spikey Egg", "Magma Egg", "Crystal Egg", "Lunar Egg", 
+            "Void Egg", "Hell Egg", "Nightmare Egg", "Rainbow Egg", "Showman Egg", "Mining Egg", 
+            "Cyber Egg", "Neon Egg", "Chance Egg", "Icy Egg", "Vine Egg", "Lava Egg", 
+            "Secret Egg", "Atlantis Egg", "Classic Egg"
+        },
+        Multi = false,
+        Default = 1,
+        Description = "Select the egg you want to hatch."
+    }):OnChanged(function(val)
+        _G.SelectedEgg = val
+    end)
+
+    Tabs.Pets:CreateButton{
+        Title = "Teleport to Selected Egg",
+        Description = "Teleport to the location of the selected egg.",
+        Callback = function()
+            if _G.SelectedEgg ~= "" then
+                TeleportToEgg(_G.SelectedEgg)
+            else
+                Library:Notify{
+                    Title = "Rcash Hub 💸",
+                    Content = "Please select an egg first.",
+                    Duration = 5
+                }
+            end
+        end
+    }
+
+    Tabs.Pets:CreateToggle("AutoHatch", {
+        Title = "Auto Hatch",
+        Default = false,
+        Description = "Automatically hatch the selected egg."
+    }):OnChanged(function(state)
+        _G.AutoHatch = state
+        if state then
+            task.spawn(AutoHatch)
+        end
+    end)
+
+    Tabs.Pets:CreateToggle("Hide Hatch Animation", {
+        Title = "Hide Hatch Animation",
+        Default = false,
+        Description = "Automatically hide the hatch animation."
+    }):OnChanged(function(state)
+        _G.HideHatchAnim = state
+        if state then
+            task.spawn(HideHatchAnim)
+        end
+    end)
+
+    Tabs.Pets:CreateToggle("Spam E Key (For Obby Completion)", {
+        Title = "Spam E Key",
+        Default = false,
+        Description = "Automatically spam the E key."
+    }):OnChanged(function(state)
+        _G.SpamE = state
+        if state then
+            task.spawn(SpamEKey)
+        end
+    end)
+
+-- Shop Tab
+    Tabs.Shop:CreateToggle("AutoBuyAutumnShop", {
+        Title = "Auto Buy Autumn Shop Items",
+        Default = false,
+        Description = "Automatically buy items from the autumn shop."
+    }):OnChanged(function(state)
+        _G.AutoBuyAutumnShop = state
+        if state then
+            task.spawn(AutoBuyAutumnShop)
+        end
+    end)
+
+-- Misc Tab
+    Tabs.Misc:CreateToggle("AutoClaimPTR", {
+        Title = "Auto Claim Playtime Rewards",
+        Default = false,
+        Description = "Automatically claim playtime rewards."
+    }):OnChanged(function(state)
+        _G.AutoClaimPTR = state
+        if state then
+            task.spawn(AutoClaimPTR)
+        end
+    end)
+
+    Tabs.Misc:CreateToggle("AutoMysteryBox", {
+        Title = "Auto Open Mystery Boxes",
+        Default = false,
+        Description = "Automatically open mystery boxes."
+    }):OnChanged(function(state)
+        _G.AutoMysteryBox = state
+        if state then
+            task.spawn(AutoMysteryBox)
+        end
+    end)
+
+    Tabs.Misc:CreateToggle("AutoSeasonEgg", {
+        Title = "Auto Hatch Season Egg",
+        Default = false,
+        Description = "Automatically hatch the season egg."
+    }):OnChanged(function(state)
+        _G.AutoSeasonEgg = state
+        if state then
+            task.spawn(AutoSeasonEgg)
+        end
+    end)
+
+    Tabs.Misc:CreateToggle("AutoSpinAutumnWheel", {
+        Title = "Auto Spin Autumn Wheel",
+        Default = false,
+        Description = "Automatically spin the autumn wheel."
+    }):OnChanged(function(state)
+        _G.AutoSpinAutumnWheel = state
+        if state then
+            task.spawn(SpinAutumnWheel)
+        end
+    end)
+
+-- Console Tab
+    local ConsoleParagraph = Tabs.Console:CreateParagraph("ConsoleOutput", {
+        Title = "Console Output",
+        Content = table.concat(ConsoleOutput, "\n"),
+        TitleAlignment = "Left",
+        ContentAlignment = Enum.TextXAlignment.Left
+    })
+
+    ConsoleUILabel = ConsoleParagraph
+    task.spawn(UpdateConsoleUI)
+
+-- Settings Tab
+    Tabs.Settings:CreateParagraph("SettingsInfo", { 
+        Title = "Settings", 
+        Content = "Manage your settings with the options below."
+    })
+
+    
+
+    
 
 
 
