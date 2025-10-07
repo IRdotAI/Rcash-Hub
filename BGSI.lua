@@ -393,7 +393,6 @@ if game.PlaceId == 85896571713843 then
 
             HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-            -- Using OrionLib/DiscordLib Notification style
             DiscordLib:Notification("Rcash Hub 💸", "Teleported to: " .. EggName, "Success!")
         else
             DiscordLib:Notification("Rcash Hub 💸", "Error: Could not find model for **" .. EggName .. "** in the game.", "Error!")
@@ -401,12 +400,16 @@ if game.PlaceId == 85896571713843 then
     end
 
 
--- UI Construction (DiscordLib Structure: Window -> Tab -> Group -> Component)
+-- UI Construction (Simplified, using the standard pattern for this library)
 
+    -- Define the main channels/tabs directly under the window object
+    local main_channel = win:Channel("Main")
+    local auto_channel = win:Channel("Automation")
+    local event_channel = win:Channel("Events/World")
+    local console_channel = win:Channel("Console")
+    
 -- Main Tab
-    local tab_main = win:Tab("Main")
-
-    local group_info = tab_main:Group("General Information")
+    local group_info = main_channel:Group("General Information")
 
     group_info:Label("By Rdota")
     group_info:Label("Supported Games:\n • Bubble Gum Simulator INFINITY\n • More to come...\n •V1.01")
@@ -458,10 +461,9 @@ if game.PlaceId == 85896571713843 then
     end)
 
 -- Automation Tab
-    local tab_auto = win:Tab("Automation")
     
     -- Auto Hatching Group
-    local group_hatch = tab_auto:Group("Auto Hatching")
+    local group_hatch = auto_channel:Group("Auto Hatching")
 
     group_hatch:Toggle("Auto Hatch", _G.AutoHatch, function(v)
         _G.AutoHatch = v
@@ -487,7 +489,7 @@ if game.PlaceId == 85896571713843 then
     end)
     
     -- Pet Utility Group
-    local group_pets = tab_auto:Group("Pet Utility")
+    local group_pets = auto_channel:Group("Pet Utility")
 
     group_pets:Toggle("Auto Equip Best Pets", _G.AutoEquipBest, function(v)
         _G.AutoEquipBest = v
@@ -504,7 +506,7 @@ if game.PlaceId == 85896571713843 then
     end)
 
     -- Item & Currency Group
-    local group_items = tab_auto:Group("Item/Currency")
+    local group_items = auto_channel:Group("Item/Currency")
 
     group_items:Toggle("Auto Blow Bubbles", _G.AutoBlowBubbles, function(v)
         _G.AutoBlowBubbles = v
@@ -542,9 +544,7 @@ if game.PlaceId == 85896571713843 then
     end)
 
 -- Event/World Tab
-    local tab_event = win:Tab("Events/World")
-
-    local group_event = tab_event:Group("Autumn Event")
+    local group_event = event_channel:Group("Autumn Event")
 
     group_event:Toggle("Auto Spin Autumn Wheel", _G.AutoSpinAutumnWheel, function(v)
         _G.AutoSpinAutumnWheel = v
@@ -560,7 +560,7 @@ if game.PlaceId == 85896571713843 then
         end
     end)
 
-    local group_world = tab_event:Group("World")
+    local group_world = event_channel:Group("World")
 
     group_world:Toggle("Spam 'E' Key", _G.SpamE, function(v)
         _G.SpamE = v
@@ -576,7 +576,7 @@ if game.PlaceId == 85896571713843 then
         end
     end)
 
-    local group_teleport = tab_event:Group("Egg Teleports")
+    local group_teleport = event_channel:Group("Egg Teleports")
 
     -- Teleport buttons using the TeleportToEgg function
     for EggName, _ in pairs(EggModelMap) do
@@ -586,8 +586,7 @@ if game.PlaceId == 85896571713843 then
     end
     
 -- Console Tab (New Feature)
-    local tab_console = win:Tab("Console")
-    local group_log = tab_console:Group("System Log Output")
+    local group_log = console_channel:Group("System Log Output")
 
     -- Create the Label and store its reference for the update loop
     ConsoleUILabel = group_log:Label(table.concat(ConsoleOutput, "\n"))
