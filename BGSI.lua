@@ -1,15 +1,15 @@
 if game.PlaceId == 85896571713843 then
 
---Library
+-- Library Initialization
     local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
 
---Window
+-- Window Creation
     local win = DiscordLib:Window(
         "Rcash Hub",                  -- Window Title
-        "rbxassetid://82088779453504" --13060262582
+        "rbxassetid://82088779453504" -- Window Icon/Logo (Ensure this is a valid, public asset ID)
     )
 
--- Global toggles
+-- Global Toggles
     _G.AutoBlowBubbles = false
     _G.AutoHatch = false
     _G.AutoCS = false
@@ -27,19 +27,15 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSellPets = false
 
 -- Console Logging Feature Start
-
     local MaxConsoleLines = 40 -- Max number of logs to display
     local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V5)"} 
     local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
     local LogService = game:GetService("LogService")
 
-    -- CRITICAL FIX: Removed the messageType argument as some executors/APIs do not pass it, causing an error.
-    -- We will rely on the LogService hook capturing prints and errors, which only pass 'message'.
     local function LogMessage(message)
         local timeStamp = os.date("%H:%M:%S")
-        local prefix = "[INFO]" -- Default prefix, as we can't reliably determine the type
+        local prefix = "[INFO]" 
 
-        -- Use tostring() to safely handle cases where 'message' might be a table or an object
         local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
 
         -- Add the new message to the start of the array
@@ -53,7 +49,6 @@ if game.PlaceId == 85896571713843 then
 
     -- Hook the game's logging service
     LogService.MessageOut:Connect(LogMessage)
-
 
 
     local EggModelMap = {
@@ -389,25 +384,19 @@ if game.PlaceId == 85896571713843 then
 
             HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Teleported to: " .. EggName,
-                Time = 3
-            })
+            -- FIX: Changed to DiscordLib:Notification
+            DiscordLib:Notification("Rcash Hub 💸", "Teleported to: " .. EggName, "Success!")
         else
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
-                Time = 5
-            })
+            -- FIX: Changed to DiscordLib:Notification
+            DiscordLib:Notification("Rcash Hub 💸", "Error: Could not find model for **" .. EggName .. "** in the game.", "Error!")
         end
     end
 
 
--- Main Tab
-    local serv = win:Server("Rcash Hub 💸", "82088779453504")
+-- Main Tab UI Construction (FIXED)
 
-    local main = main:Channel("Main")
+    -- FIX: Use :Tab() on the window object to create the navigation section
+    local main = win:Tab("Main")
 
     main:Label("By Rdota")
     main:Label("Supported Games:\n • Bubble Gum Simulator INFINITY\n • More to come...\n •V1.01")
@@ -458,7 +447,8 @@ if game.PlaceId == 85896571713843 then
         loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/main/main.lua"))()
     end)
     
-
-
-
+    -- Start background loops for console and animation hiding
+    task.spawn(UpdateConsoleUI)
+    task.spawn(HideHatchAnim)
+    
 end
