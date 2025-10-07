@@ -1,6 +1,10 @@
 if game.PlaceId == 8304191830 then
 -- UI Library (Fluent-Renewed)
     local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+    if not Library then
+        warn("Fluent-Renewed Library failed to load. Script execution halted.")
+        return -- Stop the script from running further
+    end
     local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
     local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
@@ -816,7 +820,7 @@ if game.PlaceId == 8304191830 then
         Content = "Manage your settings with the options below."
     })
 
-    
+
 
     
 
