@@ -1,12 +1,13 @@
 if game.PlaceId == 85896571713843 then
 
 --Library
+    -- Using the library specified in the original script: dawid-scripts/UI-Libs
     local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
 
 --Window
     local win = DiscordLib:Window(
         "Rcash Hub",                  -- Window Title
-        "rbxassetid://82088779453504" --13060262582
+        "rbxassetid://82088779453504" 
     )
 
 -- Global toggles
@@ -29,17 +30,14 @@ if game.PlaceId == 85896571713843 then
 -- Console Logging Feature Start
 
     local MaxConsoleLines = 40 -- Max number of logs to display
-    local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V5)"} 
+    local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V1.01)"} 
     local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
     local LogService = game:GetService("LogService")
 
-    -- CRITICAL FIX: Removed the messageType argument as some executors/APIs do not pass it, causing an error.
-    -- We will rely on the LogService hook capturing prints and errors, which only pass 'message'.
     local function LogMessage(message)
         local timeStamp = os.date("%H:%M:%S")
-        local prefix = "[INFO]" -- Default prefix, as we can't reliably determine the type
+        local prefix = "[INFO]" 
 
-        -- Use tostring() to safely handle cases where 'message' might be a table or an object
         local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
 
         -- Add the new message to the start of the array
@@ -53,7 +51,6 @@ if game.PlaceId == 85896571713843 then
 
     -- Hook the game's logging service
     LogService.MessageOut:Connect(LogMessage)
-
 
 
     local EggModelMap = {
@@ -91,10 +88,10 @@ if game.PlaceId == 85896571713843 then
     local function UpdateConsoleUI()
         while true do
             if ConsoleUILabel then
-                -- Concatenate the stored messages with newlines (in reverse order for oldest at bottom)
+                -- Concatenate the stored messages with newlines 
                 local consoleText = table.concat(ConsoleOutput, "\n")
             
-                -- Safely update the content of the Orion Paragraph/Label
+                -- Safely update the content of the Label (using :set() for this library)
                 pcall(function()
                     ConsoleUILabel:set(consoleText)
                 end)
@@ -201,6 +198,13 @@ if game.PlaceId == 85896571713843 then
             end;
         end;
     end;
+
+    function AutoPickupLoop()
+        while _G.AutoPickupAll do
+            CollectPickups()
+            task.wait(0.1)
+        end
+    end
 
     function SpinAutumnWheel()
         while _G.AutoSpinAutumnWheel do
@@ -389,44 +393,39 @@ if game.PlaceId == 85896571713843 then
 
             HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Teleported to: " .. EggName,
-                Time = 3
-            })
+            -- Using OrionLib/DiscordLib Notification style
+            DiscordLib:Notification("Rcash Hub 💸", "Teleported to: " .. EggName, "Success!")
         else
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
-                Time = 5
-            })
+            DiscordLib:Notification("Rcash Hub 💸", "Error: Could not find model for **" .. EggName .. "** in the game.", "Error!")
         end
     end
 
 
+-- UI Construction (DiscordLib Structure: Window -> Tab -> Group -> Component)
+
 -- Main Tab
-    local serv = win:Server("Rcash Hub 💸", "82088779453504")
+    local tab_main = win:Tab("Main")
 
-    local main = main:Channel("Main")
+    local group_info = tab_main:Group("General Information")
 
-    main:Label("By Rdota")
-    main:Label("Supported Games:\n • Bubble Gum Simulator INFINITY\n • More to come...\n •V1.01")
+    group_info:Label("By Rdota")
+    group_info:Label("Supported Games:\n • Bubble Gum Simulator INFINITY\n • More to come...\n •V1.01")
 
-    main:Button("Discord",function()
+    group_info:Button("Discord",function()
         setclipboard("https://discord.gg/JQFrBajQxW")
         DiscordLib:Notification("Rcash Hub 💸", "Discord link copied to clipboard!", "Okay!")
     end)
 
-    main:Button("Patreon",function()
+    group_info:Button("Patreon",function()
         setclipboard("https://www.patreon.com/cw/RdotA")
         DiscordLib:Notification("Rcash Hub 💸", "Patreon link copied to clipboard!", "Okay!")
     end)
 
-    main:Button("Rejoin Server",function()
+    group_info:Button("Rejoin Server",function()
         game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
     end)
 
-    main:Button("Server Hop",function()
+    group_info:Button("Server Hop",function()
         local x = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
         if x and x.data and #x.data > 0 then
             local y = {}
@@ -445,20 +444,171 @@ if game.PlaceId == 85896571713843 then
         end
     end)
 
-    main:Button("Destroy GUI",function()
+    group_info:Button("Destroy GUI",function()
         DiscordLib:Notification("Rcash Hub 💸", "GUI Destroyed. Re-execute script to re-open.", "Okay!")
         DiscordLib:Destroy()
     end)
 
-    main:Button("Reload UI",function()
+    group_info:Button("Reload UI",function()
         if DiscordLib then
             DiscordLib:Destroy()
         end
         DiscordLib:Notification("Rcash Hub 💸", "UI Reloaded.", "Okay!")
         loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/main/main.lua"))()
     end)
-    
 
+-- Automation Tab
+    local tab_auto = win:Tab("Automation")
+    
+    -- Auto Hatching Group
+    local group_hatch = tab_auto:Group("Auto Hatching")
+
+    group_hatch:Toggle("Auto Hatch", _G.AutoHatch, function(v)
+        _G.AutoHatch = v
+        if v then
+            task.spawn(AutoHatch)
+        end
+    end)
+
+    group_hatch:Dropdown("Select Egg", EggModelMap, _G.SelectedEgg, function(v)
+        _G.SelectedEgg = v
+        DiscordLib:Notification("Rcash Hub 💸", "Selected Egg: " .. v, "Info!")
+    end)
+    
+    group_hatch:Toggle("Hide Hatch Animation", _G.HideHatchAnim, function(v)
+        _G.HideHatchAnim = v
+    end)
+    
+    group_hatch:Toggle("Auto Season Egg", _G.AutoSeasonEgg, function(v)
+        _G.AutoSeasonEgg = v
+        if v then
+            task.spawn(AutoSeasonEgg)
+        end
+    end)
+    
+    -- Pet Utility Group
+    local group_pets = tab_auto:Group("Pet Utility")
+
+    group_pets:Toggle("Auto Equip Best Pets", _G.AutoEquipBest, function(v)
+        _G.AutoEquipBest = v
+        if v then
+            task.spawn(AutoEquipBest)
+        end
+    end)
+
+    group_pets:Toggle("Auto Sell Pets", _G.AutoSellPets, function(v)
+        _G.AutoSellPets = v
+        if v then
+            task.spawn(AutoSellPets)
+        end
+    end)
+
+    -- Item & Currency Group
+    local group_items = tab_auto:Group("Item/Currency")
+
+    group_items:Toggle("Auto Blow Bubbles", _G.AutoBlowBubbles, function(v)
+        _G.AutoBlowBubbles = v
+        if v then
+            task.spawn(AutoBlowBubbles)
+        end
+    end)
+
+    group_items:Toggle("Auto Pickup All", _G.AutoPickupAll, function(v)
+        _G.AutoPickupAll = v
+        if v then
+            task.spawn(AutoPickupLoop)
+        end
+    end)
+
+    group_items:Toggle("Auto Claim Playtime Rewards", _G.AutoClaimPTR, function(v)
+        _G.AutoClaimPTR = v
+        if v then
+            task.spawn(AutoClaimPTR)
+        end
+    end)
+
+    group_items:Toggle("Auto Claim Season Rewards", _G.AutoCS, function(v)
+        _G.AutoCS = v
+        if v then
+            task.spawn(AutoCS)
+        end
+    end)
+
+    group_items:Toggle("Auto Use Mystery Box (25x)", _G.AutoMysteryBox, function(v)
+        _G.AutoMysteryBox = v
+        if v then
+            task.spawn(AutoMysteryBox)
+        end
+    end)
+
+-- Event/World Tab
+    local tab_event = win:Tab("Events/World")
+
+    local group_event = tab_event:Group("Autumn Event")
+
+    group_event:Toggle("Auto Spin Autumn Wheel", _G.AutoSpinAutumnWheel, function(v)
+        _G.AutoSpinAutumnWheel = v
+        if v then
+            task.spawn(SpinAutumnWheel)
+        end
+    end)
+
+    group_event:Toggle("Auto Buy Autumn Shop Items", _G.AutoBuyAutumnShop, function(v)
+        _G.AutoBuyAutumnShop = v
+        if v then
+            task.spawn(AutoBuyAutumnShop)
+        end
+    end)
+
+    local group_world = tab_event:Group("World")
+
+    group_world:Toggle("Spam 'E' Key", _G.SpamE, function(v)
+        _G.SpamE = v
+        if v then
+            task.spawn(SpamEKey)
+        end
+    end)
+
+    group_world:Toggle("Auto Obby Cycle", _G.AutoObby, function(v)
+        _G.AutoObby = v
+        if v then
+            task.spawn(AutoObbyCycle)
+        end
+    end)
+
+    local group_teleport = tab_event:Group("Egg Teleports")
+
+    -- Teleport buttons using the TeleportToEgg function
+    for EggName, _ in pairs(EggModelMap) do
+        group_teleport:Button("TP to "..EggName, function()
+            TeleportToEgg(EggName)
+        end)
+    end
+    
+-- Console Tab (New Feature)
+    local tab_console = win:Tab("Console")
+    local group_log = tab_console:Group("System Log Output")
+
+    -- Create the Label and store its reference for the update loop
+    ConsoleUILabel = group_log:Label(table.concat(ConsoleOutput, "\n"))
+
+
+-- Start background loops 
+task.spawn(UpdateConsoleUI)
+task.spawn(HideHatchAnim)
+task.spawn(AutoPickupLoop)
+task.spawn(AutoHatch)
+task.spawn(AutoBlowBubbles)
+task.spawn(AutoCS)
+task.spawn(AutoClaimPTR)
+task.spawn(AutoMysteryBox)
+task.spawn(AutoSeasonEgg)
+task.spawn(SpamEKey)
+task.spawn(SpinAutumnWheel)
+task.spawn(AutoBuyAutumnShop)
+task.spawn(AutoObbyCycle)
+task.spawn(AutoEquipBest)
+task.spawn(AutoSellPets)
 
 
 end
