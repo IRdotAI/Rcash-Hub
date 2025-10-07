@@ -1,266 +1,510 @@
-repeat wait() until game:IsLoaded()
+if game.PlaceId == 8304191830 then
+-- UI Library (Fluent-Renewed)
+    local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+    local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+    local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
---// Services
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- Window
+    local Window = Library:CreateWindow{
+        Title = "Rcash Hub 💸 | BGSI",
+        SubTitle = "By RdotA",
+        TabWidth = 160,
+        Size = UDim2.fromOffset(830, 525),
+        Resize = true,
+        MinSize = Vector2.new(470, 380),
+        Acrylic = true,
+        Theme = "Dark",
+        MinimizeKey = Enum.KeyCode.RightControl
+    }
 
---// Constants
--- Shared
-local Shared = ReplicatedStorage.Shared
-local SData = Shared.Data
-local Framework = Shared.Framework
-local Utils = Shared.Utils
+-- Loaded Notification
+    Library:Notify{
+        Title = "Rcash Hub 💸",
+        Content = "Loaded successfully!",
+        Duration = 5
+    }
 
--- Client
-local Client = ReplicatedStorage.Client
-local Tutorial = require(Client.Tutorial)
+-- Global toggles
+    _G.AutoBlowBubbles = false
+    _G.AutoHatch = false
+    _G.AutoCS = false
+    _G.SelectedEgg = ""
+    _G.AutoClaimPTR = false
+    _G.AutoMysteryBox = false
+    _G.AutoSeasonEgg = false
+    _G.HideHatchAnim = false
+    _G.SpamE = false
+    _G.AutoPickupAll = false
+    _G.AutoSpinAutumnWheel = false
+    _G.AutoBuyAutumnShop = false
+    _G.AutoObby = false
+    _G.AutoEquipBest = false
+    _G.AutoSellPets = false
 
---// Utils
-local StatsUtil = require(Utils.Stats.StatsUtil)
 
---// Data
-local localData = require(Client.Framework.Services.LocalData)
-local Data = localData:Get()
+-- Console Logging Feature Start
 
---// Handlers
-local EventHandler = Framework.Network.Remote.RemoteEvent
-local FunctionHandler = Framework.Network.Remote.RemoteFunction
+    local MaxConsoleLines = 40 -- Max number of logs to display
+    local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V5)"} 
+    local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
+    local LogService = game:GetService("LogService")
 
---// UI Library (Fluent-Renewed)
-local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
-local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
-local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+    -- CRITICAL FIX: Removed the messageType argument as some executors/APIs do not pass it, causing an error.
+    -- We will rely on the LogService hook capturing prints and errors, which only pass 'message'.
+    local function LogMessage(message)
+        local timeStamp = os.date("%H:%M:%S")
+        local prefix = "[INFO]" -- Default prefix, as we can't reliably determine the type
 
-local Window = Library:CreateWindow{
-    Title = "Flame | BGSI",
-    SubTitle = "by flame",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Resize = true,
-    MinSize = Vector2.new(470, 380),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.RightControl
-}
+        -- Use tostring() to safely handle cases where 'message' might be a table or an object
+        local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
 
-local Tabs = {
-    Bubbles = Window:CreateTab{ Title = "Bubbles", Icon = "shell" },
-    Automation = Window:CreateTab{ Title = "Automation", Icon = "workflow" },
-    Teleport = Window:CreateTab{ Title = "Teleportation", Icon = "move" },
-    Pets = Window:CreateTab{ Title = "Pets", Icon = "paw-print" }
-}
+        -- Add the new message to the start of the array
+        table.insert(ConsoleOutput, 1, formattedMessage)
 
-local Options = Library.Options
-
---// Bubbles Tab
-Tabs.Bubbles:CreateParagraph("BubblesInfo", { Title = "Bubbles", Content = "Bubble-related automation." })
-local autoSellPer = 50
-local autoBlowValue = false
-local autoSellValue = false
-
-Tabs.Bubbles:CreateToggle("AutoBlowBubbles", {
-    Title = "Auto Blow Bubbles",
-    Default = false
-}):OnChanged(function(state)
-    autoBlowValue = state
-end)
-
-Tabs.Bubbles:CreateToggle("AutoSellBubbles", {
-    Title = "Auto Sell Bubbles",
-    Default = false
-}):OnChanged(function(state)
-    autoSellValue = state
-end)
-
-Tabs.Bubbles:CreateSlider("AutoSellPercentage", {
-    Title = "Sell when reached % of storage",
-    Default = 50,
-    Min = 1,
-    Max = 100,
-    Rounding = 0
-}):OnChanged(function(value)
-    autoSellPer = value
-end)
-
---// Automation Tab
-Tabs.Automation:CreateParagraph("AutomationInfo", { Title = "Automation", Content = "Automate coins, areas, and prizes." })
-local autoCollectCoinsValue = false
-Tabs.Automation:CreateToggle("AutoCollectCoins", {
-    Title = "Auto Collect Coins",
-    Default = false
-}):OnChanged(function(state)
-    autoCollectCoinsValue = state
-    if autoCollectCoinsValue then
-        for i,v in pairs(Tutorial._activePickups) do
-            v:Destroy()
-            Tutorial._activePickups[tostring(i)] = nil
-            game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(i)
+        -- Keep the array trimmed to the maximum line count
+        while #ConsoleOutput > MaxConsoleLines do
+            table.remove(ConsoleOutput, #ConsoleOutput)
         end
     end
-end)
 
-Tabs.Automation:CreateButton{
-    Title = "Unlock all areas",
-    Description = "Unlocks all areas automatically",
-    Callback = function()
-        for i,v in pairs(workspace.Worlds["The Overworld"].Islands:GetChildren()) do
-            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Island.UnlockHitbox, 0)
+    -- Hook the game's logging service
+    LogService.MessageOut:Connect(LogMessage)
+
+
+
+    local EggModelMap = {
+        ["Candle Egg"] = "Candle Egg",
+        ["Autumn Egg"] = "Autumn Egg",
+        ["Developer Egg"] = "Rcash_DevEgg_Marker",
+        ["Infinity Egg"] = "Infinity Egg", 
+        ["Common Egg"] = "Common Egg", 
+        ["Spotted Egg"] = "Spotted Egg", 
+        ["Iceshard Egg"] = "Iceshard Egg", 
+        ["Inferno Egg"] = "Inferno Egg", 
+        ["Spikey Egg"] = "Spikey Egg", 
+        ["Magma Egg"] = "Magma Egg", 
+        ["Crystal Egg"] = "Crystal Egg", 
+        ["Lunar Egg"] = "Lunar Egg", 
+        ["Void Egg"] = "Void Egg", 
+        ["Hell Egg"] = "Hell Egg", 
+        ["Nightmare Egg"] = "Nightmare Egg", 
+        ["Rainbow Egg"] = "Rainbow Egg", 
+        ["Showman Egg"] = "Showman Egg", 
+        ["Mining Egg"] = "Mining Egg", 
+        ["Cyber Egg"] = "Cyber Egg", 
+        ["Neon Egg"] = "Neon Egg", 
+        ["Chance Egg"] = "Chance Egg", 
+        ["Icy Egg"] = "Icy Egg", 
+        ["Vine Egg"] = "Vine Egg", 
+        ["Lava Egg"] = "Lava Egg", 
+        ["Secret Egg"] = "Secret Egg", 
+        ["Atlantis Egg"] = "Atlantis Egg", 
+        ["Classic Egg"] = "Classic Egg"
+    }
+
+-- Functions
+
+    local function UpdateConsoleUI()
+        while true do
+            if ConsoleUILabel then
+                -- Concatenate the stored messages with newlines (in reverse order for oldest at bottom)
+                local consoleText = table.concat(ConsoleOutput, "\n")
+            
+                -- Safely update the content of the Orion Paragraph/Label
+                pcall(function()
+                    ConsoleUILabel:set(consoleText)
+                end)
+            end
+            task.wait(0.1) -- Update every 0.1 seconds for real-time viewing
+        end
+    end
+
+    function AutoBlowBubbles()
+        while _G.AutoBlowBubbles do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("BlowBubble")
+            task.wait(0.3)
+        end
+    end
+
+    function AutoHatch()
+        while _G.AutoHatch do
+            if _G.SelectedEgg ~= "" then
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,15)
+            end
+            task.wait(0.3)
+        end
+    end
+
+    function AutoCS()
+        while _G.AutoCS do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimSeason")
             task.wait(0.1)
-            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Island.UnlockHitbox, 1)
-            task.wait(10)
         end
     end
-}
 
-local autoclaimplaytimeval = false
-local autoclaimchestsval = false
-local autoClaimRiftGiftval = false
-Tabs.Automation:CreateToggle("AutoClaimPlaytime", {
-    Title = "Auto Claim Playtime",
-    Default = false
-}):OnChanged(function(state)
-    autoclaimplaytimeval = state
-end)
-Tabs.Automation:CreateToggle("AutoClaimChests", {
-    Title = "Auto Claim Chests",
-    Default = false
-}):OnChanged(function(state)
-    autoclaimchestsval = state
-end)
-Tabs.Automation:CreateToggle("AutoClaimRiftGifts", {
-    Title = "Auto Claim Rift Gifts",
-    Default = false
-}):OnChanged(function(state)
-    autoClaimRiftGiftval = state
-end)
-
---// Teleportation Tab
-local selectedArea = "The Overworld"
-Tabs.Teleport:CreateButton{
-    Title = "Teleport",
-    Description = "Teleport to the selected area",
-    Callback = function()
-        if selectedArea == "The Overworld" then
-            EventHandler:FireServer("Teleport", "Workspace.Worlds.The Overworld.PortalSpawn")
-        else
-            EventHandler:FireServer("Teleport", "Workspace.Worlds.The Overworld.Islands."..selectedArea..".Island.Portal.Spawn")
+    function AutoClaimPTR()
+        while _G.AutoClaimPTR do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAllPlaytime")
+            task.wait(30) 
         end
     end
-}
-Tabs.Teleport:CreateDropdown("AreaSelect", {
-    Title = "Select area",
-    Values = {"The Overworld", "Floating Island", "Outer Space", "Twilight", "The Void", "Zen"},
-    Multi = false,
-    Default = 1
-}):OnChanged(function(val)
-    selectedArea = val
-end)
 
---// Pet Tab
-Tabs.Pets:CreateParagraph("PetsInfo", { Title = "Pets", Content = "Pet hatching and gifts automation." })
-local autoHatchValue = false
-local selectedEgg = ""
-local eggs = {}
-for eggName, _ in pairs(require(SData.Eggs)) do
-    table.insert(eggs, eggName)
-end
-Tabs.Pets:CreateDropdown("EggSelect", {
-    Title = "Select Egg",
-    Values = eggs,
-    Multi = false,
-    Default = 1
-}):OnChanged(function(val)
-    selectedEgg = val
-end)
-Tabs.Pets:CreateToggle("AutoHatch", {
-    Title = "Auto Hatch",
-    Default = false
-}):OnChanged(function(state)
-    autoHatchValue = state
-end)
-local autoGiftValue = false
-Tabs.Pets:CreateToggle("AutoGift", {
-    Title = "Auto Open Mystery Boxes",
-    Default = false
-}):OnChanged(function(state)
-    autoGiftValue = state
-end)
-
---// Event Handlers
-coroutine.wrap(function()
-    while wait(.5) do
-        if autoBlowValue == true then
-            EventHandler:FireServer("BlowBubble")
-        end
-        if autoSellValue == true and (autoSellPer/100)*StatsUtil:GetBubbleStorage(Data) <= Data.Bubble.Amount then
-            EventHandler:FireServer("SellBubble")
+    function AutoMysteryBox()
+        while _G.AutoMysteryBox do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("UseGift","Mystery Box",25)
+            task.wait(0.3)
         end
     end
-end)()
 
-workspace.Rendered:GetChildren()[14].ChildAdded:Connect(function(coin)
-    if autoCollectCoinsValue == true then
-        coin:Destroy()
-        Tutorial._activePickups[tostring(coin.Name)] = nil
-        game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(coin.Name)
-    end
-end)
-
-coroutine.wrap(function()
-    while wait(0.1) do
-        if autoclaimplaytimeval == true then
-            local count = 1
-            for i,v in pairs(Data.PlaytimeRewards.Claimed) do
-                count+=1
-            end
-            FunctionHandler:InvokeServer("ClaimPlaytime", count)
-        end
-        if autoclaimchestsval == true then
-            for i,v in pairs(require(SData.Chests)) do
-                EventHandler:FireServer("ClaimChest", i)
-            end
+    function AutoSeasonEgg()
+        while _G.AutoSeasonEgg do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("HatchPowerupEgg","Season 8 Egg",1)
+            task.wait(0.1)
         end
     end
-end)()
 
-EventHandler.OnClientEvent:Connect(function(eventName, gifts)
-    if eventName == "RenderGifts" and autoClaimRiftGiftval then
-        for giftId, giftData in pairs(gifts) do
-            task.delay(0.1, function()
-                EventHandler:FireServer("ClaimRiftGift", giftId)
-            end)
+    function AutoEquipBest()
+        while _G.AutoEquipBest do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("EquipBestPets")
+            task.wait(5) 
         end
     end
-end)
 
-coroutine.wrap(function()
-    while wait(0.1) do
-        if autoHatchValue and selectedEgg ~= "" then
-            EventHandler:FireServer("HatchEgg", selectedEgg, 1)
-        end
-    end
-end)()
+    function HideHatchAnim()
+        local player = game.Players.LocalPlayer
+        local PlayerGui = player:WaitForChild("PlayerGui")
+        
+        PlayerGui.ChildAdded:Connect(function(child)
 
-coroutine.wrap(function()
-    while wait(0.1) do
-        if autoGiftValue then
-            local giftAmount = require(Utils.Stats.ItemUtil):GetOwnedAmount(Data, {
-                Type = "Powerup",
-                Name = "Mystery Box"
-            })
-            local amountToOpen = 1
-            if giftAmount >= 10 then
-                amountToOpen = 10
-            elseif giftAmount >= 5 then
-                amountToOpen = 5
-            end
-            if giftAmount > 0 then
-                EventHandler:FireServer("UseGift", "Mystery Box", amountToOpen)
-                wait(0.5)
-                for i = 1, 8 do
-                    mouse1click()
-                    task.wait(0.5)
+            if _G.HideHatchAnim and child.Name:lower():match("hatch") then
+                
+                if child.Name == "Hatching" or child.Name:lower():match("hatch") then
+                    task.wait(0.01)
+                    child:Destroy()
+                    print("[PETS] Successfully destroyed hatch animation GUI: " .. child.Name)
                 end
             end
+        end)
+    end
+
+    function SpamEKey()
+        local VirtualInputManager = game:GetService("VirtualInputManager")
+        while _G.SpamE do
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+            task.wait(0.001) 
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+            task.wait(0.001)
         end
     end
-end)()
+
+
+    for i, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
+        v:Disable();
+    end;
+
+    local function CollectPickups()
+        for i, v in next, game:GetService("Workspace").Rendered:GetChildren() do
+            if v.Name == "Chunker" then
+                for i2, v2 in next, v:GetChildren() do
+                    local Part, HasMeshPart = v2:FindFirstChild("Part"), v2:FindFirstChildWhichIsA("MeshPart");
+                    local HasStars = Part and Part:FindFirstChild("Stars");
+                    local HasPartMesh = Part and Part:FindFirstChild("Mesh");
+                    if HasMeshPart or HasStars or HasPartMesh then
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(v2.Name);
+                        v2:Destroy();
+                    end;
+                end;
+            end;
+        end;
+    end;
+
+    function SpinAutumnWheel()
+        while _G.AutoSpinAutumnWheel do
+            pcall(function()
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteFunction:InvokeServer("AutumnWheelSpin")
+            end)
+            pcall(function()
+                game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("ClaimAutumnWheelSpinQueue")
+            end)
+            task.wait(0.3)
+        end
+    end
+
+    function AutoBuyAutumnShop()
+        while _G.AutoBuyAutumnShop do
+            local Remote = game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent
+            pcall(function()
+                Remote:FireServer("BuyShopItem", "autumnnorm-shop", 1, true)
+                Remote:FireServer("BuyShopItem", "autumnnorm-shop", 2, true)
+                Remote:FireServer("BuyShopItem", "autumnnorm-shop", 3, true)
+            end)
+            task.wait(1) 
+        end
+    end
+
+
+    local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
+    local TELEPORT_DELAY = 2.5
+
+
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Workspace = game:GetService("Workspace")
+    local LocalPlayer = Players.LocalPlayer
+
+    local LocalData = require(ReplicatedStorage.Client.Framework.Services.LocalData)
+    local RemoteEvent = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent
+    local ObbysFolder = Workspace.Obbys
+    local ObbyTeleports = Workspace.Worlds["Seven Seas"].Areas["Classic Island"].Obbys
+
+    local function teleportTo(target)
+        local character = LocalPlayer.Character
+        if not character or not target then return end
+        local targetCFrame
+        if typeof(target) == "CFrame" then
+            targetCFrame = target
+        elseif target:IsA("BasePart") then
+            targetCFrame = target.CFrame
+        elseif target:IsA("Model") then
+            targetCFrame = target:GetPivot()
+        end
+        if targetCFrame then
+            character:PivotTo(targetCFrame * CFrame.new(0, 3, 0))
+        end
+    end
+
+    local function runObbyCycle(difficulty)
+        print("Starting obby: " .. difficulty)
+        local teleportPart = ObbyTeleports:FindFirstChild(difficulty) 
+            and ObbyTeleports[difficulty]:FindFirstChild("Portal") 
+            and ObbyTeleports[difficulty].Portal:FindFirstChild("Part")
+        local completePart = ObbysFolder:FindFirstChild(difficulty) and ObbysFolder[difficulty]:FindFirstChild("Complete")
+        if not teleportPart or not completePart then
+            return
+        end
+        teleportTo(teleportPart)
+        task.wait(0.5)
+        RemoteEvent:FireServer("StartObby", difficulty)
+        task.wait(TELEPORT_DELAY)
+        teleportTo(completePart)
+        task.wait(0.5)
+        RemoteEvent:FireServer("CompleteObby")
+        task.wait(0.5)
+        RemoteEvent:FireServer("ClaimObbyChest")
+        task.wait(2)
+    end
+
+    function AutoObbyCycle()
+        task.spawn(function()
+            while _G.AutoObby do
+                local character = LocalPlayer.Character
+                local playerData = LocalData:Get()
+                if not character or not character.PrimaryPart or not playerData or not playerData.ObbyCooldowns then
+                    task.wait(1)
+                    continue
+                end
+                local initialPosition = character.PrimaryPart.CFrame
+                local completedAnObbyInCycle = false
+                for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
+                    local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
+                    if os.time() >= cooldownEndTime then
+                        runObbyCycle(difficulty)
+                        completedAnObbyInCycle = true
+                        task.wait(3)
+                        playerData = LocalData:Get()
+                        if not playerData or not playerData.ObbyCooldowns then break end
+                    end
+                end
+                if completedAnObbyInCycle then
+                    teleportTo(initialPosition)
+                end
+                playerData = LocalData:Get()
+                if not playerData or not playerData.ObbyCooldowns then
+                    task.wait(1)
+                    continue
+                end
+                local nextAvailableTime = math.huge
+                for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
+                    local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
+                    if cooldownEndTime > os.time() and cooldownEndTime < nextAvailableTime then
+                        nextAvailableTime = cooldownEndTime
+                    end
+                end
+                if nextAvailableTime ~= math.huge then
+                    local timeToWait = nextAvailableTime - os.time()
+                    if timeToWait > 0 then
+                        print("All obbies are on cooldown. Next check in " .. timeToWait .. " seconds.")
+                        task.wait(timeToWait)
+                    end
+                end
+            end
+        end)
+    end
+
+    function AutoSellPets() 
+        while _G.AutoSellPets do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("SellPets")
+            task.wait(5)
+        end
+    end
+
+    function TeleportToEgg(EggName)
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character or Player.CharacterAdded:Wait()
+        local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
+        local Workspace = game:GetService("Workspace")
+
+        if not HRP then return end
+
+        local TargetModelName = EggModelMap[EggName] or EggName
+        local EggModel = nil
+    
+        if TargetModelName == "Rcash_DevEgg_Marker" then
+            local foundEgg = nil
+            local closestDistance = math.huge
+        
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if obj:IsA("Model") or obj:IsA("BasePart") then
+                    if string.find(obj.Name:lower(), "dev", 1, true) or string.find(obj.Name:lower(), "egg", 1, true) then
+                        local eggPosition = obj:IsA("Model") and obj:GetPivot().p or obj.Position
+                        local distance = (eggPosition - HRP.Position).Magnitude
+                    
+                        if distance < closestDistance and distance < 1000 then
+                            closestDistance = distance
+                            foundEgg = obj
+                        end
+                    end
+                end
+            end
+        
+            EggModel = foundEgg
+        
+        else
+        
+            -- 1. PRIORITY SEARCH 1: Check the Rendered.Generic path (For Event Eggs)
+            local GenericFolder = Workspace:FindFirstChild("Rendered") and Workspace.Rendered:FindFirstChild("Generic")
+            if GenericFolder then
+                EggModel = GenericFolder:FindFirstChild(TargetModelName) 
+            end
+        
+            -- 2. FALLBACK SEARCH: Search the entire workspace recursively (For World Eggs)
+            if not EggModel then
+                EggModel = Workspace:FindFirstChild(TargetModelName, true) 
+            end
+        end
+
+
+        if EggModel and (EggModel:IsA("Model") or EggModel:IsA("BasePart")) then
+            local EggCFrame
+            if EggModel:IsA("Model") then
+                local PrimaryPart = EggModel.PrimaryPart or EggModel:FindFirstChildOfClass("BasePart") 
+                EggCFrame = PrimaryPart and PrimaryPart.CFrame or EggModel:GetPivot()
+            else
+                EggCFrame = EggModel.CFrame
+            end
+
+            HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
+        
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Teleported to: " .. EggName,
+                Time = 3
+            })
+        else
+            OrionLib:MakeNotification({
+                Name = "Rcash Hub 💸",
+                Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
+                Time = 5
+            })
+        end
+    end
+
+
+-- Tabs
+    local Tabs = {
+        Main = Window:CreateTab{
+            Title = "Main",
+            Icon = "user"
+        },
+
+        Farming = Window:CreateTab{
+            Title = "Farming",
+            Icon = "leaf"
+        },
+
+        Pets = Window:CreateTab{
+            Title = "Pets",
+            Icon = "paw-print"
+        },
+
+        Shop = Window:CreateTab{
+            Title = "Shop",
+            Icon = "store"
+        },
+        Misc = Window:CreateTab{
+            Title = "Misc",
+            Icon = "plus"
+        }
+
+        Console = Window:CreateTab{
+            Title = "Console",
+            Icon = "terminal"
+        }
+
+        Settings = Window:CreateTab{
+            Title = "Settings",
+            Icon = "cog"
+        }
+    },
+
+--Main Tab
+Tabs.Main:CreateParagraph("Aligned Paragraph", {
+    Title = "Rcash Hub 💸 | BGSI",
+    Content = "Supported Games:\n • Bubble Gum Simulator INFINITY\n",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Center
+})
+
+
+
+
+
+
+
+
+
+-- Save Manager
+    SaveManager:SetLibrary(Library)
+    InterfaceManager:SetLibrary(Library)
+
+    SaveManager:IgnoreThemeSettings()
+
+    SaveManager:SetIgnoreIndexes{}
+
+    InterfaceManager:SetFolder("RcashHub")
+    SaveManager:SetFolder("RcashHub/BGSI")
+
+    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+    SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+    Window:SelectTab(1)
+
+    Library:Notify{
+    Title = "Rcash Hub 💸",
+        Content = "The script has been loaded.",
+        Duration = 8
+    }
+
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config
+-- which has been marked to be one that auto loads!
+    SaveManager:LoadAutoloadConfig()
+    
+
+
+
+
+
+
+
+end
