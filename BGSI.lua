@@ -405,28 +405,28 @@ if game.PlaceId == 85896571713843 then
 
 
 -- Main Tab
-    local Rcash = win:Server("Rcash Hub 💸", "82088779453504")
+    local serv = win:Server("Rcash Hub 💸", "82088779453504")
 
     local main = main:Channel("Main")
 
-    label = main:Label("By Rdota")
-    label = main:Label("Supported Games:\n • Bubble Gum Simulator INFINITY\n • More to come...\n •V1.01")
+    main:Label("By Rdota")
+    main:Label("Supported Games:\n • Bubble Gum Simulator INFINITY\n • More to come...\n •V1.01")
 
-    Button = main:Button("Discord",function()
+    main:Button("Discord",function()
         setclipboard("https://discord.gg/JQFrBajQxW")
         DiscordLib:Notification("Rcash Hub 💸", "Discord link copied to clipboard!", "Okay!")
     end)
 
-    Button = main:Button("Patreon",function()
+    main:Button("Patreon",function()
         setclipboard("https://www.patreon.com/cw/RdotA")
         DiscordLib:Notification("Rcash Hub 💸", "Patreon link copied to clipboard!", "Okay!")
     end)
 
-    Button = main:Button("Rejoin Server",function()
+    main:Button("Rejoin Server",function()
         game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
     end)
 
-    Button = main:Button("Server Hop",function()
+    main:Button("Server Hop",function()
         local x = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
         if x and x.data and #x.data > 0 then
             local y = {}
@@ -445,12 +445,12 @@ if game.PlaceId == 85896571713843 then
         end
     end)
 
-    Button = main:Button("Destroy GUI",function()
+    main:Button("Destroy GUI",function()
         DiscordLib:Notification("Rcash Hub 💸", "GUI Destroyed. Re-execute script to re-open.", "Okay!")
         DiscordLib:Destroy()
     end)
 
-    Button = main:Button("Reload UI",function()
+    main:Button("Reload UI",function()
         if DiscordLib then
             DiscordLib:Destroy()
         end
