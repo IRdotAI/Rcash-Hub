@@ -1,4 +1,4 @@
-      local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
+local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
 
     game:GetService("StarterGui"):SetCore("SendNotification",{
 	    Title = "Rcash Hub 💸", -- Obbligatorio
@@ -657,5 +657,6 @@ win:Server("Main", "http://www.roblox.com/asset/?id=13060262582")
 
 -- Start the Hide Hatch listener
     task.spawn(HideHatchAnim) 
+
 
 
