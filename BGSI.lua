@@ -292,99 +292,116 @@ end;
 
     -- Obby Functions (Requires LocalData and Obby paths, simplified calls)
     
-    local ENABLED = true
-    local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
-    local TELEPORT_DELAY = 2.5
+        local DIFFICULTIES_TO_CYCLE = { "Easy", "Medium", "Hard" }
+        local TELEPORT_DELAY = 2.5
 
-    if not ENABLED then return end
+        -- Obby Services/References (These lines were missing from your script)
+        local LocalData = require(ReplicatedStorage.Client.Framework.Services.LocalData)
+        local ObbysFolder = Workspace:WaitForChild("Obbys")
+        local ObbyTeleports = Workspace:WaitForChild("Worlds"):WaitForChild("Seven Seas"):WaitForChild("Areas"):WaitForChild("Classic Island"):WaitForChild("Obbys")
 
-    local Players = game:GetService("Players")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Workspace = game:GetService("Workspace")
-    local LocalPlayer = Players.LocalPlayer
 
-    local LocalData = require(ReplicatedStorage.Client.Framework.Services.LocalData)
-    local RemoteEvent = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent
-    local ObbysFolder = Workspace.Obbys
-    local ObbyTeleports = Workspace.Worlds["Seven Seas"].Areas["Classic Island"].Obbys
-
-    local function teleportTo(target)
-    local character = LocalPlayer.Character
-    if not character or not target then return end
-    local targetCFrame
-    if typeof(target) == "CFrame" then
-        targetCFrame = target
-    elseif target:IsA("BasePart") then
-        targetCFrame = target.CFrame
-    elseif target:IsA("Model") then
-        targetCFrame = target:GetPivot()
-    end
-    if targetCFrame then
-        character:PivotTo(targetCFrame * CFrame.new(0, 3, 0))
-    end
-end
-
-    local function runObbyCycle(difficulty)
-        print("Starting obby: " .. difficulty)
-        local teleportPart = ObbyTeleports:FindFirstChild(difficulty) 
-            and ObbyTeleports[difficulty]:FindFirstChild("Portal") 
-            and ObbyTeleports[difficulty].Portal:FindFirstChild("Part")
-        local completePart = ObbysFolder:FindFirstChild(difficulty) and ObbysFolder[difficulty]:FindFirstChild("Complete")
-        if not teleportPart or not completePart then
-            return
-        end
-        teleportTo(teleportPart)
-        task.wait(0.5)
-        RemoteEvent:FireServer("StartObby", difficulty)
-        task.wait(TELEPORT_DELAY)
-        teleportTo(completePart)
-        task.wait(0.5)
-        RemoteEvent:FireServer("CompleteObby")
-        task.wait(0.5)
-        RemoteEvent:FireServer("ClaimObbyChest")
-        task.wait(2)
-    end
-
-    task.spawn(function()
-        while task.wait(1) do
+        -- Obby Utility Function (This function was missing from your script)
+        local function teleportTo(target)
             local character = LocalPlayer.Character
-            local playerData = LocalData:Get()
-            if not character or not character.PrimaryPart or not playerData or not playerData.ObbyCooldowns then
-                continue
+            if not character or not target then return end
+            local targetCFrame
+            if typeof(target) == "CFrame" then
+                targetCFrame = target
+            elseif target:IsA("BasePart") then
+                targetCFrame = target.CFrame
+            elseif target:IsA("Model") then
+                targetCFrame = target:GetPivot()
             end
-            local initialPosition = character.PrimaryPart.CFrame
-            local completedAnObbyInCycle = false
-            for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
-                local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
-                if os.time() >= cooldownEndTime then
-                    runObbyCycle(difficulty)
-                    completedAnObbyInCycle = true
-                    task.wait(3)
-                    playerData = LocalData:Get()
-                    if not playerData or not playerData.ObbyCooldowns then break end
+            if targetCFrame then
+                -- Use PivotTo for models or CFrame for parts (PivotTo is generally safer for characters)
+                character:PivotTo(targetCFrame * CFrame.new(0, 3, 0)) 
+            end
+        end
+
+        -- Obby Core Logic Function (This is your original logic)
+        local function runObbyCycle(difficulty)
+            print("Starting obby: " .. difficulty)
+            local teleportPart = ObbyTeleports:FindFirstChild(difficulty) 
+                and ObbyTeleports[difficulty]:FindFirstChild("Portal") 
+                and ObbyTeleports[difficulty].Portal:FindFirstChild("Part")
+            local completePart = ObbysFolder:FindFirstChild(difficulty) and ObbysFolder[difficulty]:FindFirstChild("Complete")
+            if not teleportPart or not completePart then
+                return
+            end
+            
+            -- 1. Teleport to Start
+            teleportTo(teleportPart)
+            task.wait(0.5)
+            
+            -- 2. Start Obby on Server
+            RemoteEvent:FireServer("StartObby", difficulty)
+            task.wait(TELEPORT_DELAY)
+            
+            -- 3. Teleport to Complete
+            teleportTo(completePart)
+            task.wait(0.5)
+            
+            -- 4. Complete Obby and Claim Chest
+            RemoteEvent:FireServer("CompleteObby")
+            task.wait(0.5)
+            RemoteEvent:FireServer("ClaimObbyChest")
+            task.wait(2)
+        end
+
+        -- Toggled Obby Loop Function (The primary loop)
+        function AutoObbyLoop()
+            while _G.AutoObby do
+                local character = LocalPlayer.Character
+                local playerData = LocalData:Get()
+
+                if not character or not character.PrimaryPart or not playerData or not playerData.ObbyCooldowns then
+                    task.wait(1)
+                    continue
                 end
-            end
-            if completedAnObbyInCycle then
-                teleportTo(initialPosition)
-            end
-            playerData = LocalData:Get()
-            if not playerData or not playerData.ObbyCooldowns then continue end
-            local nextAvailableTime = math.huge
-            for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
-                local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
-                if cooldownEndTime > os.time() and cooldownEndTime < nextAvailableTime then
-                    nextAvailableTime = cooldownEndTime
+
+                local initialPosition = character.PrimaryPart.CFrame
+                local completedAnObbyInCycle = false
+
+                for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
+                    local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
+                    
+                    if os.time() >= cooldownEndTime then
+                        runObbyCycle(difficulty)
+                        completedAnObbyInCycle = true
+                        task.wait(3)
+                        -- Re-fetch data after a cycle
+                        playerData = LocalData:Get() 
+                        if not playerData or not playerData.ObbyCooldowns then break end
+                    end
                 end
-            end
-            if nextAvailableTime ~= math.huge then
-                local timeToWait = nextAvailableTime - os.time()
-                if timeToWait > 0 then
-                    print("All obbies are on cooldown. Next check in " .. timeToWait .. " seconds.")
-                    task.wait(timeToWait)
+
+                if completedAnObbyInCycle then
+                    -- Teleport back to original position
+                    teleportTo(initialPosition) 
+                end
+
+                -- Cooldown Management
+                local nextAvailableTime = math.huge
+                for _, difficulty in ipairs(DIFFICULTIES_TO_CYCLE) do
+                    local cooldownEndTime = playerData.ObbyCooldowns[difficulty] or 0
+                    if cooldownEndTime > os.time() and cooldownEndTime < nextAvailableTime then
+                        nextAvailableTime = cooldownEndTime
+                    end
+                end
+
+                if nextAvailableTime ~= math.huge then
+                    local timeToWait = nextAvailableTime - os.time()
+                    if timeToWait > 0 then
+                        print("All obbies are on cooldown. Next check in " .. timeToWait .. " seconds.")
+                        task.wait(timeToWait)
+                    end
+                else
+                    -- If something went wrong finding cooldowns, wait a standard interval
+                    task.wait(5)
                 end
             end
         end
-    end)
 
 -- DiscordLib UI Setup
 
@@ -453,7 +470,9 @@ end
 
     FarmingServer:Channel("Auto Obby"):Toggle("Auto Complete Obbies", false, function(Value)
         _G.AutoObby = Value
-        if Value then task.spawn(AutoObbyLoop) end
+        if Value then 
+            task.spawn(AutoObbyLoop)
+        end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
