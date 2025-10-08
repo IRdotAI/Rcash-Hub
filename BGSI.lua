@@ -23,43 +23,59 @@ if game.PlaceId == 85896571713843 then
     _G.AutoCollectFreeGifts = false
     _G.AutoOpenDailyRewards = false
     _G.AutoSpinAutumnWheel = false
+    _G.AutoEquipBest = false -- Added missing toggle
+    _G.AutoSellPets = false   -- Added missing toggle
 
     local EggModelMap = {
-    -- Event Eggs (Often in Workspace.Rendered.Generic or World-specific)
-    ["Candle Egg"] = "Candle Egg",
-    ["Autumn Egg"] = "Autumn Egg",
-    ["Developer Egg"] = "Rcash_DevEgg_Marker", -- Triggers the special closest-object search
-    ["Infinity Egg"] = "Infinity Egg", 
+        -- Event Eggs (Often in Workspace.Rendered.Generic or World-specific)
+        ["Candle Egg"] = "Candle Egg",
+        ["Autumn Egg"] = "Autumn Egg",
+        ["Developer Egg"] = "Rcash_DevEgg_Marker", -- Triggers the special closest-object search
+        ["Infinity Egg"] = "Infinity Egg", 
+        
+        -- World 1 Eggs
+        ["Common Egg"] = "Common Egg", 
+        ["Spotted Egg"] = "Spotted Egg", 
+        ["Iceshard Egg"] = "Iceshard Egg", 
+        ["Inferno Egg"] = "Inferno Egg", 
+        ["Spikey Egg"] = "Spikey Egg", 
+        ["Magma Egg"] = "Magma Egg", 
+        ["Crystal Egg"] = "Crystal Egg", 
+        ["Lunar Egg"] = "Lunar Egg", 
+        ["Void Egg"] = "Void Egg", 
+        ["Hell Egg"] = "Hell Egg", 
+        ["Nightmare Egg"] = "Nightmare Egg", 
+        ["Rainbow Egg"] = "Rainbow Egg", 
+        
+        -- World 2 Eggs
+        ["Showman Egg"] = "Showman Egg", 
+        ["Mining Egg"] = "Mining Egg", 
+        ["Cyber Egg"] = "Cyber Egg", 
+        ["Neon Egg"] = "Neon Egg", 
+        ["Chance Egg"] = "Chance Egg", 
+        
+        -- World 3 Eggs
+        ["Icy Egg"] = "Icy Egg", 
+        ["Vine Egg"] = "Vine Egg", 
+        ["Lava Egg"] = "Lava Egg", 
+        ["Secret Egg"] = "Secret Egg", 
+        ["Atlantis Egg"] = "Atlantis Egg", 
+        ["Classic Egg"] = "Classic Egg"
+    }
+
+-- List for the dropdown menu
+    local AllEggs = {}
+    for _, eggName in pairs(EggModelMap) do
+        table.insert(AllEggs, eggName)
+    end
+    -- NOTE: DiscordLib's dropdown uses the list of names for options. 
+    -- The TeleportToEgg function should rely on EggModelMap lookup.
     
-    -- World 1 Eggs
-    ["Common Egg"] = "Common Egg", 
-    ["Spotted Egg"] = "Spotted Egg", 
-    ["Iceshard Egg"] = "Iceshard Egg", 
-    ["Inferno Egg"] = "Inferno Egg", 
-    ["Spikey Egg"] = "Spikey Egg", 
-    ["Magma Egg"] = "Magma Egg", 
-    ["Crystal Egg"] = "Crystal Egg", 
-    ["Lunar Egg"] = "Lunar Egg", 
-    ["Void Egg"] = "Void Egg", 
-    ["Hell Egg"] = "Hell Egg", 
-    ["Nightmare Egg"] = "Nightmare Egg", 
-    ["Rainbow Egg"] = "Rainbow Egg", 
-    
-    -- World 2 Eggs
-    ["Showman Egg"] = "Showman Egg", 
-    ["Mining Egg"] = "Mining Egg", 
-    ["Cyber Egg"] = "Cyber Egg", 
-    ["Neon Egg"] = "Neon Egg", 
-    ["Chance Egg"] = "Chance Egg", 
-    
-    -- World 3 Eggs
-    ["Icy Egg"] = "Icy Egg", 
-    ["Vine Egg"] = "Vine Egg", 
-    ["Lava Egg"] = "Lava Egg", 
-    ["Secret Egg"] = "Secret Egg", 
-    ["Atlantis Egg"] = "Atlantis Egg", 
-    ["Classic Egg"] = "Classic Egg"
-}
+    local EggDisplayNames = {}
+    for displayName in pairs(EggModelMap) do
+        table.insert(EggDisplayNames, displayName)
+    end
+
 
 -- Get Services
 
@@ -117,6 +133,13 @@ if game.PlaceId == 85896571713843 then
         while _G.AutoEquipBest do
             game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("EquipBestPets")
             task.wait(5) 
+        end
+    end
+
+    function AutoSellPets() 
+        while _G.AutoSellPets do
+            game:GetService("ReplicatedStorage").Shared.Framework.Network.Remote.RemoteEvent:FireServer("SellPets")
+            task.wait(5)
         end
     end
 
@@ -355,17 +378,15 @@ if game.PlaceId == 85896571713843 then
 
             HRP.CFrame = EggCFrame * CFrame.new(5, 3, 0) 
         
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Teleported to: " .. EggName,
-                Time = 3
+            -- Replaced OrionLib Notification with StarterGui Notification
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Rcash Hub 💸",
+                Text = "Teleported to: " .. EggName,
+                Duration = 3
             })
         else
-            OrionLib:MakeNotification({
-                Name = "Rcash Hub 💸",
-                Content = "Error: Could not find model for **" .. EggName .. "** in the game.",
-                Time = 5
-            })
+            -- Replaced OrionLib Notification with DiscordLib Notification
+            DiscordLib:Notification("Rcash Hub 💸", "Error: Could not find model for " .. EggName, "Okay!")
         end
     end
 
