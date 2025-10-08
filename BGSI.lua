@@ -310,6 +310,19 @@ if game.PlaceId == 85896571713843 then
         DiscordLib:Notification("Rcash Hub 💸", "GUI destroyed. All toggles stopped.", "Okay!")
         win:Destroy()
     end)
+    
+    -- New Support Channel
+    local SupportChannel = MainServer:Channel("Support and Help")
+    SupportChannel:Label("Links for support and community.")
+    SupportChannel:Seperator()
+    SupportChannel:Button("Join Discord", function()
+        setclipboard("https://discord.gg/JQFrBajQxW")
+        DiscordLib:Notification("Rcash Hub 💸", "Discord link copied to clipboard!", "Okay!")
+    end)
+    SupportChannel:Button("Support on Patreon", function()
+        setclipboard("https://patreon.com/RdotA?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink")
+        DiscordLib:Notification("Rcash Hub 💸", "Patreon link copied to clipboard!", "Okay!")
+    end)
 
 
 -- Pets Server
