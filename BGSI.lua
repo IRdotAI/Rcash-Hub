@@ -29,6 +29,9 @@ if game.PlaceId == 85896571713843 then
     _G.AutoSellPets = false
     _G.AutoObby = false
     _G.AutoClaimAutumnSpin = false
+    _G.AutoGoldenOrb = false
+    _G.AutoUseGift = false
+    _G.SelectedGift = ""
 
 
 -- Data Tables
@@ -68,6 +71,26 @@ if game.PlaceId == 85896571713843 then
     end
 
 
+    
+    local GiftDisplayNames = {
+        "Classic Crate",
+        "Fall Mystery Box",
+        "Festival Mystery Box",
+        "Galaxy Crate",
+        "Golden Box",
+        "Golden Crate",
+        "Light Box",
+        "Mystery Box",
+        "Shadow Mystery Box",
+        "Steel Crate",
+        "Wooden Crate"
+    }
+
+-- Get Services
+    local Players = game:GetService("Players")
+    -- ...
+
+
 -- Get Services
     local Players = game:GetService("Players")
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -87,7 +110,7 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-        function AutoHatch()
+    function AutoHatch()
         while _G.AutoHatch do
             if _G.SelectedEgg ~= "" then
                 -- FIX 1: Teleporting inside the loop for reliability.
@@ -151,7 +174,7 @@ if game.PlaceId == 85896571713843 then
     
     function AutoPickupLoop()
         while true do
-            if _G.AutoPickupAll then
+            if _G.AutoCollectPickups then
                 pcall(CollectPickups)
             end
             task.wait(0.5)
@@ -406,9 +429,34 @@ if game.PlaceId == 85896571713843 then
             end
         end
 
+        function AutoGoldenOrb()
+            while _G.AutoGoldenOrb do
+                RemoteEvent:FireServer("UseGoldenOrb")
+                task.wait(0.1)
+            end
+        end
+        
+        function AutoUseGift()
+        local VirtualInputManager = game:GetService("VirtualInputManager") 
+
+        while _G.AutoUseGift do
+            if _G.SelectedGift ~= "" then
+                RemoteEvent:FireServer("UseGift", _G.SelectedGift, 1)
+                
+                task.wait(0.02) 
+                
+                VirtualInputManager:SendEvent(Enum.UserInputType.MouseButton1, Enum.UserInputState.Begin, nil, game)
+                task.wait(0.01)
+                VirtualInputManager:SendEvent(Enum.UserInputType.MouseButton1, Enum.UserInputState.End, nil, game)
+                
+                task.wait(0.2) 
+            end
+        end
+    end
+
 -- DiscordLib UI Setup
 
-    local win = DiscordLib:Window("Rcash Hub 💸 | BGSI")
+    local win = DiscordLib:Window("Rcash Hub 💸 | " .. game.Name)
 
 -- Main Server
     local MainServer = win:Server("Main", "")
@@ -592,6 +640,11 @@ if game.PlaceId == 85896571713843 then
     AutomationChannel:Toggle("Auto Hatch Season Egg", false, function(Value)
         _G.AutoSeasonEgg = Value
         if Value then task.spawn(AutoSeasonEgg) end
+    end)
+
+    AutomationChannel:Toggle("Auto Use Golden Orb", false, function(Value)
+        _G.AutoGoldenOrb = Value
+        if Value then task.spawn(AutoGoldenOrb) end
     end)
 
 -- Current Events Server
