@@ -18,7 +18,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoClaimPTR = false;
     _G.AutoMysteryBox = false;
     _G.AutoSeasonEgg = false;
-    _G.HideHatchAnim = false;;;
+    _G.HideHatchAnim = false;
     _G.SpamE = false
     _G.AutoCollectPickups = false;
     _G.AutoCollectFreeGifts = false;
