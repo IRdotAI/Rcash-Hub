@@ -419,46 +419,40 @@ if game.PlaceId == 85896571713843 then
 -- Misc Server
     local MiscServer = win:Server("Misc", "")
 
-    local rwrd = server:Channel("Rewards")
-
-    local auto = server:Channel("Automation")
-
-    rwrd:Toggle("Auto Claim Play Time Rewards", false, function(Value)
+    MiscServer:Channel("Rewards"):Toggle("Auto Claim Playtime Rewards", false, function(Value)
         _G.AutoClaimPTR = Value
         if Value then task.spawn(AutoClaimPTR) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Play Time Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Playtime Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    rwrd:Toggle("Auto Claim Season Rewards", false, function(Value)
-        _G.AutoCS = Value
-        if Value then task.spawn(AutoCS) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Season Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-
-    Auto:Toggle("Auto Open Mystery Box", false, function(Value)
+    MiscServer:Channel("Rewards"):Toggle("Auto Open Mystery Boxes", false, function(Value)
         _G.AutoMysteryBox = Value
         if Value then task.spawn(AutoMysteryBox) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Open Mystery Box: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Open Mystery Boxes: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    Auto:Toggle("Auto Hatch Season Egg", false, function(Value)
+    MiscServer:Channel("Automation"):Toggle("Auto Hatch Season Egg", false, function(Value)
         _G.AutoSeasonEgg = Value
         if Value then task.spawn(AutoSeasonEgg) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Hatch Season Egg: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
+    MiscServer:Channel("Automation"):Toggle("Auto Claim Current Season Rewards", false, function(Value)
+        _G.AutoCS = Value
+        if Value then task.spawn(AutoCS) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Current Season Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
 --Event Server
-    local evt = win:Server("Current Event", "")
+    local EventServer = win:Server("Current Event", "")
 
-    local autumn = evt:Channel("Autumn Event")
-
-    autumn:Toggle("Auto Spin Autumn Wheel", false, function(Value)
+    EventServer:Channel("Autumn Event"):Toggle("Auto Spin Autumn Wheel", false, function(Value)
         _G.AutoSpinAutumnWheel = Value
         if Value then task.spawn(SpinAutumnWheel) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Spin Autumn Wheel: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    autumn:Toggle("Auto Buy Autumn Shop Items", false, function(Value)
+    EventServer:Channel("Autumn Event"):Toggle("Auto Buy Autumn Shop Items", false, function(Value)
         _G.AutoBuyAutumnShop = Value
         if Value then task.spawn(AutoBuyAutumnShop) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Buy Autumn Shop Items: " .. (Value and "Enabled" or "Disabled"), "Okay!")
