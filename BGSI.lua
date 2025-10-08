@@ -11,23 +11,23 @@ if game.PlaceId == 85896571713843 then
     })
 
 -- Global Toggles
-    _G.AutoBlowBubbles = false
-    _G.AutoHatch = false
-    _G.AutoCS = false
+    _G.AutoBlowBubbles = false;
+    _G.AutoHatch = false;
+    _G.AutoCS = false;
     _G.SelectedEgg = ""
-    _G.AutoClaimPTR = false
-    _G.AutoMysteryBox = false
-    _G.AutoSeasonEgg = false
-    _G.HideHatchAnim = false
+    _G.AutoClaimPTR = false;
+    _G.AutoMysteryBox = false;
+    _G.AutoSeasonEgg = false;
+    _G.HideHatchAnim = false;;;
     _G.SpamE = false
-    _G.AutoPickupAll = false
-    _G.AutoCollectFreeGifts = false
-    _G.AutoOpenDailyRewards = false
-    _G.AutoSpinAutumnWheel = false
-    _G.AutoBuyAutumnShop = false
-    _G.AutoEquipBest = false
-    _G.AutoSellPets = false
-    _G.AutoObby = false
+    _G.AutoCollectPickups = false;
+    _G.AutoCollectFreeGifts = false;
+    _G.AutoOpenDailyRewards = false;
+    _G.AutoSpinAutumnWheel = false;
+    _G.AutoBuyAutumnShop = false;
+    _G.AutoEquipBest = false;
+    _G.AutoSellPets = false;
+    _G.AutoObby = false;
 
 
 -- Data Tables
@@ -118,22 +118,32 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function CollectPickups()
-        -- Collects items (coins, bubbles, etc.) in chunks
-        for i, v in next, Workspace.Rendered:GetChildren() do
+    local function CollectPickups()
+        for i, v in next, game:GetService("Workspace").Rendered:GetChildren() do
             if v.Name == "Chunker" then
                 for i2, v2 in next, v:GetChildren() do
                     local Part, HasMeshPart = v2:FindFirstChild("Part"), v2:FindFirstChildWhichIsA("MeshPart");
                     local HasStars = Part and Part:FindFirstChild("Stars");
                     local HasPartMesh = Part and Part:FindFirstChild("Mesh");
                     if HasMeshPart or HasStars or HasPartMesh then
-                        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(v2.Name);
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(v2.Name);
                         v2:Destroy();
                     end;
                 end;
             end;
         end;
-    end
+    end;
+
+local function TweenTo(Position, Speed)
+    local CFrameValue = Instance.new("CFrameValue");
+
+    CFrameValue.Value = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+    CFrameValue:GetPropertyChangedSignal("Value"):Connect(function()
+        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrameValue.Value;
+    end);
+
+    game:GetService("TweenService"):Create(CFrameValue, TweenInfo.new(Speed, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Value = Position}):Play();
+end;
     
     function AutoPickupLoop()
         -- Continuous loop to collect pickups
@@ -390,9 +400,17 @@ if game.PlaceId == 85896571713843 then
     end)
     
     AutoFarmingChannel:Toggle("Auto Collect Pickups (Item Magnet)", false, function(Value)
-        _G.AutoPickupAll = Value
         DiscordLib:Notification("Rcash Hub 💸", "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
+        _G.AutoCollectPickups = Value;
+        task.spawn(function()
+            while _G.AutoCollectPickups do
+                CollectPickups();
+                task.wait(1);
+            end;
+        end);
+    end;)
+        
+    
 
     FarmingServer:Channel("Auto Obby"):Toggle("Auto Complete Obbies", false, function(Value)
         _G.AutoObby = Value
