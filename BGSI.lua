@@ -1,9 +1,9 @@
 if game.PlaceId == 85896571713843 then
     
-    -- Load the Discord Library
+-- Load the Discord Library
     local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
 
-    -- Initial load notification
+-- Initial load notification
     game:GetService("StarterGui"):SetCore("SendNotification",{
 	    Title = "Rcash Hub 💸",
 	    Text = "Script Successfully loaded and initialized.",
@@ -90,9 +90,12 @@ if game.PlaceId == 85896571713843 then
     function AutoHatch()
         while _G.AutoHatch do
             if _G.SelectedEgg ~= "" then
+                -- CRITICAL FIX: Ensure the player is at the egg before trying to hatch
+                TeleportToEgg(_G.SelectedEgg) 
+
                 RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,15) -- Hatch 15 at a time
             end
-            task.wait(0.3)
+            task.wait(0.3) -- Short delay between attempts
         end
     end
 
@@ -135,16 +138,16 @@ if game.PlaceId == 85896571713843 then
         end;
     end;
 
-local function TweenTo(Position, Speed)
-    local CFrameValue = Instance.new("CFrameValue");
+    local function TweenTo(Position, Speed)
+        local CFrameValue = Instance.new("CFrameValue");
 
-    CFrameValue.Value = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
-    CFrameValue:GetPropertyChangedSignal("Value"):Connect(function()
-        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrameValue.Value;
-    end);
+        CFrameValue.Value = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+        CFrameValue:GetPropertyChangedSignal("Value"):Connect(function()
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrameValue.Value;
+        end);
 
-    game:GetService("TweenService"):Create(CFrameValue, TweenInfo.new(Speed, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Value = Position}):Play();
-end;
+        game:GetService("TweenService"):Create(CFrameValue, TweenInfo.new(Speed, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Value = Position}):Play();
+    end;
     
     function AutoPickupLoop()
         while true do
@@ -421,15 +424,48 @@ end;
         game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
     end)
     
-    ServerChannel:Button("Destroy GUI", function()
-        -- Stop all global toggles (CRITICAL for safe destruction)
-        for name, value in pairs(_G) do
-            if type(value) == "boolean" and name:find("Auto") then
-                _G[name] = false
+    ServerChannel:Button("Server Hop", function()
+        local Servers = {}
+        local PlaceID = game.PlaceId
+        local AllIDs = {}
+        local foundAnything = ""
+        local actualHour = os.date("!*t").hour
+        local Deleted = false
+     
+        function TPReturner()
+            local Site;
+            if foundAnything == "" then
+                Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+            else
+                Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+            end
+            local ID = ""
+            if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+                foundAnything = Site.nextPageCursor
+            end
+            local num = 0;
+            for i,v in pairs(Site.data) do
+                if v.playing ~= v.maxPlayers then
+                    if v.id ~= game.JobId then
+                        table.insert(Servers, v.id)
+                    end
+                end
             end
         end
-        DiscordLib:Notification("Rcash Hub 💸", "GUI destroyed. All toggles stopped.", "Okay!")
-        win:Destroy()
+     
+        function Teleport()
+            if #Servers > 0 then
+                game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, Servers[math.random(1, #Servers)], LocalPlayer)
+            else
+                TPReturner()
+                wait(1)
+                Teleport()
+            end
+        end
+     
+        TPReturner()
+        wait(1)
+        Teleport()
     end)
     
     -- New Support Channel
@@ -452,11 +488,9 @@ end;
     AutoFarmingChannel:Toggle("Auto Blow Bubbles", false, function(Value)
         _G.AutoBlowBubbles = Value
         if Value then task.spawn(AutoBlowBubbles) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Blow Bubbles: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
     
     AutoFarmingChannel:Toggle("Auto Collect Pickups (Item Magnet)", false, function(Value)
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"), "Okay!")
         _G.AutoCollectPickups = Value;
         task.spawn(function()
             while _G.AutoCollectPickups do
@@ -473,7 +507,6 @@ end;
         if Value then 
             task.spawn(AutoObbyLoop)
         end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
 -- Pets Server
@@ -484,37 +517,42 @@ end;
     ManagementChannel:Toggle("Auto Equip Best Pets", false, function(Value)
         _G.AutoEquipBest = Value
         if Value then task.spawn(AutoEquipBest) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Equip Best Pets: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
     
     ManagementChannel:Toggle("Auto Sell Unused Pets", false, function(Value)
         _G.AutoSellPets = Value
         if Value then task.spawn(AutoSellPets) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Sell Pets: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
+
+    --Hathcing Channel
 
     local HatchingChannel = PetsServer:Channel("Hatching")
     
     HatchingChannel:Label("Select egg to teleport/hatch.")
     
-    -- Dropdown linked to the TeleportToEgg function and _G.SelectedEgg
-    HatchingChannel:Dropdown("Select Egg to Teleport/Hatch", EggDisplayNames, function(Value)
+    HatchingChannel:SearchableDropdown("Select Egg to Teleport/Hatch", EggDisplayNames, function(Value)
         _G.SelectedEgg = Value
         TeleportToEgg(Value)
     end)
 
+    HatchingChannel:Button("Teleport to Selected Egg", function()
+        if _G.SelectedEgg ~= "" then
+            TeleportToEgg(_G.SelectedEgg)
+        else
+            DiscordLib:Notification("Rcash Hub 💸", "Please select an egg first.", "Error!")
+        end
+    end)
 
     HatchingChannel:Toggle("Auto Hatch Egg", false, function(Value)
         _G.AutoHatch = Value
         
         if Value then
             if _G.SelectedEgg ~= "" then
-                TeleportToEgg(_G.SelectedEgg) -- Teleport before starting hatch loop
+                TeleportToEgg(_G.SelectedEgg)
             end
             task.spawn(AutoHatch) 
         end
         
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Hatch: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     HatchingChannel:Toggle("Spam E Key (For Obbies/UI)", false, function(Value)
@@ -522,12 +560,10 @@ end;
         if Value then
             task.spawn(SpamEKey)
         end
-        DiscordLib:Notification("Rcash Hub 💸", "Spam E: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     HatchingChannel:Toggle("Hide Hatch Animation", false, function(Value)
         _G.HideHatchAnim = Value
-        DiscordLib:Notification("Rcash Hub 💸", "Hide Hatch Animation: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
 
@@ -539,19 +575,16 @@ end;
     AutumnEventChannel:Toggle("Auto Spin Autumn Wheel", false, function(Value)
         _G.AutoSpinAutumnWheel = Value
         if Value then task.spawn(SpinAutumnWheel) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Spin Autumn Wheel: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     AutumnEventChannel:Toggle("Auto Claim Autumn Free Spin", false, function(Value)
         _G.AutoClaimAutumnSpin = Value
         if Value then task.spawn(AutoClaimAutumnSpin) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Autumn Free Spin: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
         _G.AutoBuyAutumnShop = Value
         if Value then task.spawn(AutoBuyAutumnShop) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Buy Autumn Shop: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
 -- Misc Server
@@ -562,13 +595,11 @@ end;
     RewardsChannel:Toggle("Auto Claim Play Time Rewards", false, function(Value)
         _G.AutoClaimPTR = Value
         if Value then task.spawn(AutoClaimPTR) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Play Time Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     RewardsChannel:Toggle("Auto Claim Season Rewards", false, function(Value)
         _G.AutoCS = Value
         if Value then task.spawn(AutoCS) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Season: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     -- AUTOMATION Channel 
@@ -576,13 +607,11 @@ end;
     AutomationChannel:Toggle("Auto Open Mystery Box", false, function(Value)
         _G.AutoMysteryBox = Value
         if Value then task.spawn(AutoMysteryBox) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Open Mystery Box: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     AutomationChannel:Toggle("Auto Hatch Season Egg", false, function(Value)
         _G.AutoSeasonEgg = Value
         if Value then task.spawn(AutoSeasonEgg) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Hatch Season Egg: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
 -- Startup Logic
