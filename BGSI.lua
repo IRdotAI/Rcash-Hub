@@ -387,10 +387,27 @@ if game.PlaceId == 85896571713843 then
         DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
+-- Current Events Server
+    local EventsServer = win:Server("Current Events", "")
+
+    -- AUTUMN EVENT Channel (MOVED)
+    local AutumnEventChannel = EventsServer:Channel("Autumn Event")
+    AutumnEventChannel:Toggle("Auto Spin Autumn Wheel", false, function(Value)
+        _G.AutoSpinAutumnWheel = Value
+        if Value then task.spawn(SpinAutumnWheel) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Spin Autumn Wheel: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
+    AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
+        _G.AutoBuyAutumnShop = Value
+        if Value then task.spawn(AutoBuyAutumnShop) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Buy Autumn Shop: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
 -- Misc Server
     local MiscServer = win:Server("Misc", "")
 
-    -- REWARDS Channel (Fixed to be declared once)
+    -- REWARDS Channel 
     local RewardsChannel = MiscServer:Channel("Rewards")
     RewardsChannel:Toggle("Auto Claim Play Time Rewards", false, function(Value)
         _G.AutoClaimPTR = Value
@@ -404,7 +421,7 @@ if game.PlaceId == 85896571713843 then
         DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Season: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    -- AUTOMATION Channel (Fixed to be declared once)
+    -- AUTOMATION Channel 
     local AutomationChannel = MiscServer:Channel("Automation")
     AutomationChannel:Toggle("Auto Open Mystery Box", false, function(Value)
         _G.AutoMysteryBox = Value
@@ -416,20 +433,6 @@ if game.PlaceId == 85896571713843 then
         _G.AutoSeasonEgg = Value
         if Value then task.spawn(AutoSeasonEgg) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Hatch Season Egg: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-
-    -- AUTUMN EVENT Channel (Fixed to be declared once)
-    local AutumnEventChannel = MiscServer:Channel("Autumn Event")
-    AutumnEventChannel:Toggle("Auto Spin Autumn Wheel", false, function(Value)
-        _G.AutoSpinAutumnWheel = Value
-        if Value then task.spawn(SpinAutumnWheel) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Spin Autumn Wheel: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-
-    AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
-        _G.AutoBuyAutumnShop = Value
-        if Value then task.spawn(AutoBuyAutumnShop) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Buy Autumn Shop: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
 -- Startup Logic
