@@ -529,7 +529,7 @@ if game.PlaceId == 85896571713843 then
     local HatchingChannel = PetsServer:Channel("Hatching")
     
     -- Added Searchable Dropdown
-    HatchingChannel:SearchableDropdown("Select Egg to Teleport/Hatch", EggDisplayNames, function(Value)
+    HatchingChannel:Dropdown("Select Egg to Teleport/Hatch", EggDisplayNames, function(Value)
         _G.SelectedEgg = Value
         TeleportToEgg(Value)
     end)
