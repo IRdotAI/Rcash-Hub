@@ -28,6 +28,7 @@ if game.PlaceId == 85896571713843 then
     _G.AutoEquipBest = false
     _G.AutoSellPets = false
     _G.AutoObby = false
+    _G.AutoClaimAutumnSpin = false
 
 
 -- Data Tables
@@ -270,6 +271,15 @@ end;
         end
     end
 
+    function AutoClaimAutumnSpin()
+        while _G.AutoClaimAutumnSpin do
+            pcall(function()
+                RemoteEvent:FireServer("ClaimAutumnFreeWheelSpin")
+            end)
+            task.wait(30) 
+        end
+    end
+
     function AutoBuyAutumnShop()
         while _G.AutoBuyAutumnShop do
             pcall(function()
@@ -334,6 +344,34 @@ end;
         DiscordLib:Notification("Rcash Hub 💸", "Patreon link copied to clipboard!", "Okay!")
     end)
 
+-- Farming Server
+    local FarmingServer = win:Server("Farming", "")
+    
+    local AutoFarmingChannel = FarmingServer:Channel("Auto Farming")
+    AutoFarmingChannel:Toggle("Auto Blow Bubbles", false, function(Value)
+        _G.AutoBlowBubbles = Value
+        if Value then task.spawn(AutoBlowBubbles) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Blow Bubbles: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+    
+    AutoFarmingChannel:Toggle("Auto Collect Pickups (Item Magnet)", false, function(Value)
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+        _G.AutoCollectPickups = Value;
+        task.spawn(function()
+            while _G.AutoCollectPickups do
+                CollectPickups();
+                task.wait(1);
+            end;
+        end);
+    end;)
+        
+    
+
+    FarmingServer:Channel("Auto Obby"):Toggle("Auto Complete Obbies", false, function(Value)
+        _G.AutoObby = Value
+        if Value then task.spawn(AutoObbyLoop) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
 
 -- Pets Server
     local PetsServer = win:Server("Pets", "")
@@ -389,34 +427,6 @@ end;
         DiscordLib:Notification("Rcash Hub 💸", "Hide Hatch Animation: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
--- Farming Server
-    local FarmingServer = win:Server("Farming", "")
-    
-    local AutoFarmingChannel = FarmingServer:Channel("Auto Farming")
-    AutoFarmingChannel:Toggle("Auto Blow Bubbles", false, function(Value)
-        _G.AutoBlowBubbles = Value
-        if Value then task.spawn(AutoBlowBubbles) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Blow Bubbles: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-    
-    AutoFarmingChannel:Toggle("Auto Collect Pickups (Item Magnet)", false, function(Value)
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-        _G.AutoCollectPickups = Value;
-        task.spawn(function()
-            while _G.AutoCollectPickups do
-                CollectPickups();
-                task.wait(1);
-            end;
-        end);
-    end;)
-        
-    
-
-    FarmingServer:Channel("Auto Obby"):Toggle("Auto Complete Obbies", false, function(Value)
-        _G.AutoObby = Value
-        if Value then task.spawn(AutoObbyLoop) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
 
 -- Current Events Server
     local EventsServer = win:Server("Current Events", "")
@@ -427,6 +437,12 @@ end;
         _G.AutoSpinAutumnWheel = Value
         if Value then task.spawn(SpinAutumnWheel) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Spin Autumn Wheel: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
+    AutumnEventChannel:Toggle("Auto Claim Autumn Free Spin", false, function(Value)
+        _G.AutoClaimAutumnSpin = Value
+        if Value then task.spawn(AutoClaimAutumnSpin) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Autumn Free Spin: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
     AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
