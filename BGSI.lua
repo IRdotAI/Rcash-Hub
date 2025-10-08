@@ -1,30 +1,15 @@
 if game.PlaceId == 85896571713843 then
--- UI Library (Fluent-Renewed)
-    local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-    local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/dawid-scripts/Fluent/refs/heads/master/Addons/SaveManager.lua"))()
-    local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/dawid-scripts/Fluent/refs/heads/master/Addons/InterfaceManager.lua"))()
+    
+    local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
 
--- Window
-    local Window = Library:CreateWindow{
-        Title = "Rcash Hub 💸 | BGSI",
-        SubTitle = "By RdotA",
-        TabWidth = 160,
-        Size = UDim2.fromOffset(830, 525),
-        Resize = true,
-        MinSize = Vector2.new(470, 380),
-        Acrylic = true,
-        Theme = "Dark",
-        MinimizeKey = Enum.KeyCode.RightControl
-    }
+    game:GetService("StarterGui"):SetCore("SendNotification",{
+	    Title = "Rcash Hub 💸", -- Obbligatorio
+	    Text = "Script Successfully loaded", -- Obbligatorio
+	    Icon = "rbxassetid://82088779453504" -- Facoltativo
+    })
 
--- Loaded Notification
-    Library:Notify{
-        Title = "Rcash Hub 💸",
-        Content = "Loaded successfully!",
-        Duration = 5
-    }
+-- Global Toggles
 
--- Global toggles
     _G.AutoBlowBubbles = false
     _G.AutoHatch = false
     _G.AutoCS = false
@@ -35,89 +20,54 @@ if game.PlaceId == 85896571713843 then
     _G.HideHatchAnim = false
     _G.SpamE = false
     _G.AutoPickupAll = false
+    _G.AutoCollectFreeGifts = false
+    _G.AutoOpenDailyRewards = false
     _G.AutoSpinAutumnWheel = false
-    _G.AutoBuyAutumnShop = false
-    _G.AutoObby = false
-    _G.AutoEquipBest = false
-    _G.AutoSellPets = false
-
-
--- Console Logging Feature Start
-
-    local MaxConsoleLines = 40 -- Max number of logs to display
-    local ConsoleOutput = {"[SYSTEM] Console UI initialised. (V5)"} 
-    local ConsoleUILabel = nil -- Will hold the reference to the GUI element for updating
-    local LogService = game:GetService("LogService")
-
-    -- CRITICAL FIX: Removed the messageType argument as some executors/APIs do not pass it, causing an error.
-    -- We will rely on the LogService hook capturing prints and errors, which only pass 'message'.
-    local function LogMessage(message)
-        local timeStamp = os.date("%H:%M:%S")
-        local prefix = "[INFO]" -- Default prefix, as we can't reliably determine the type
-
-        -- Use tostring() to safely handle cases where 'message' might be a table or an object
-        local formattedMessage = string.format("[%s] %s %s", timeStamp, prefix, tostring(message))
-
-        -- Add the new message to the start of the array
-        table.insert(ConsoleOutput, 1, formattedMessage)
-
-        -- Keep the array trimmed to the maximum line count
-        while #ConsoleOutput > MaxConsoleLines do
-            table.remove(ConsoleOutput, #ConsoleOutput)
-        end
-    end
-
-    -- Hook the game's logging service
-    LogService.MessageOut:Connect(LogMessage)
-
-
 
     local EggModelMap = {
-        ["Candle Egg"] = "Candle Egg",
-        ["Autumn Egg"] = "Autumn Egg",
-        ["Developer Egg"] = "Rcash_DevEgg_Marker",
-        ["Infinity Egg"] = "Infinity Egg", 
-        ["Common Egg"] = "Common Egg", 
-        ["Spotted Egg"] = "Spotted Egg", 
-        ["Iceshard Egg"] = "Iceshard Egg", 
-        ["Inferno Egg"] = "Inferno Egg", 
-        ["Spikey Egg"] = "Spikey Egg", 
-        ["Magma Egg"] = "Magma Egg", 
-        ["Crystal Egg"] = "Crystal Egg", 
-        ["Lunar Egg"] = "Lunar Egg", 
-        ["Void Egg"] = "Void Egg", 
-        ["Hell Egg"] = "Hell Egg", 
-        ["Nightmare Egg"] = "Nightmare Egg", 
-        ["Rainbow Egg"] = "Rainbow Egg", 
-        ["Showman Egg"] = "Showman Egg", 
-        ["Mining Egg"] = "Mining Egg", 
-        ["Cyber Egg"] = "Cyber Egg", 
-        ["Neon Egg"] = "Neon Egg", 
-        ["Chance Egg"] = "Chance Egg", 
-        ["Icy Egg"] = "Icy Egg", 
-        ["Vine Egg"] = "Vine Egg", 
-        ["Lava Egg"] = "Lava Egg", 
-        ["Secret Egg"] = "Secret Egg", 
-        ["Atlantis Egg"] = "Atlantis Egg", 
-        ["Classic Egg"] = "Classic Egg"
-    }
+    -- Event Eggs (Often in Workspace.Rendered.Generic or World-specific)
+    ["Candle Egg"] = "Candle Egg",
+    ["Autumn Egg"] = "Autumn Egg",
+    ["Developer Egg"] = "Rcash_DevEgg_Marker", -- Triggers the special closest-object search
+    ["Infinity Egg"] = "Infinity Egg", 
+    
+    -- World 1 Eggs
+    ["Common Egg"] = "Common Egg", 
+    ["Spotted Egg"] = "Spotted Egg", 
+    ["Iceshard Egg"] = "Iceshard Egg", 
+    ["Inferno Egg"] = "Inferno Egg", 
+    ["Spikey Egg"] = "Spikey Egg", 
+    ["Magma Egg"] = "Magma Egg", 
+    ["Crystal Egg"] = "Crystal Egg", 
+    ["Lunar Egg"] = "Lunar Egg", 
+    ["Void Egg"] = "Void Egg", 
+    ["Hell Egg"] = "Hell Egg", 
+    ["Nightmare Egg"] = "Nightmare Egg", 
+    ["Rainbow Egg"] = "Rainbow Egg", 
+    
+    -- World 2 Eggs
+    ["Showman Egg"] = "Showman Egg", 
+    ["Mining Egg"] = "Mining Egg", 
+    ["Cyber Egg"] = "Cyber Egg", 
+    ["Neon Egg"] = "Neon Egg", 
+    ["Chance Egg"] = "Chance Egg", 
+    
+    -- World 3 Eggs
+    ["Icy Egg"] = "Icy Egg", 
+    ["Vine Egg"] = "Vine Egg", 
+    ["Lava Egg"] = "Lava Egg", 
+    ["Secret Egg"] = "Secret Egg", 
+    ["Atlantis Egg"] = "Atlantis Egg", 
+    ["Classic Egg"] = "Classic Egg"
+}
+
+-- Get Services
+
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local LocalPlayer = Players.LocalPlayer
 
 -- Functions
-
-    local function UpdateConsoleUI()
-        while true do
-            if ConsoleUILabel then
-                -- Concatenate the stored messages with newlines (in reverse order for oldest at bottom)
-                local consoleText = table.concat(ConsoleOutput, "\n")
-            
-                -- Safely update the content of the Orion Paragraph/Label
-                pcall(function()
-                    ConsoleUILabel:set(consoleText)
-                end)
-            end
-            task.wait(0.1) -- Update every 0.1 seconds for real-time viewing
-        end
-    end
 
     function AutoBlowBubbles()
         while _G.AutoBlowBubbles do
@@ -420,467 +370,331 @@ if game.PlaceId == 85896571713843 then
     end
 
 
--- Tabs
-    local Tabs = {
-        Main = Window:CreateTab{
-            Title = "Main",
-            Icon = "user"
-        },
 
-        Farming = Window:CreateTab{
-            Title = "Farming",
-            Icon = "leaf"
-        },
 
-        Pets = Window:CreateTab{
-            Title = "Pets",
-            Icon = "paw-print"
-        },
 
-        Shop = Window:CreateTab{
-            Title = "Shop",
-            Icon = "store"
-        },
-        Misc = Window:CreateTab{
-            Title = "Misc",
-            Icon = "plus"
-        }
+    local function GetRemote(name)
+        return ReplicatedStorage.Events:FindFirstChild(name)
+    end
 
-        Console = Window:CreateTab{
-            Title = "Console",
-            Icon = "terminal"
-        }
-
-        Settings = Window:CreateTab{
-            Title = "Settings",
-            Icon = "cog"
-        }
-    },
-
--- Main Tab
-    Tabs.Main:CreateParagraph("Aligned Paragraph", {
-        Title = "Rcash Hub 💸 | BGSI",
-        Content = "Supported Games:\n• Bubble Gum Simulator INFINITY\n• More to Come!\n\n• By RdotA",
-        TitleAlignment = "Middle",
-        ContentAlignment = Enum.TextXAlignment.Center
-    })
-
-    Tabs.Main:CreateButton{
-        Title = "Discord",
-        Description = "Join the Discord server for support, updates, and more!",
-        Callback = function()
-            setclipboard("https://discord.gg/JQFrBajQxW")
-            Library:Notify{
-                Title = "Rcash Hub 💸",
-                Content = "Discord link copied to clipboard!",
-                Duration = 5
-            }
+    local function FindEggByName(eggName)
+        for _, egg in pairs(workspace.Eggs:GetChildren()) do
+            if egg.Name == eggName then
+                return egg
+            end
         end
-    }
+    end
 
-    Tabs.Main:CreateButton{
-        Title = "Patreon",
-        Description = "Support the development of Rcash Hub by becoming a patron!",
-        Callback = function()`
-            setclipboard("https://www.patreon.com/rdota")
-            Library:Notify{
-                Title = "Rcash Hub 💸",
-                Content = "Patreon link copied to clipboard!",
-                Duration = 5
-            }
+    local function BlowBubble()
+        if GetRemote("BlowBubble") then
+            GetRemote("BlowBubble"):FireServer()
         end
-    }
+    end
 
-    Tabs.Main:CreateButton{
-        Title = "Rejoin",
-        Description = "Rejoin the current game server.",
-        Callback = function()
-            game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+    local function DoHatch(egg)
+        if GetRemote("Hatch") then
+            GetRemote("Hatch"):FireServer(egg)
         end
-    }
+    end
 
-    Tabs.main:CreateButton{
-        Title = "Server Hop",
-        Description = "Hop to a different server.",
-        Callback = function()
-            local PlaceID = game.PlaceId
-            local AllIDs = {}
-            local foundAnything = ""
-            local actualHour = os.date("!*t").hour
-            local Deleted = false
-            function TPReturner()
-                local Site;
-                if foundAnything == "" then
-                    Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
-                else
-                    Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
-                end
-                local ID = ""
-                if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
-                    foundAnything = Site.nextPageCursor
-                end
-                local num = 0;
-                for i,v in pairs(Site.data) do
-                    local Possible = true
-                    ID = tostring(v.id)
-                    if tonumber(v.maxPlayers) > tonumber(v.playing) then
-                        for _,Existing in pairs(AllIDs) do
-                            if num ~= 0 then
-                                if ID == Existing then
-                                    Possible = false
-                                end
-                            else
-                                if tonumber(actualHour) ~= tonumber(Existing) then
-                                    AllIDs = {}
-                                    num = 1
-                                    break
-                                end
-                            end
-                        end
-                        if Possible == true then
-                            table.insert(AllIDs, ID)
-                            wait()
-                            pcall(function()
-                                game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
-                            end)
-                            wait(4)
-                        end
+    local function ClaimFreeGift()
+        if GetRemote("ClaimFreeGift") then
+            GetRemote("ClaimFreeGift"):FireServer()
+        end
+    end
+
+    local function OpenDailyReward()
+        if GetRemote("OpenDailyReward") then
+            GetRemote("OpenDailyReward"):FireServer()
+        end
+    end
+
+    local function SpinAutumnWheel()
+        if GetRemote("SpinAutumnWheel") then
+            GetRemote("SpinAutumnWheel"):FireServer()
+        end
+    end
+
+    local function PickupAll()
+        if GetRemote("PickupAll") then
+            GetRemote("PickupAll"):FireServer()
+        end
+    end
+
+    local function AutoBlowBubbles()
+        while _G.AutoBlowBubbles do
+            BlowBubble()
+            task.wait(0.2)
+        end
+    end
+
+    local function AutoHatch()
+        while _G.AutoHatch do
+            local egg = FindEggByName(_G.SelectedEgg)
+            if egg then
+                DoHatch(egg)
+            else
+                task.wait(1)
+            end
+            task.wait(0.5)
+        end
+    end
+
+    local function AutoClaimPTR()
+        while _G.AutoClaimPTR do
+            if GetRemote("ClaimPTRRewards") then
+                GetRemote("ClaimPTRRewards"):FireServer()
+            end
+            task.wait(5)
+        end
+    end
+
+    local function AutoMysteryBox()
+        while _G.AutoMysteryBox do
+            if GetRemote("OpenMysteryBox") then
+                GetRemote("OpenMysteryBox"):FireServer()
+            end
+            task.wait(0.5)
+        end
+    end
+
+    local function AutoSeasonEgg()
+        while _G.AutoSeasonEgg do
+            if GetRemote("OpenSeasonEgg") then
+                GetRemote("OpenSeasonEgg"):FireServer()
+            end
+            task.wait(0.5)
+        end
+    end
+
+    local function AutoCollectFreeGifts()
+        while _G.AutoCollectFreeGifts do
+            ClaimFreeGift()
+            task.wait(10)
+        end
+    end
+
+    local function AutoOpenDailyRewards()
+        while _G.AutoOpenDailyRewards do
+            OpenDailyReward()
+            task.wait(10)
+        end
+    end
+
+    local function AutoSpinAutumnWheel()
+        while _G.AutoSpinAutumnWheel do
+            SpinAutumnWheel()
+            task.wait(1)
+        end
+    end
+
+    local function AutoPickupLoop()
+        while true do
+            if _G.AutoPickupAll then
+                PickupAll()
+                task.wait(0.5)
+            else
+                task.wait(1)
+            end
+        end
+    end
+
+    local function HideHatchAnim()
+        if _G.HideHatchAnim then
+            local hatch_gui = LocalPlayer.PlayerGui:FindFirstChild("HatchGUI")
+            if hatch_gui then
+                hatch_gui.Enabled = false
+            end
+        end
+    end
+
+    local function SpamE()
+        while _G.SpamE do
+            if GetRemote("SpamE") then
+                GetRemote("SpamE"):FireServer()
+            end
+            task.wait(0.1)
+        end
+    end
+
+-- Main Server
+
+    local win = DiscordLib:Window("Rcash Hub 💸 | BGSI")
+
+    local serv = win:Server("Main", "")
+
+    local info = serv:Channel("Information")
+
+    info:Label("By Rdota")
+    info:Seperator()
+    info:Label("Supported games:\n• Bubble Gum Simulator Infinity\n• V.1.0")
+    
+
+    local sprt = serv:Channel("Support and Help")
+
+    sprt:Label("Join our Discord server for more scripts and help!")
+
+    sprt:Button("Join Discord server", function()
+        setclipboard("https://discord.gg/JQFrBajQxW")
+        DiscordLib:Notification("Notification", "Link Copied", "Okay!")
+    end)
+
+    sprt:Seperator()
+
+    sprt:Label("If you want to support me, you can do it on Patreon which helps\nencorage me to make more scripts!")
+
+    sprt:Button("Patreon", function()
+        setclipboard("https://www.patreon.com/RdotA")
+        DiscordLib:Notification("Notification", "Link Copied", "Okay!")
+    end)
+
+    local srvs = serv:Channel("Server Settings")
+
+    srvs:Button("Rejoin", function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+    end)
+
+    srvs:Button("Server Hop", function()
+        local HttpService = game:GetService("HttpService")
+            local x = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+            if x and x.data and #x.data > 0 then
+                local y = {}
+                for _,v in pairs(x.data) do
+                    if type(v) == "table" and v.maxPlayers > v.playing and v.id ~= game.JobId then
+                        table.insert(y, v.id)
                     end
                 end
-            end
-            function Teleport()
-                while wait() do
-                    pcall(function()
-                        TPReturner()
-                        if foundAnything == "" then
-                            wait(15)
-                        end
-                    end)
-                end
-            end
-            Teleport()
-        end
-    }
+                if #y > 0 then
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, y[math.random(1, #y)])
+                    game:GetService("StarterGui"):SetCore("SendNotification",{
+	                    Title = "Rcash Hub 💸", -- Obbligatorio
+	                    Text = "Server Hopping", -- Obbligatorio
+	                    Icon = "rbxassetid://82088779453504" -- Facoltativo
+                    })
+                else
+                    game:GetService("StarterGui"):SetCore("SendNotification",{
+                        Title = "Rcash Hub 💸", -- Obbligatorio
+                        Text = "No available servers found", -- Obbligatorio
+                        Icon = "rbxassetid://82088779453504" -- Facoltativo
+                    })
+    )
 
-    Tabs.Main:CreateButton{
-        Title = "Server Info",
-        Description = "Copy the current server's info to clipboard.",
-        Callback = function()
-            local ServerInfo = "Place ID: " .. game.PlaceId .. "\nJob ID: " .. game.JobId .. "\nServer Time (UTC): " .. os.date("!*t").hour .. ":" .. os.date("!*t").min .. ":" .. os.date("!*t").sec
-            setclipboard(ServerInfo)
-            Library:Notify{
-                Title = "Rcash Hub 💸",
-                Content = "Server info copied to clipboard!",
-                Duration = 5
-            }
-        end
-    }
+    srvs:Button("Server Hop (Low Ping)", function()
+        local HttpService = game:GetService("HttpService")
+        local Servers = {}
+        local PlaceID = game.PlaceId
+        local AllIDs = {}
+        local foundAnything = ""
+        local actualHour = os.date("!*t").hour
+        local Deleted = false
 
-    Tabs.Main:CreateButton{
-        Title = "Destroy GUI",
-        Description = "Destroy the GUI and unload the script.",
-        Callback = function()
-            Library.Notify{
-                Title = "Rcash Hub 💸",
-                Content = "Unloaded successfully!",
-                Duration = 5
-            }
-            Library:Destroy()
-        end
-    }
-
-    Tabs.Main:CreateButton{
-        Title = "Reload GUI",
-        Description = "Reload the GUI.",
-        Callback = function()
-            Library.Notify{
-                Title = "Rcash Hub 💸",
-                Content = "Reloading...",
-                Duration = 5
-            }
-            Library:Destroy()
-            wait(1)
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/main.lua"))()
-        end
-    }
-
--- Farming Tab
-    Tabs.Farming:CreateToggle("AutoBlowBubbles", {
-        Title = "Auto Blow Bubbles",
-        Default = false,
-        Description = "Automatically blow bubbles."
-    }):OnChanged(function(state)
-        _G.AutoBlowBubbles = state
-        if state then
-            task.spawn(AutoBlowBubbles)
-        end
-    end)
-
-    Tabs.Farming:CreateToggle("AutoCollectPickups", {
-        Title = "Auto Collect Pickups",
-        Default = false,
-        Description = "Automatically collect all pickups."
-    }):OnChanged(function(state)
-        _G.AutoPickupAll = state
-        if state then
-            task.spawn(function()
-                while _G.AutoPickupAll do
-                    CollectPickups()
-                    task.wait(1)
-                end
-            end)
-        end
-    end)
-
-    Tabs.Farming:CreateToggle("Auto Complete Obbies (Use Auto Spam E in pets tab)", {
-        Title = "Auto Complete Obbies",
-        Default = false,
-        Description = "Automatically complete obbies."
-    }):OnChanged(function(state)
-        _G.AutoObby = state
-        if state then
-            AutoObbyCycle()
-        end
-    end)
-
--- Pets Tab
-
-    Tabs.Pets:CreateParagraph("Pets Manager", { 
-        Title = "Pets Manager", 
-        Content = "Manage your pets with the options below."
-    })
-
-    Tabs.Pets:CreateToggle("AutoEquipBest", {
-        Title = "Auto Equip Best Pets",
-        Default = false,
-        Description = "Automatically equip the best pets."
-    }):OnChanged(function(state)
-        _G.AutoEquipBest = state
-        if state then
-            task.spawn(AutoEquipBest)
-        end
-    end)
-
-    Tabs.Pets:CreateToggle("AutoSellPets", {
-        Title = "Auto Sell Pets",
-        Default = false,
-        Description = "Automatically sell all pets."
-    }):OnChanged(function(state)
-        _G.AutoSellPets = state
-        if state then
-            task.spawn(AutoSellPets)
-        end
-    end)
-
-    Tabs.Pets:CreateParagraph("Hatch Manager", { 
-        Title = "Hatch Manager", 
-        Content = "Manage your hatching with the options below."
-    })
-
-    Tabs.Pets:CreateDropdown("EggSelect", {
-        Title = "Select Egg",
-        Values = {
-            "Candle Egg", "Autumn Egg", "Developer Egg", "Infinity Egg", "Common Egg", "Spotted Egg", 
-            "Iceshard Egg", "Inferno Egg", "Spikey Egg", "Magma Egg", "Crystal Egg", "Lunar Egg", 
-            "Void Egg", "Hell Egg", "Nightmare Egg", "Rainbow Egg", "Showman Egg", "Mining Egg", 
-            "Cyber Egg", "Neon Egg", "Chance Egg", "Icy Egg", "Vine Egg", "Lava Egg", 
-            "Secret Egg", "Atlantis Egg", "Classic Egg"
-        },
-        Multi = false,
-        Default = 1,
-        Description = "Select the egg you want to hatch."
-    }):OnChanged(function(val)
-        _G.SelectedEgg = val
-    end)
-
-    Tabs.Pets:CreateButton{
-        Title = "Teleport to Selected Egg",
-        Description = "Teleport to the location of the selected egg.",
-        Callback = function()
-            if _G.SelectedEgg ~= "" then
-                TeleportToEgg(_G.SelectedEgg)
+        function TPReturner()
+            local Site;
+            if foundAnything == "" then
+                Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
             else
-                Library:Notify{
-                    Title = "Rcash Hub 💸",
-                    Content = "Please select an egg first.",
-                    Duration = 5
-                }
+                Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+            end
+            local ID = ""
+            if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+                foundAnything = Site.nextPageCursor
+            end
+            local num = 0;
+            for i, v in pairs(Site.data) do
+                if v.playing < v.maxPlayers and v.id ~= game.JobId then
+                    num = num + 1
+                    Servers[num] = v.id
+                end
+            end
+            if num > 0 then
+                ID = Servers[math.random(1, #Servers)]
+                AllIDs[#AllIDs + 1] = ID
+                wait()
+                pcall(function()
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                end)
+            else
+                TPReturner()
             end
         end
-    }
 
-    Tabs.Pets:CreateToggle("AutoHatch", {
-        Title = "Auto Hatch",
-        Default = false,
-        Description = "Automatically hatch the selected egg."
-    }):OnChanged(function(state)
-        _G.AutoHatch = state
-        if state then
-            task.spawn(AutoHatch)
+        function Teleport()
+            while wait() do
+                pcall(function()
+                    TPReturner()
+                    if foundAnything ~= "" then
+                        TPReturner()
+                    end
+                end)
+            end
         end
+
+        Teleport()
     end)
-
-    Tabs.Pets:CreateToggle("Hide Hatch Animation", {
-        Title = "Hide Hatch Animation",
-        Default = false,
-        Description = "Automatically hide the hatch animation."
-    }):OnChanged(function(state)
-        _G.HideHatchAnim = state
-        if state then
-            task.spawn(HideHatchAnim)
-        end
-    end)
-
-    Tabs.Pets:CreateToggle("Spam E Key (For Obby Completion)", {
-        Title = "Spam E Key",
-        Default = false,
-        Description = "Automatically spam the E key."
-    }):OnChanged(function(state)
-        _G.SpamE = state
-        if state then
-            task.spawn(SpamEKey)
-        end
-    end)
-
--- Shop Tab
-    Tabs.Shop:CreateToggle("AutoBuyAutumnShop", {
-        Title = "Auto Buy Autumn Shop Items",
-        Default = false,
-        Description = "Automatically buy items from the autumn shop."
-    }):OnChanged(function(state)
-        _G.AutoBuyAutumnShop = state
-        if state then
-            task.spawn(AutoBuyAutumnShop)
-        end
-    end)
-
--- Misc Tab
-    Tabs.Misc:CreateToggle("AutoClaimPTR", {
-        Title = "Auto Claim Playtime Rewards",
-        Default = false,
-        Description = "Automatically claim playtime rewards."
-    }):OnChanged(function(state)
-        _G.AutoClaimPTR = state
-        if state then
-            task.spawn(AutoClaimPTR)
-        end
-    end)
-
-    Tabs.Misc:CreateToggle("AutoMysteryBox", {
-        Title = "Auto Open Mystery Boxes",
-        Default = false,
-        Description = "Automatically open mystery boxes."
-    }):OnChanged(function(state)
-        _G.AutoMysteryBox = state
-        if state then
-            task.spawn(AutoMysteryBox)
-        end
-    end)
-
-    Tabs.Misc:CreateToggle("AutoSeasonEgg", {
-        Title = "Auto Hatch Season Egg",
-        Default = false,
-        Description = "Automatically hatch the season egg."
-    }):OnChanged(function(state)
-        _G.AutoSeasonEgg = state
-        if state then
-            task.spawn(AutoSeasonEgg)
-        end
-    end)
-
-    Tabs.Misc:CreateToggle("AutoSpinAutumnWheel", {
-        Title = "Auto Spin Autumn Wheel",
-        Default = false,
-        Description = "Automatically spin the autumn wheel."
-    }):OnChanged(function(state)
-        _G.AutoSpinAutumnWheel = state
-        if state then
-            task.spawn(SpinAutumnWheel)
-        end
-    end)
-
--- Console Tab
-    local ConsoleParagraph = Tabs.Console:CreateParagraph("ConsoleOutput", {
-        Title = "Console Output",
-        Content = table.concat(ConsoleOutput, "\n"),
-        TitleAlignment = "Left",
-        ContentAlignment = Enum.TextXAlignment.Left
-    })
-
-    ConsoleUILabel = ConsoleParagraph
-    task.spawn(UpdateConsoleUI)
-
--- Settings Tab
-    Tabs.Settings:CreateParagraph("SettingsInfo", { 
-        Title = "Settings", 
-        Content = "Manage your settings with the options below."
-    })
 
     
+--[[local tgls = serv:Channel("Toggles")
 
-    
+tgls:Toggle("Auto-Farm",false, function(bool)
+print(bool)
+end)
 
+local sldrs = serv:Channel("Sliders")
 
+local sldr = sldrs:Slider("Slide me!", 0, 1000, 400, function(t)
+print(t)
+end)
 
+sldrs:Button("Change to 50", function()
+sldr:Change(50)
+end)
 
-
-
-
-
-
--- Save Manager
-    SaveManager:SetLibrary(Library)
-    InterfaceManager:SetLibrary(Library)
-
-    SaveManager:IgnoreThemeSettings()
-
-    SaveManager:SetIgnoreIndexes{}
-
-    InterfaceManager:SetFolder("RcashHub")
-    SaveManager:SetFolder("RcashHub/BGSI")
-
-    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-    SaveManager:BuildConfigSection(Tabs.Settings)
+local drops = serv:Channel("Dropdowns")
 
 
-    Window:SelectTab(1)
+local drop = drops:Dropdown("Pick me!",{"Option 1","Option 2","Option 3","Option 4","Option 5"}, function(bool)
+print(bool)
+end)
 
-    Library:Notify{
-    Title = "Rcash Hub 💸",
-        Content = "The script has been loaded.",
-        Duration = 8
-    }
+drops:Button("Clear", function()
+drop:Clear()
+end)
 
+drops:Button("Add option", function()
+drop:Add("Option")
+end)
 
-    SaveManager:SetLibrary(Library)
-    InterfaceManager:SetLibrary(Library)
+local clrs = serv:Channel("Colorpickers")
 
+clrs:Colorpicker("ESP Color", Color3.fromRGB(255,1,1), function(t)
+print(t)
+end)
 
-    SaveManager:IgnoreThemeSettings()
+local textbs = serv:Channel("Textboxes")
 
-    SaveManager:SetIgnoreIndexes{}
+textbs:Textbox("Gun power", "Type here!", true, function(t)
+print(t)
+end)
 
-    InterfaceManager:SetFolder("FluentScriptHub")
-    SaveManager:SetFolder("FluentScriptHub/specific-game")
+local lbls = serv:Channel("Labels")
 
-    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-    SaveManager:BuildConfigSection(Tabs.Settings)
+lbls:Label("This is just a label.")
 
+local bnds = serv:Channel("Binds")
 
-    Window:SelectTab(1)
+bnds:Bind("Kill bind", Enum.KeyCode.RightShift, function()
+print("Killed everyone!")
+end)
 
-    Library:Notify{
-        Title = "Rcash Hub 💸",
-        Content = "The Config has been loaded.",
-        Duration = 8
-    }
-    SaveManager:LoadAutoloadConfig()
-    
-
-
-
-
+serv:Channel("by dawid#7205")
 
 
+win:Server("Main", "http://www.roblox.com/asset/?id=13060262582")--]]
+
+-- Start the continuous Auto Pickup background loop (waits for _G.AutoPickupAll to be true)
+    task.spawn(AutoPickupLoop)
+
+-- Start the Hide Hatch listener
+    task.spawn(HideHatchAnim) 
 
 end
