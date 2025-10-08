@@ -299,26 +299,7 @@ if game.PlaceId == 85896571713843 then
     ServerChannel:Button("Rejoin", function()
         game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
     end)
-
-    ServerChannel:Seperator()
     
-    ServerChannel:Button("Server Hop", function()
-        local TeleportService = game:GetService("TeleportService")
-        local Players = game:GetService("Players")
-        local PlaceID = game.PlaceId
-        local AllServers = {}
-        local Servers = TeleportService:GetAllServersAsync(PlaceID, true, AllServers)
-        
-        for _, Server in pairs(Servers) do
-            if Server.playing < Server.maxPlayers and Server.id ~= game.JobId then
-                TeleportService:TeleportToPlaceInstance(PlaceID, Server.id, Players.LocalPlayer)
-                break
-            end
-        end
-    end)
-
-    ServerChannel:Seperator()
-
     ServerChannel:Button("Destroy GUI", function()
         -- Stop all global toggles (CRITICAL for safe destruction)
         for name, value in pairs(_G) do
@@ -328,37 +309,6 @@ if game.PlaceId == 85896571713843 then
         end
         DiscordLib:Notification("Rcash Hub 💸", "GUI destroyed. All toggles stopped.", "Okay!")
         win:Destroy()
-    end)
-
-    ServerChannel:Seperator()
-
-    ServerChannel:Button("Reload GUI", function()
-        -- Reload the script by re-executing it
-        local HttpService = game:GetService("HttpService")
-        local scriptUrl = "https://raw.githubusercontent.com/rcashhub/scripts/main/BGSI.lua" -- Update with actual URL
-        local scriptContent = game:HttpGet(scriptUrl)
-        loadstring(scriptContent)()
-        DiscordLib:Notification("Rcash Hub 💸", "GUI reloaded.", "Okay!")
-    end)
-
--- Farming Server
-    local FarmingServer = win:Server("Farming", "")
-    
-    FarmingServer:Channel("Auto Farming"):Toggle("Auto Blow Bubbles", false, function(Value)
-        _G.AutoBlowBubbles = Value
-        if Value then task.spawn(AutoBlowBubbles) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Blow Bubbles: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-    
-    FarmingServer:Channel("Auto Farming"):Toggle("Auto Collect Pickups (Item Magnet)", false, function(Value)
-        _G.AutoPickupAll = Value
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-
-    FarmingServer:Channel("Auto Obby"):Toggle("Auto Complete Obbies", false, function(Value)
-        _G.AutoObby = Value
-        if Value then task.spawn(AutoObbyLoop) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
 
@@ -416,49 +366,71 @@ if game.PlaceId == 85896571713843 then
         DiscordLib:Notification("Rcash Hub 💸", "Hide Hatch Animation: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
+-- Farming Server
+    local FarmingServer = win:Server("Farming", "")
+    
+    local AutoFarmingChannel = FarmingServer:Channel("Auto Farming")
+    AutoFarmingChannel:Toggle("Auto Blow Bubbles", false, function(Value)
+        _G.AutoBlowBubbles = Value
+        if Value then task.spawn(AutoBlowBubbles) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Blow Bubbles: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+    
+    AutoFarmingChannel:Toggle("Auto Collect Pickups (Item Magnet)", false, function(Value)
+        _G.AutoPickupAll = Value
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Collect Pickups: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
+    FarmingServer:Channel("Auto Obby"):Toggle("Auto Complete Obbies", false, function(Value)
+        _G.AutoObby = Value
+        if Value then task.spawn(AutoObbyLoop) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Obbies: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
 -- Misc Server
     local MiscServer = win:Server("Misc", "")
 
-    MiscServer:Channel("Rewards"):Toggle("Auto Claim Playtime Rewards", false, function(Value)
+    -- REWARDS Channel (Fixed to be declared once)
+    local RewardsChannel = MiscServer:Channel("Rewards")
+    RewardsChannel:Toggle("Auto Claim Play Time Rewards", false, function(Value)
         _G.AutoClaimPTR = Value
         if Value then task.spawn(AutoClaimPTR) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Playtime Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Play Time Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    MiscServer:Channel("Rewards"):Toggle("Auto Open Mystery Boxes", false, function(Value)
+    RewardsChannel:Toggle("Auto Claim Season Rewards", false, function(Value)
+        _G.AutoCS = Value
+        if Value then task.spawn(AutoCS) end
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Season: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+    end)
+
+    -- AUTOMATION Channel (Fixed to be declared once)
+    local AutomationChannel = MiscServer:Channel("Automation")
+    AutomationChannel:Toggle("Auto Open Mystery Box", false, function(Value)
         _G.AutoMysteryBox = Value
         if Value then task.spawn(AutoMysteryBox) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Open Mystery Boxes: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Open Mystery Box: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    MiscServer:Channel("Automation"):Toggle("Auto Hatch Season Egg", false, function(Value)
+    AutomationChannel:Toggle("Auto Hatch Season Egg", false, function(Value)
         _G.AutoSeasonEgg = Value
         if Value then task.spawn(AutoSeasonEgg) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Hatch Season Egg: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    MiscServer:Channel("Automation"):Toggle("Auto Claim Current Season Rewards", false, function(Value)
-        _G.AutoCS = Value
-        if Value then task.spawn(AutoCS) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Claim Current Season Rewards: " .. (Value and "Enabled" or "Disabled"), "Okay!")
-    end)
-
---Event Server
-    local EventServer = win:Server("Current Event", "")
-
-    EventServer:Channel("Autumn Event"):Toggle("Auto Spin Autumn Wheel", false, function(Value)
+    -- AUTUMN EVENT Channel (Fixed to be declared once)
+    local AutumnEventChannel = MiscServer:Channel("Autumn Event")
+    AutumnEventChannel:Toggle("Auto Spin Autumn Wheel", false, function(Value)
         _G.AutoSpinAutumnWheel = Value
         if Value then task.spawn(SpinAutumnWheel) end
         DiscordLib:Notification("Rcash Hub 💸", "Auto Spin Autumn Wheel: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
 
-    EventServer:Channel("Autumn Event"):Toggle("Auto Buy Autumn Shop Items", false, function(Value)
+    AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
         _G.AutoBuyAutumnShop = Value
         if Value then task.spawn(AutoBuyAutumnShop) end
-        DiscordLib:Notification("Rcash Hub 💸", "Auto Buy Autumn Shop Items: " .. (Value and "Enabled" or "Disabled"), "Okay!")
+        DiscordLib:Notification("Rcash Hub 💸", "Auto Buy Autumn Shop: " .. (Value and "Enabled" or "Disabled"), "Okay!")
     end)
-
-
 
 -- Startup Logic
     -- Start continuous listeners/loops
