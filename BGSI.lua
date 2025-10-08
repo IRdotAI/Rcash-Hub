@@ -11,23 +11,23 @@ if game.PlaceId == 85896571713843 then
     })
 
 -- Global Toggles
-    _G.AutoBlowBubbles = false;
-    _G.AutoHatch = false;
-    _G.AutoCS = false;
+    _G.AutoBlowBubbles = false
+    _G.AutoHatch = false
+    _G.AutoCS = false
     _G.SelectedEgg = ""
-    _G.AutoClaimPTR = false;
-    _G.AutoMysteryBox = false;
-    _G.AutoSeasonEgg = false;
-    _G.HideHatchAnim = false;
+    _G.AutoClaimPTR = false
+    _G.AutoMysteryBox = false
+    _G.AutoSeasonEgg = false
+    _G.HideHatchAnim = false
     _G.SpamE = false
-    _G.AutoCollectPickups = false;
-    _G.AutoCollectFreeGifts = false;
-    _G.AutoOpenDailyRewards = false;
-    _G.AutoSpinAutumnWheel = false;
-    _G.AutoBuyAutumnShop = false;
-    _G.AutoEquipBest = false;
-    _G.AutoSellPets = false;
-    _G.AutoObby = false;
+    _G.AutoCollectPickups = false
+    _G.AutoCollectFreeGifts = false
+    _G.AutoOpenDailyRewards = false
+    _G.AutoSpinAutumnWheel = false
+    _G.AutoBuyAutumnShop = false
+    _G.AutoEquipBest = false
+    _G.AutoSellPets = false
+    _G.AutoObby = false
 
 
 -- Data Tables
