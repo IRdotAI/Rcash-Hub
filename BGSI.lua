@@ -851,8 +851,29 @@ if game.PlaceId == 85896571713843 then
         Duration = 8
     }
 
--- You can use the SaveManager:LoadAutoloadConfig() to load a config
--- which has been marked to be one that auto loads!
+
+    SaveManager:SetLibrary(Library)
+    InterfaceManager:SetLibrary(Library)
+
+
+    SaveManager:IgnoreThemeSettings()
+
+    SaveManager:SetIgnoreIndexes{}
+
+    InterfaceManager:SetFolder("FluentScriptHub")
+    SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+    SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+    Window:SelectTab(1)
+
+    Library:Notify{
+        Title = "Rcash Hub 💸",
+        Content = "The Config has been loaded.",
+        Duration = 8
+    }
     SaveManager:LoadAutoloadConfig()
     
 
