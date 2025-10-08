@@ -87,15 +87,15 @@ if game.PlaceId == 85896571713843 then
         end
     end
 
-    function AutoHatch()
+        function AutoHatch()
         while _G.AutoHatch do
             if _G.SelectedEgg ~= "" then
-                -- CRITICAL FIX: Ensure the player is at the egg before trying to hatch
+                -- FIX 1: Teleporting inside the loop for reliability.
                 TeleportToEgg(_G.SelectedEgg) 
 
                 RemoteEvent:FireServer("HatchEgg",_G.SelectedEgg,15) -- Hatch 15 at a time
             end
-            task.wait(0.3) -- Short delay between attempts
+            task.wait(0.3) 
         end
     end
 
@@ -528,13 +528,13 @@ if game.PlaceId == 85896571713843 then
 
     local HatchingChannel = PetsServer:Channel("Hatching")
     
-    HatchingChannel:Label("Select egg to teleport/hatch.")
-    
+    -- Added Searchable Dropdown
     HatchingChannel:SearchableDropdown("Select Egg to Teleport/Hatch", EggDisplayNames, function(Value)
         _G.SelectedEgg = Value
         TeleportToEgg(Value)
     end)
 
+    -- Added new button
     HatchingChannel:Button("Teleport to Selected Egg", function()
         if _G.SelectedEgg ~= "" then
             TeleportToEgg(_G.SelectedEgg)
@@ -543,14 +543,12 @@ if game.PlaceId == 85896571713843 then
         end
     end)
 
+    -- Cleaned up Auto Hatch Toggle
     HatchingChannel:Toggle("Auto Hatch Egg", false, function(Value)
         _G.AutoHatch = Value
         
         if Value then
-            if _G.SelectedEgg ~= "" then
-                TeleportToEgg(_G.SelectedEgg)
-            end
-            task.spawn(AutoHatch) 
+            task.spawn(AutoHatch)
         end
         
     end)
@@ -567,25 +565,7 @@ if game.PlaceId == 85896571713843 then
     end)
 
 
--- Current Events Server
-    local EventsServer = win:Server("Current Events", "")
 
-    -- AUTUMN EVENT Channel (MOVED)
-    local AutumnEventChannel = EventsServer:Channel("Autumn Event")
-    AutumnEventChannel:Toggle("Auto Spin Autumn Wheel", false, function(Value)
-        _G.AutoSpinAutumnWheel = Value
-        if Value then task.spawn(SpinAutumnWheel) end
-    end)
-
-    AutumnEventChannel:Toggle("Auto Claim Autumn Free Spin", false, function(Value)
-        _G.AutoClaimAutumnSpin = Value
-        if Value then task.spawn(AutoClaimAutumnSpin) end
-    end)
-
-    AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
-        _G.AutoBuyAutumnShop = Value
-        if Value then task.spawn(AutoBuyAutumnShop) end
-    end)
 
 -- Misc Server
     local MiscServer = win:Server("Misc", "")
@@ -614,6 +594,25 @@ if game.PlaceId == 85896571713843 then
         if Value then task.spawn(AutoSeasonEgg) end
     end)
 
+-- Current Events Server
+    local EventsServer = win:Server("Current Events", "")
+
+    -- AUTUMN EVENT Channel (MOVED)
+    local AutumnEventChannel = EventsServer:Channel("Autumn Event")
+    AutumnEventChannel:Toggle("Auto Spin Autumn Wheel", false, function(Value)
+        _G.AutoSpinAutumnWheel = Value
+        if Value then task.spawn(SpinAutumnWheel) end
+    end)
+
+    AutumnEventChannel:Toggle("Auto Claim Autumn Free Spin", false, function(Value)
+        _G.AutoClaimAutumnSpin = Value
+        if Value then task.spawn(AutoClaimAutumnSpin) end
+    end)
+
+    AutumnEventChannel:Toggle("Auto Buy Autumn Shop", false, function(Value)
+        _G.AutoBuyAutumnShop = Value
+        if Value then task.spawn(AutoBuyAutumnShop) end
+    end)
 -- Startup Logic
     -- Start continuous listeners/loops
     task.spawn(HideHatchAnim) 
