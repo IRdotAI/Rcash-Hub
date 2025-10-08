@@ -1,4 +1,6 @@
-local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
+if game.PlaceId == 85896571713843 then
+    
+    local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
 
     game:GetService("StarterGui"):SetCore("SendNotification",{
 	    Title = "Rcash Hub 💸", -- Obbligatorio
@@ -21,6 +23,43 @@ local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/daw
     _G.AutoCollectFreeGifts = false
     _G.AutoOpenDailyRewards = false
     _G.AutoSpinAutumnWheel = false
+
+    local EggModelMap = {
+    -- Event Eggs (Often in Workspace.Rendered.Generic or World-specific)
+    ["Candle Egg"] = "Candle Egg",
+    ["Autumn Egg"] = "Autumn Egg",
+    ["Developer Egg"] = "Rcash_DevEgg_Marker", -- Triggers the special closest-object search
+    ["Infinity Egg"] = "Infinity Egg", 
+    
+    -- World 1 Eggs
+    ["Common Egg"] = "Common Egg", 
+    ["Spotted Egg"] = "Spotted Egg", 
+    ["Iceshard Egg"] = "Iceshard Egg", 
+    ["Inferno Egg"] = "Inferno Egg", 
+    ["Spikey Egg"] = "Spikey Egg", 
+    ["Magma Egg"] = "Magma Egg", 
+    ["Crystal Egg"] = "Crystal Egg", 
+    ["Lunar Egg"] = "Lunar Egg", 
+    ["Void Egg"] = "Void Egg", 
+    ["Hell Egg"] = "Hell Egg", 
+    ["Nightmare Egg"] = "Nightmare Egg", 
+    ["Rainbow Egg"] = "Rainbow Egg", 
+    
+    -- World 2 Eggs
+    ["Showman Egg"] = "Showman Egg", 
+    ["Mining Egg"] = "Mining Egg", 
+    ["Cyber Egg"] = "Cyber Egg", 
+    ["Neon Egg"] = "Neon Egg", 
+    ["Chance Egg"] = "Chance Egg", 
+    
+    -- World 3 Eggs
+    ["Icy Egg"] = "Icy Egg", 
+    ["Vine Egg"] = "Vine Egg", 
+    ["Lava Egg"] = "Lava Egg", 
+    ["Secret Egg"] = "Secret Egg", 
+    ["Atlantis Egg"] = "Atlantis Egg", 
+    ["Classic Egg"] = "Classic Egg"
+}
 
 -- Get Services
 
@@ -594,7 +633,7 @@ local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/daw
     end)
 
     
-local tgls = serv:Channel("Toggles")
+--[[local tgls = serv:Channel("Toggles")
 
 tgls:Toggle("Auto-Farm",false, function(bool)
 print(bool)
@@ -650,7 +689,7 @@ end)
 serv:Channel("by dawid#7205")
 
 
-win:Server("Main", "http://www.roblox.com/asset/?id=13060262582")
+win:Server("Main", "http://www.roblox.com/asset/?id=13060262582")--]]
 
 -- Start the continuous Auto Pickup background loop (waits for _G.AutoPickupAll to be true)
     task.spawn(AutoPickupLoop)
@@ -658,5 +697,4 @@ win:Server("Main", "http://www.roblox.com/asset/?id=13060262582")
 -- Start the Hide Hatch listener
     task.spawn(HideHatchAnim) 
 
-
-
+end
