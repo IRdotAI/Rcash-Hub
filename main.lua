@@ -20,7 +20,12 @@ local scriptURL = games[game.PlaceId]
 if scriptURL then
     loadstring(game:HttpGet(scriptURL))()
 else 
-    print("Game not supported by Rcash Hub")
+    game:GetService("StarterGui"):SetCore("SendNotification",{
+	    Title = "Rcash Hub 💸",
+	    Text = "Game not supported by Rcash Hub.",
+	    Icon = "rbxassetid://110392278560658"
+    })
 end
+
 
 
