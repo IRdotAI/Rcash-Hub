@@ -2,6 +2,7 @@ local games = {
     [13667319624] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/KS.lua",
     [85896571713843] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/BGSI.lua",
     [286090429] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/ARS.lua",
+--[[    [] = ""
     [] = ""
     [] = ""
     [] = ""
@@ -12,8 +13,7 @@ local games = {
     [] = ""
     [] = ""
     [] = ""
-    [] = ""
-    
+    --]]
 }
 
 local scriptURL = games[game.PlaceId]
@@ -26,6 +26,7 @@ else
 	    Icon = "rbxassetid://110392278560658"
     })
 end
+
 
 
 
