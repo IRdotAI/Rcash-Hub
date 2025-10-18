@@ -3,7 +3,8 @@ local games = {
     [85896571713843] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/BGSI.lua",
     [286090429] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/ARS.lua",
 	[128886701132186] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/CRR.lua",
-	[79546208627805] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/99NITF.lua"
+	[79546208627805] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/99NITF.lua",
+	[18687417158] = "https://raw.githubusercontent.com/IRdotAI/Rcash-Hub/refs/heads/main/FSN.lua",
 }
 
 local scriptURL = games[game.PlaceId]
@@ -16,6 +17,7 @@ else
 	    Icon = "rbxassetid://110392278560658"
     })
 end
+
 
 
 
