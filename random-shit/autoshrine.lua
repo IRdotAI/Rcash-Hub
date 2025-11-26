@@ -1,46 +1,63 @@
--- ==============================================================================
---                       STANDALONE AUTO SHRINES SCRIPT
--- ==============================================================================
--- Includes the auto-shrine logic, a live status display GUI, and a startup 
--- game notification.
--- ==============================================================================
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui") -- Service needed for notifications
+local StarterGui = game:GetService("StarterGui")
 local RemoteEvent = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent
 
--- Configuration Check (Must be set by your config loader script)
+-- Configuration Check
 local Config = getgenv().RdotAshrineConfig
 if not Config then
-    error("[AutoShrines] Configuration (getgenv().RdotAshrineConfig) not found. Please ensure your config script runs first. Exiting.")
+    error("[AutoShrines] Configuration (getgenv().RdotAshrineConfig) not found. Exiting.")
 end
 
 -- Shared Variables
-local WaitTime = Config.ThresholdSeconds or 60 -- Interval between renewal attempts
+local WaitTime = Config.ThresholdSeconds or 60 
 _G.AutoBubbleShrine = true
 _G.AutoDreamerShrine = true
 
 -- Status Tracking Variables for the Display
-local NextRenewalTime = os.time() -- Tracks the timestamp for the next renewal
-local CurrentShrineStatus = "Initializing" -- Tracks which shrine was last successfully renewed/attempted
+local NextRenewalTime = os.time()
+local CurrentShrineStatus = "Initializing"
 
 -- ===================================
--- 1. STARTUP NOTIFICATION
+-- 1. NOTIFICATION FUNCTIONS
 -- ===================================
 local function ShowStartupNotification()
-    -- Uses StarterGui:SetCore to display a standard game notification.
     StarterGui:SetCore("SendNotification", {
         Title = "RdotA Random Shit",
         Text = "Auto shrines loaded.",
-        Icon = "rbxassetid://114269510951824", -- Your provided asset ID
-        Duration = 5, -- Show for 5 seconds
+        Icon = "rbxassetid://114269510951824", 
+        Duration = 5,
+    })
+end
+
+local function ShowNotEnoughItemsNotification(itemName)
+    StarterGui:SetCore("SendNotification", {
+        Title = "RdotA Shrine Error ❌",
+        Text = string.format("Not enough %s! Skipping renewal attempt.", itemName),
+        Icon = "rbxassetid://114269510951824", 
+        Duration = 5,
     })
 end
 
 -- ===================================
--- 2. GUI Setup and Status Function
+-- 2. INVENTORY CHECK (PLACEHOLDER)
+-- ===================================
+local function HasEnoughItems(itemName, amount)
+    -- ⚠️ ACTION REQUIRED: REPLACE THIS LOGIC!
+    -- This is a placeholder function. You must replace 'return true' with code 
+    -- that reads the game's inventory to check if the player has 'amount' of 'itemName'.
+    
+    -- Example structure if you were checking a value in the Player object:
+    -- if itemName == "Coins" and LocalPlayer.Data.Coins.Value < amount then
+    --     return false
+    -- end
+
+    return true -- Currently assumes you always have enough items.
+end
+
+-- ===================================
+-- 3. GUI Setup and Status Function
 -- ===================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AutoShrineStatusGUI"
@@ -50,29 +67,23 @@ local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Name = "ShrineStatusLabel"
 StatusLabel.Parent = ScreenGui
 
--- TextLabel Properties
-StatusLabel.Size = UDim2.new(1, 0, 0, 36)
--- Center Top Position (X=50% - Width/2, Y=0)
+-- TextLabel Properties (Fixed height to 24px)
+StatusLabel.Size = UDim2.new(1, 0, 0, 24)
 StatusLabel.Position = UDim2.new(0.5, 0, 0, 0)
 StatusLabel.AnchorPoint = Vector2.new(0.5, 0) 
 StatusLabel.BackgroundTransparency = 1
 StatusLabel.Font = Enum.Font.FredokaOne
 StatusLabel.TextScaled = true
 StatusLabel.TextColor3 = Color3.new(1, 1, 1)
-StatusLabel.TextStrokeTransparency = 0 -- Gives better visibility
+StatusLabel.TextStrokeTransparency = 0 
 
--- Function to reset the timer and update the status type
 local function UpdateStatus(status_type)
     NextRenewalTime = os.time() + WaitTime
     CurrentShrineStatus = status_type
     print(string.format("[AutoShrines] Status Updated: %s (Next check in %d seconds)", status_type, WaitTime))
 end
 
--- ===================================
--- 3. Timer/Display Loop
--- ===================================
 local function StatusDisplayLoop(textLabel)
-    -- Initialize the timer visually
     UpdateStatus(CurrentShrineStatus) 
     
     while task.wait(0.1) do
@@ -83,19 +94,17 @@ local function StatusDisplayLoop(textLabel)
         local StatusText = ""
 
         if TimeRemaining > 0 then
-            -- Active Countdown
             if CurrentShrineStatus == "Bubble" then
                 Emoji = "🫧"
                 StatusText = "Bubble Shrine Renewal in: " .. TimeString
             elseif CurrentShrineStatus == "Dreamer" then
                 Emoji = "✨"
                 StatusText = "Dreamer Shrine Renewal in: " .. TimeString
-            else -- Initializing or Shared Countdown
+            else
                 Emoji = "⏳"
                 StatusText = "Next Shrine Check in: " .. TimeString
             end
         else
-            -- Timer expired, awaiting renewal call
             Emoji = "🔄"
             StatusText = "Attempting Shrine Renewal..."
         end
@@ -105,29 +114,32 @@ local function StatusDisplayLoop(textLabel)
 end
 
 -- ===================================
--- 4. Auto Shrine Logic (Modified to call UpdateStatus)
+-- 4. Auto Shrine Logic (with Inventory Check)
 -- ===================================
 
 local function AutoBubbleShrineFunction()
     local PotionName = Config.BubblePotionName
-    local PotionTier = Config.BubblePotionTier
     local DonateAmount = Config.BubbleDonateAmount
+    local PotionTier = Config.BubblePotionTier
     
     while _G.AutoBubbleShrine do
-        -- Only attempt to fire if the timer has expired or is close to zero
-        if os.time() >= NextRenewalTime or CurrentShrineStatus ~= "Bubble" then
-            pcall(function()
-                if RemoteEvent then
-                    -- Fire the server event to activate the Bubble Shrine
-                    RemoteEvent:FireServer("ShrineDonate", "Bubble", PotionName, PotionTier, DonateAmount)
-                    UpdateStatus("Bubble") -- Reset timer and set status on successful fire
-                else
-                    print("Error: RemoteEvent not found for Bubble Shrine.")
-                end
-            end)
-        end
+        pcall(function()
+            -- CHECK: Not enough items
+            if not HasEnoughItems(PotionName, DonateAmount) then
+                ShowNotEnoughItemsNotification(PotionName)
+                return 
+            end
+
+            -- ACTION: Items available, fire remote
+            if RemoteEvent then
+                RemoteEvent:FireServer("ShrineDonate", "Bubble", PotionName, PotionTier, DonateAmount)
+                UpdateStatus("Bubble")
+            else
+                print("Error: RemoteEvent not found for Bubble Shrine.")
+            end
+        end)
         
-        task.wait(1) -- Check every 1 second
+        task.wait(WaitTime) 
     end
 end
 
@@ -136,32 +148,31 @@ local function AutoDreamerShrineFunction()
     local PreferExact100Fish = Config.PreferExact100Fish
     
     while _G.AutoDreamerShrine do
-        -- Only attempt to fire if the timer has expired or is close to zero
-        if os.time() >= NextRenewalTime or CurrentShrineStatus ~= "Dreamer" then
-            pcall(function()
-                if RemoteEvent then
-                    -- Fire the server event to activate the Dreamer Shrine
-                    RemoteEvent:FireServer("ShrineDonate", "Dreamer", DonateAmount, PreferExact100Fish)
-                    UpdateStatus("Dreamer") -- Reset timer and set status on successful fire
-                else
-                    print("Error: RemoteEvent not found for Dreamer Shrine.")
-                end
-            end)
-        end
+        pcall(function()
+            -- CHECK: Not enough items (Assuming item name is "Fish")
+            if not HasEnoughItems("Fish", DonateAmount) then
+                ShowNotEnoughItemsNotification("Fish")
+                return 
+            end
+            
+            -- ACTION: Items available, fire remote
+            if RemoteEvent then
+                RemoteEvent:FireServer("ShrineDonate", "Dreamer", DonateAmount, PreferExact100Fish)
+                UpdateStatus("Dreamer") 
+            else
+                print("Error: RemoteEvent not found for Dreamer Shrine.")
+            end
+        end)
         
-        task.wait(1) -- Check every 1 second
+        task.wait(WaitTime) 
     end
 end
 
 
 -- 5. Final Initialization Sequence
--- Show the notification first
 ShowStartupNotification()
-
--- Start the status display
 task.spawn(StatusDisplayLoop, StatusLabel)
 
--- Start the auto shrine loops
 if _G.AutoBubbleShrine then
     task.spawn(AutoBubbleShrineFunction)
 end
