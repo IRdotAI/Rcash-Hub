@@ -3,7 +3,7 @@
 -- ===================================
 
 local Config = getgenv().RdotAdeleteConfig or {} 
-local AUTO_DELETE = true -- Hardcoded to true
+local AUTO_DELETE = true 
 
 local function cleanConfigList(list)
     local cleaned = {}
@@ -30,7 +30,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 
-local Network = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent -- Used for DeletePet event
+local Network = ReplicatedStorage.Shared.Framework.Network.Remote.RemoteEvent 
 local LocalData = require(ReplicatedStorage.Client.Framework.Services.LocalData)
 local PetsModule = require(ReplicatedStorage.Shared.Data.Pets)
 local LocalPlayer = Players.LocalPlayer
@@ -50,9 +50,8 @@ StarterGui:SetCore("SendNotification", {
     Duration = 5;
 })
 
--- Only set up UI if deletion is configured (otherwise, it will just show the warning text)
+-- Handle case where user hasn't configured anything to keep
 if not IS_CONFIGURED then
-    local warningMessage = "❌ NO RARITIES OR PETS CHOSEN TO KEEP"
     StarterGui:SetCore("SendNotification", {
         Title = "RdotA Config Warning";
         Text = "Auto Delete is active but nothing is configured to be kept. Please check RdotAdeleteConfig.";
@@ -64,7 +63,7 @@ end
 
 
 -- ===================================
--- 2. Status Bar Setup
+-- 2. Status Bar Setup (WHERE THE PROGRESS UI IS CREATED)
 -- ===================================
 
 local UI_HEIGHT = 20
@@ -115,7 +114,7 @@ PROGRESS_BAR_FILL.Parent = PROGRESS_BAR_BG
 
 
 -- ===================================
--- Utility Functions (Adapted from your logic)
+-- Utility Functions
 -- ===================================
 
 local function getTeamPetIds()
@@ -133,6 +132,7 @@ local function getTeamPetIds()
 end
 
 local function shouldKeep(pet, teamSet)
+    -- Check 1: Specific Name Keep
     if #KEEP_PETS > 0 then
         for _, name in ipairs(KEEP_PETS) do
             if pet.Name == name then
@@ -146,6 +146,7 @@ local function shouldKeep(pet, teamSet)
         local info = PetsModule[pet.Name]
         if info then
             petRarity = info.Rarity
+            -- Check 2: Rarity Keep
             if #KEEP_RARITIES > 0 then
                 for _, rarity in ipairs(KEEP_RARITIES) do
                     if info.Rarity == rarity then
@@ -156,6 +157,7 @@ local function shouldKeep(pet, teamSet)
         end
     end
 
+    -- Check 3: Team Keep
     if KEEP_TEAM and teamSet[pet.Id] then
         return true
     end
@@ -164,7 +166,7 @@ local function shouldKeep(pet, teamSet)
 end
 
 -- ===================================
--- Auto Delete Core Loop (Based on your improved structure)
+-- Auto Delete Core Loop (DELETES AND UPDATES PROGRESS)
 -- ===================================
 
 local function AutoDeleteUnkeptRarityPets()
@@ -208,7 +210,6 @@ local function AutoDeleteUnkeptRarityPets()
         STATUS_LABEL.Text = ("❌ Starting Deletion (Total: %d pets)"):format(totalAmountToDelete)
 
         for _, petInfo in ipairs(petsToDelete) do
-            -- Update the displayed rarity
             if petInfo.Rarity and petInfo.Rarity ~= petToDeleteRarity then
                 petToDeleteRarity = petInfo.Rarity
             end
@@ -219,7 +220,7 @@ local function AutoDeleteUnkeptRarityPets()
             deletedCount = deletedCount + petInfo.Amount 
             task.wait(0.1) -- Throttle remote calls
 
-            -- Update the progress bar and status text 
+            -- Update the progress bar and status text (constant total is used here)
             local progress = deletedCount / totalAmountToDelete
             
             PROGRESS_BAR_FILL:TweenSize(
@@ -230,13 +231,12 @@ local function AutoDeleteUnkeptRarityPets()
                 true
             )
 
-            -- Update the status text with the correct, constant total
             local rarityText = petToDeleteRarity and ("Deleting: " .. petToDeleteRarity) or "Processing..."
             STATUS_LABEL.Text = ("❌ %s (Progress: %d/%d)"):format(rarityText, deletedCount, totalAmountToDelete)
         end
     end
     
-    -- 3. RESET UI after completion or if no pets were found
+    -- 3. RESET UI
     if STATUS_LABEL then
         STATUS_LABEL.Text = "❌ Auto Delete Active"
     end
@@ -252,7 +252,7 @@ task.spawn(function()
         if AUTO_DELETE and IS_CONFIGURED then
             AutoDeleteUnkeptRarityPets()
         end
-        -- Wait a few seconds before checking the inventory and deleting again
+        -- Wait a few seconds before checking the inventory again
         task.wait(2) 
     end
 end)
